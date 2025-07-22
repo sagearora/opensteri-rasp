@@ -1,0 +1,180 @@
+{
+  "designSystem": {
+    "theme": {
+      "colorPalette": {
+        "backgroundPrimary": "#FFF7F0",
+        "backgroundSecondary": "#0A014F",
+        "primaryText": "#1C1C3D",
+        "secondaryText": "#5C5C8A",
+        "headingText": "#0A014F",
+        "accent": "#5A3FFF",
+        "mutedAccent": "#EAE6FD",
+        "highlight": "#FFD580",
+        "cardBackground": "#FFFFFF",
+        "border": "#E4E4F7",
+        "footerBackground": "#0A014F",
+        "footerText": "#FFFFFF"
+      },
+      "typography": {
+        "fontFamily": "'Inter', sans-serif",
+        "heading": {
+          "fontWeight": 800,
+          "letterSpacing": "-0.03em",
+          "fontSizeScale": ["2rem", "2.5rem", "3rem"]
+        },
+        "subheading": {
+          "fontWeight": 500,
+          "fontSize": "1.25rem",
+          "lineHeight": 1.5
+        },
+        "body": {
+          "fontWeight": 400,
+          "fontSize": "1rem",
+          "lineHeight": 1.6
+        },
+        "small": {
+          "fontSize": "0.875rem",
+          "color": "#6F6F8F"
+        }
+      },
+      "radius": {
+        "small": "4px",
+        "medium": "8px",
+        "large": "12px"
+      },
+      "spacing": {
+        "xs": "0.5rem",
+        "sm": "1rem",
+        "md": "2rem",
+        "lg": "4rem",
+        "xl": "6rem"
+      },
+      "elevation": {
+        "card": "0px 6px 12px rgba(0, 0, 0, 0.06)"
+      }
+    },
+    "layout": {
+      "pageWidth": "1200px",
+      "sectionSpacing": "5rem",
+      "grid": {
+        "columns": 12,
+        "gutter": "24px"
+      },
+      "alignment": "center",
+      "padding": {
+        "horizontal": "1rem",
+        "vertical": "3rem"
+      }
+    },
+    "components": {
+      "navbar": {
+        "type": "top-fixed",
+        "background": "#FFF7F0",
+        "height": "64px",
+        "elements": ["logoLeft", "menuCenter", "ctaRight"],
+        "ctaButtonStyle": "outlineRounded"
+      },
+      "hero": {
+        "style": "full-screen",
+        "background": "#0A014F",
+        "textColor": "#FFFFFF",
+        "alignment": "center",
+        "cta": "primaryFilled",
+        "trustBadges": true,
+        "illustration": "rightOrCenter",
+        "headlineWeight": 800
+      },
+      "section": {
+        "backgroundAlternating": true,
+        "maxContentWidth": "1000px",
+        "alignment": "center"
+      },
+      "card": {
+        "type": "shadow",
+        "borderRadius": "8px",
+        "padding": "1.5rem",
+        "background": "#FFFFFF",
+        "layout": "imageLeftTextRight"
+      },
+      "featureGrid": {
+        "columns": 3,
+        "layout": "iconTopTextBottom",
+        "gap": "2rem"
+      },
+      "testimonial": {
+        "style": "cardCarousel",
+        "cardBorder": "none",
+        "layout": "avatarTopTextBottom",
+        "quoteSymbol": true
+      },
+      "faq": {
+        "style": "accordion",
+        "background": "#F9F9FF",
+        "textColor": "#1C1C3D",
+        "iconAlignment": "right"
+      },
+      "footer": {
+        "style": "multi-column",
+        "background": "#0A014F",
+        "textColor": "#FFFFFF",
+        "linkColor": "#EAE6FD",
+        "columns": [
+          "Branding",
+          "Product Links",
+          "Company",
+          "Legal",
+          "Social"
+        ]
+      },
+      "cta": {
+        "primary": {
+          "background": "#5A3FFF",
+          "textColor": "#FFFFFF",
+          "borderRadius": "8px",
+          "padding": "1rem 2rem",
+          "hoverState": {
+            "background": "#4A32D4"
+          }
+        },
+        "outline": {
+          "border": "1px solid #5A3FFF",
+          "textColor": "#5A3FFF",
+          "hoverState": {
+            "background": "#F4F1FD"
+          }
+        }
+      }
+    },
+    "motion": {
+      "onHover": {
+        "scale": 1.03,
+        "transition": "all 0.2s ease"
+      },
+      "ctaEntrance": "fadeInUp",
+      "scrollReveal": "fadeIn"
+    },
+    "semantics": {
+      "sectionOrder": [
+        "hero",
+        "features",
+        "howItWorks",
+        "useCases",
+        "textGenerator",
+        "imageGenerator",
+        "templates",
+        "testimonials",
+        "faq",
+        "footerCTA",
+        "footer"
+      ],
+      "consistentSectionSpacing": true,
+      "repeatedCTA": true
+    },
+    "accessibility": {
+      "contrast": "AA",
+      "keyboardNavigation": true,
+      "ariaLabels": true,
+      "skipToContent": true
+    }
+  }
+}

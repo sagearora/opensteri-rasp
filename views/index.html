@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>OpenSteri Wi-Fi Status</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background-primary: #FFF7F0;
+      --background-secondary: #0A014F;
+      --primary-text: #1C1C3D;
+      --secondary-text: #5C5C8A;
+      --heading-text: #0A014F;
+      --accent: #5A3FFF;
+      --muted-accent: #EAE6FD;
+      --highlight: #FFD580;
+      --card-bg: #FFFFFF;
+      --border: #E4E4F7;
+      --radius-medium: 8px;
+      --elevation-card: 0px 6px 12px rgba(0, 0, 0, 0.06);
+      --font-family: 'Inter', sans-serif;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--background-primary);
+      color: var(--primary-text);
+      font-family: var(--font-family);
+      min-height: 100vh;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: var(--card-bg);
+      box-shadow: var(--elevation-card);
+      border-radius: var(--radius-medium);
+      padding: 2rem 2.5rem;
+      max-width: 350px;
+      width: 100%;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: var(--heading-text);
+      font-weight: 800;
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .status-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+    .status-label {
+      color: var(--secondary-text);
+      font-weight: 500;
+    }
+    .status-value {
+      font-weight: 500;
+      color: var(--primary-text);
+      word-break: break-all;
+    }
+    .status-online {
+      color: #2ecc40;
+      font-weight: 700;
+    }
+    .status-offline {
+      color: #ff4136;
+      font-weight: 700;
+    }
+    #wifiStatusMsg {
+      min-height: 1.5em;
+      font-size: 0.95em;
+      margin-bottom: 1rem;
+      color: var(--secondary-text);
+      text-align: center;
+      transition: color 0.2s;
+    }
+    .refresh-btn {
+      background: var(--muted-accent);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-medium);
+      font-family: var(--font-family);
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .refresh-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spinner {
+      display: inline-block;
+      width: 1.2em;
+      height: 1.2em;
+      border: 2.5px solid var(--muted-accent);
+      border-top: 2.5px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5em;
+      vertical-align: middle;
+    }
+    @media (max-width: 480px) {
+      .card {
+        padding: 1rem;
+        max-width: 100vw;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-label="Wi-Fi Status">
+    <h1>Wi-Fi Status</h1>
+    <div id="wifiStatusMsg" aria-live="polite"></div>
+    <div id="wifiInfo" style="width:100%;display:none;">
+      <div class="status-row">
+        <span class="status-label">SSID:</span>
+        <span class="status-value" id="ssidValue">-</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">IP Address:</span>
+        <span class="status-value" id="ipValue">-</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-value" id="connStatus">-</span>
+      </div>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="fetchWifiStatus()">
+      <span id="refreshIcon">🔄</span> Refresh
+    </button>
+  </div>
+  <script>
+    const wifiStatusMsg = document.getElementById('wifiStatusMsg');
+    const wifiInfo = document.getElementById('wifiInfo');
+    const ssidValue = document.getElementById('ssidValue');
+    const ipValue = document.getElementById('ipValue');
+    const connStatus = document.getElementById('connStatus');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const refreshIcon = document.getElementById('refreshIcon');
+
+    async function fetchWifiStatus() {
+      wifiStatusMsg.textContent = 'Checking Wi-Fi status...';
+      wifiInfo.style.display = 'none';
+      refreshBtn.disabled = true;
+      refreshIcon.classList.add('spinner');
+      try {
+        const res = await fetch('/api/wifi');
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+        if (data && data.connected) {
+          ssidValue.textContent = data.ssid || '-';
+          ipValue.textContent = data.ip || '-';
+          connStatus.textContent = 'Connected';
+          connStatus.className = 'status-value status-online';
+          wifiStatusMsg.textContent = 'Connected to Wi-Fi.';
+        } else {
+          ssidValue.textContent = '-';
+          ipValue.textContent = '-';
+          connStatus.textContent = 'Not Connected';
+          connStatus.className = 'status-value status-offline';
+          wifiStatusMsg.textContent = 'Not connected to any Wi-Fi.';
+        }
+        wifiInfo.style.display = 'block';
+      } catch (err) {
+        wifiStatusMsg.textContent = 'Failed to get Wi-Fi status. Please try again.';
+        wifiInfo.style.display = 'none';
+      } finally {
+        refreshBtn.disabled = false;
+        refreshIcon.classList.remove('spinner');
+      }
+    }
+    window.onload = fetchWifiStatus;
+  </script>
+</body>
+</html> 
