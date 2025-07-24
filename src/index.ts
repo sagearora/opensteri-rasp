@@ -8,55 +8,101 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 function scanWifi(callback: (ssids: string[]) => void): void {
+  console.log('Starting WiFi scan...');
+  
   // First, force a rescan of all WiFi devices
   exec('nmcli device wifi rescan', (rescanErr) => {
     if (rescanErr) {
       console.error('Rescan error:', rescanErr);
     }
     
-    // Wait a moment for the rescan to complete, then list all networks
+    // Wait longer for the rescan to complete, then list all networks
     setTimeout(() => {
+      console.log('Fetching WiFi networks...');
+      
       // Use a more comprehensive command to get all WiFi networks
-      exec('nmcli -t -f SSID,SIGNAL,SECURITY device wifi list', (err, stdout) => {
+      // Added --rescan to force another scan and get fresh results
+      exec('nmcli --terse --fields SSID,SIGNAL,SECURITY device wifi list --rescan yes', (err, stdout) => {
         if (err) {
           console.error('WiFi list error:', err);
-          return callback([]);
+          console.error('Trying fallback command...');
+          
+          // Fallback to simpler command without --rescan
+          exec('nmcli -t -f SSID,SIGNAL device wifi list', (fallbackErr, fallbackStdout) => {
+            if (fallbackErr) {
+              console.error('Fallback WiFi list error:', fallbackErr);
+              return callback([]);
+            }
+            
+            const fallbackSsids = parseScanOutput(fallbackStdout);
+            console.log(`Found ${fallbackSsids.length} networks (fallback)`);
+            callback(fallbackSsids);
+          });
+          return;
         }
 
-        const lines = stdout
-          .split('\n')
-          .map(line => line.trim())
-          .filter(line => line && line !== '*');
-
-        const seen = new Map<string, number>();
-        
-        lines.forEach(line => {
-          // Parse tab-separated values: SSID, SIGNAL, SECURITY
-          const parts = line.split(':');
-          if (parts.length >= 2) {
-            const ssid = parts[0].trim();
-            const signalStr = parts[1].trim();
-            
-            // Skip empty SSIDs and non-numeric signals
-            if (ssid && !isNaN(Number(signalStr))) {
-              const signal = Number(signalStr);
-              // Keep the strongest signal for each SSID
-              if (!seen.has(ssid) || seen.get(ssid)! < signal) {
-                seen.set(ssid, signal);
-              }
-            }
-          }
-        });
-
-        // Sort by signal strength (strongest first) and return SSIDs
-        const sorted = [...seen.entries()]
-          .sort((a, b) => b[1] - a[1])
-          .map(([ssid]) => ssid);
-
-        callback(sorted);
+        const ssids = parseScanOutput(stdout);
+        console.log(`Found ${ssids.length} networks`);
+        callback(ssids);
       });
-    }, 2000); // Wait 2 seconds for rescan to complete
+    }, 4000); // Increased timeout to 4 seconds
   });
+}
+
+function parseScanOutput(stdout: string): string[] {
+  console.log('Raw nmcli output:', stdout.substring(0, 200) + '...');
+  
+  const lines = stdout
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line && line !== '*');
+
+  const seen = new Map<string, number>();
+  
+  lines.forEach((line, index) => {
+    console.log(`Processing line ${index}: "${line}"`);
+    
+    // Split on colon, but handle SSIDs that might contain colons
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) {
+      console.log(`Skipping line ${index}: no colon found`);
+      return;
+    }
+    
+    const ssid = line.substring(0, colonIndex).trim();
+    const remainder = line.substring(colonIndex + 1);
+    
+    // Find the signal strength (should be the first numeric value after SSID)
+    const parts = remainder.split(':');
+    let signal = 0;
+    
+    for (const part of parts) {
+      const trimmedPart = part.trim();
+      if (trimmedPart && !isNaN(Number(trimmedPart))) {
+        signal = Number(trimmedPart);
+        break;
+      }
+    }
+    
+    // Skip empty SSIDs but allow hidden networks (they might show as empty or special chars)
+    if (ssid && ssid !== '--' && signal > 0) {
+      console.log(`Found network: "${ssid}" with signal ${signal}`);
+      // Keep the strongest signal for each SSID
+      if (!seen.has(ssid) || seen.get(ssid)! < signal) {
+        seen.set(ssid, signal);
+      }
+    } else {
+      console.log(`Skipped network: SSID="${ssid}", signal=${signal}`);
+    }
+  });
+
+  // Sort by signal strength (strongest first) and return SSIDs
+  const sorted = [...seen.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([ssid]) => ssid);
+
+  console.log('Final sorted networks:', sorted);
+  return sorted;
 }
 
 
