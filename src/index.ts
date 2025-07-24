@@ -87,4 +87,4 @@ app.post('/api/connect', (req: Request, res: Response) => {
   });
 });
 
-app.listen(8080, () => console.log('Portal running on port 8080')); 
+app.listen(3001, '0.0.0.0', () => console.log('Portal running on port 3001')); 
