@@ -1,1 +1,213 @@
- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect to WiFi - OpenSteri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">OpenSteri</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">Connect to WiFi</h1>
+                    <p class="card-subtitle">Select your WiFi network and enter the password to connect</p>
+                </div>
+
+                <form id="wifiForm">
+                    <div class="form-group">
+                        <label for="ssid" class="form-label">
+                            <span class="wifi-icon"></span>
+                            WiFi Network
+                        </label>
+                        <div style="display: flex; align-items: center;">
+                            <select id="ssid" name="ssid" class="form-select" required>
+                                <option value="">Select a WiFi network...</option>
+                            </select>
+                            <button type="button" id="refreshNetworks" class="btn btn-outline" style="margin-left: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="password" name="password" class="form-input" placeholder="Enter WiFi password" required>
+                            <button type="button" id="togglePassword" class="password-toggle">👁</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="connectButton" class="btn btn-primary btn-full">
+                        <span id="buttonText">Connect to WiFi</span>
+                        <span id="loadingSpinner" class="loading hidden"></span>
+                    </button>
+                </form>
+
+                <div id="statusMessage" class="status-message hidden"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class WiFiConnector {
+            constructor() {
+                this.form = document.getElementById('wifiForm');
+                this.ssidSelect = document.getElementById('ssid');
+                this.passwordInput = document.getElementById('password');
+                this.connectButton = document.getElementById('connectButton');
+                this.buttonText = document.getElementById('buttonText');
+                this.loadingSpinner = document.getElementById('loadingSpinner');
+                this.statusMessage = document.getElementById('statusMessage');
+                this.refreshButton = document.getElementById('refreshNetworks');
+                this.togglePasswordButton = document.getElementById('togglePassword');
+
+                this.initializeEventListeners();
+                this.loadNetworks();
+            }
+
+            initializeEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.refreshButton.addEventListener('click', () => this.loadNetworks());
+                this.togglePasswordButton.addEventListener('click', () => this.togglePasswordVisibility());
+            }
+
+            async loadNetworks() {
+                try {
+                    this.showStatus('Scanning for WiFi networks...', 'info');
+                    this.refreshButton.disabled = true;
+                    this.refreshButton.textContent = 'Scanning...';
+
+                    const networks = await this.scanNetworks();
+                    this.populateNetworks(networks);
+                    this.hideStatus();
+                } catch (error) {
+                    this.showStatus('Failed to scan networks. Please try again.', 'error');
+                } finally {
+                    this.refreshButton.disabled = false;
+                    this.refreshButton.textContent = 'Refresh';
+                }
+            }
+
+            async scanNetworks() {
+                // Use the actual API endpoint from index.js
+                const response = await fetch('/api/scan');
+                if (!response.ok) {
+                    throw new Error('Failed to scan networks');
+                }
+                const ssids = await response.json();
+                
+                // Convert SSIDs to network objects with simulated signal strength
+                return ssids.map((ssid, index) => ({
+                    ssid: ssid,
+                    strength: Math.max(30, 100 - (index * 10)), // Simulate signal strength based on order
+                    security: 'WPA2' // Default security type
+                }));
+            }
+
+            populateNetworks(networks) {
+                this.ssidSelect.innerHTML = '<option value="">Select a WiFi network...</option>';
+                
+                networks.forEach(network => {
+                    const option = document.createElement('option');
+                    option.value = network.ssid;
+                    option.textContent = `${network.ssid} (${network.strength}% signal)`;
+                    option.dataset.strength = network.strength;
+                    option.dataset.security = network.security;
+                    this.ssidSelect.appendChild(option);
+                });
+            }
+
+            togglePasswordVisibility() {
+                const type = this.passwordInput.type === 'password' ? 'text' : 'password';
+                this.passwordInput.type = type;
+                this.togglePasswordButton.textContent = type === 'password' ? '👁' : '🙈';
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                const ssid = this.ssidSelect.value;
+                const password = this.passwordInput.value;
+
+                if (!ssid || !password) {
+                    this.showStatus('Please select a network and enter a password.', 'error');
+                    return;
+                }
+
+                this.setLoading(true);
+                this.showStatus('Connecting to WiFi network...', 'info');
+
+                try {
+                    await this.connectToWiFi(ssid, password);
+                    this.showStatus('Successfully connected! Redirecting...', 'success');
+                    
+                    // Redirect to home page after successful connection
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } catch (error) {
+                    this.showStatus('Failed to connect. Please check your password and try again.', 'error');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async connectToWiFi(ssid, password) {
+                // Use the actual API endpoint from index.js
+                const response = await fetch('/api/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Connection failed');
+                }
+
+                // The API will handle the connection and reboot
+                return response.text();
+            }
+
+            setLoading(loading) {
+                this.connectButton.disabled = loading;
+                this.ssidSelect.disabled = loading;
+                this.passwordInput.disabled = loading;
+                
+                if (loading) {
+                    this.buttonText.className = 'hidden';
+                    this.loadingSpinner.className = 'loading visible';
+                } else {
+                    this.buttonText.className = 'visible';
+                    this.loadingSpinner.className = 'loading hidden';
+                }
+            }
+
+            showStatus(message, type) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.className = `status-message status-${type} visible`;
+            }
+
+            hideStatus() {
+                this.statusMessage.className = 'status-message hidden';
+            }
+        }
+
+        // Initialize the WiFi connector when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new WiFiConnector();
+        });
+    </script>
+</body>
+</html> 

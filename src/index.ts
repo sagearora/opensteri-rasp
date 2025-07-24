@@ -47,6 +47,11 @@ app.get('/connect', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, '../views', 'connect.html'));
 });
 
+// Serve shared CSS file
+app.get('/shared.css', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../views', 'shared.css'));
+});
+
 // Serve scanned SSIDs
 app.get('/api/scan', (req: Request, res: Response) => {
   scanWifi((ssids) => {
