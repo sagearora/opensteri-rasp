@@ -14,13 +14,13 @@ function scanWifi(callback: (ssids: string[]) => void): void {
   exec('nmcli device status | grep wifi', (statusErr, statusStdout) => {
     console.log('WiFi device status:', statusStdout);
     
-    // Get the WiFi device name
-    exec('nmcli device | grep wifi | awk \'{print $1}\'', (deviceErr, deviceStdout) => {
+    // Get the WiFi device name - take only the first wifi device that's not p2p
+    exec('nmcli device | grep wifi | grep -v "p2p" | head -1 | awk \'{print $1}\'', (deviceErr, deviceStdout) => {
       const wifiDevice = deviceStdout.trim() || 'wlan0';
-      console.log('WiFi device:', wifiDevice);
+      console.log('Selected WiFi device:', wifiDevice);
       
-      // Force a rescan using the specific device
-      const rescanCmd = `nmcli device wifi rescan ifname ${wifiDevice}`;
+      // Force a rescan using sudo and the specific device
+      const rescanCmd = `sudo nmcli device wifi rescan ifname ${wifiDevice}`;
       console.log('Running rescan command:', rescanCmd);
       
       exec(rescanCmd, (rescanErr, rescanStdout, rescanStderr) => {
@@ -35,7 +35,7 @@ function scanWifi(callback: (ssids: string[]) => void): void {
           console.log('Fetching WiFi networks...');
           
           // Try approach 1: Force rescan and list all
-          const scanCmd1 = `nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname ${wifiDevice} --rescan yes`;
+          const scanCmd1 = `nmcli -t -f SSID,SIGNAL device wifi list ifname ${wifiDevice} --rescan yes`;
           console.log('Trying command 1:', scanCmd1);
           
           exec(scanCmd1, (err1, stdout1) => {
@@ -65,7 +65,7 @@ function scanWifi(callback: (ssids: string[]) => void): void {
               console.log('Command 2 failed or insufficient results, trying command 3...');
               
               // Try approach 3: Use iwlist scan as fallback
-              const scanCmd3 = `sudo iwlist ${wifiDevice} scan | grep -E "ESSID|Signal level" | grep -B1 "ESSID" | grep "Signal level" -A1`;
+              const scanCmd3 = `sudo iwlist ${wifiDevice} scan | grep "ESSID:" | grep -v '""'`;
               console.log('Trying command 3 (iwlist):', scanCmd3);
               
               exec(scanCmd3, (err3, stdout3) => {
@@ -93,7 +93,7 @@ function scanWifi(callback: (ssids: string[]) => void): void {
               });
             });
           });
-        }, 5000); // Increased timeout to 5 seconds
+        }, 3000); // Reduced timeout since we're using sudo for faster scan
       });
     });
   });
@@ -101,21 +101,23 @@ function scanWifi(callback: (ssids: string[]) => void): void {
 
 function parseIwlistOutput(stdout: string): string[] {
   console.log('Parsing iwlist output...');
+  console.log('iwlist raw output:', stdout);
+  
   const lines = stdout.split('\n').map(l => l.trim()).filter(l => l);
   const ssids: string[] = [];
   
   for (const line of lines) {
-    if (line.includes('ESSID:')) {
-      const match = line.match(/ESSID:"([^"]+)"/);
-      if (match && match[1] && match[1] !== '') {
-        ssids.push(match[1]);
-      }
+    // Line format: ESSID:"NetworkName"
+    const match = line.match(/ESSID:"([^"]+)"/);
+    if (match && match[1] && match[1] !== '' && match[1] !== '<hidden>') {
+      ssids.push(match[1]);
+      console.log('Found ESSID:', match[1]);
     }
   }
   
   // Remove duplicates and return
   const uniqueSsids = [...new Set(ssids)];
-  console.log('iwlist found SSIDs:', uniqueSsids);
+  console.log('iwlist found unique SSIDs:', uniqueSsids);
   return uniqueSsids;
 }
 
