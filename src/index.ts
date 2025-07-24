@@ -8,32 +8,54 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 function scanWifi(callback: (ssids: string[]) => void): void {
-  exec('nmcli device wifi rescan', () => {
-    exec('nmcli -f SSID,SIGNAL device wifi list', (err, stdout) => {
-      if (err) return callback([]);
-
-      const lines = stdout
-        .split('\n')
-        .slice(1)
-        .map(line => line.trim())
-        .filter(line => line);
-
-      const seen = new Map<string, number>();
-      lines.forEach(line => {
-        const match = line.match(/^(.+?)\s+(\d+)$/);
-        if (!match) return;
-        const [, ssid, signal] = match;
-        if (!seen.has(ssid) || seen.get(ssid)! < Number(signal)) {
-          seen.set(ssid, Number(signal));
+  // First, force a rescan of all WiFi devices
+  exec('nmcli device wifi rescan', (rescanErr) => {
+    if (rescanErr) {
+      console.error('Rescan error:', rescanErr);
+    }
+    
+    // Wait a moment for the rescan to complete, then list all networks
+    setTimeout(() => {
+      // Use a more comprehensive command to get all WiFi networks
+      exec('nmcli -t -f SSID,SIGNAL,SECURITY device wifi list', (err, stdout) => {
+        if (err) {
+          console.error('WiFi list error:', err);
+          return callback([]);
         }
+
+        const lines = stdout
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line && line !== '*');
+
+        const seen = new Map<string, number>();
+        
+        lines.forEach(line => {
+          // Parse tab-separated values: SSID, SIGNAL, SECURITY
+          const parts = line.split(':');
+          if (parts.length >= 2) {
+            const ssid = parts[0].trim();
+            const signalStr = parts[1].trim();
+            
+            // Skip empty SSIDs and non-numeric signals
+            if (ssid && !isNaN(Number(signalStr))) {
+              const signal = Number(signalStr);
+              // Keep the strongest signal for each SSID
+              if (!seen.has(ssid) || seen.get(ssid)! < signal) {
+                seen.set(ssid, signal);
+              }
+            }
+          }
+        });
+
+        // Sort by signal strength (strongest first) and return SSIDs
+        const sorted = [...seen.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([ssid]) => ssid);
+
+        callback(sorted);
       });
-
-      const sorted = [...seen.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .map(([ssid]) => ssid);
-
-      callback(sorted);
-    });
+    }, 2000); // Wait 2 seconds for rescan to complete
   });
 }
 
