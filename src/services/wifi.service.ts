@@ -30,20 +30,125 @@ export class WiFiService {
   }
 
   static async connect(connection: WiFiConnection): Promise<{ success: boolean; message: string }> {
-    return new Promise((resolve) => {
-      const cmd = `sudo /usr/bin/nmcli dev wifi connect "${connection.ssid}" password "${connection.password}"`;
-
-      exec('sudo systemctl stop raspapd.service', () => {
-        exec(cmd, (err, stdout, stderr) => {
-          if (err) {
-            resolve({ success: false, message: stderr });
-          } else {
-            // Reboot after successful connection
-            setTimeout(() => exec('sudo reboot'), 1000);
-            resolve({ success: true, message: `Connected to ${connection.ssid}` });
+    return new Promise(async (resolve) => {
+      try {
+        // Get current connection info for backup
+        const currentStatus = await this.getStatus();
+        
+        // Create connection profile without auto-connecting first
+        const profileName = `temp-${connection.ssid}-${Date.now()}`;
+        const createCmd = `sudo nmcli connection add type wifi con-name "${profileName}" ssid "${connection.ssid}" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "${connection.password}" autoconnect no`;
+        
+        exec(createCmd, (createErr, createStdout, createStderr) => {
+          if (createErr) {
+            return resolve({ 
+              success: false, 
+              message: `Failed to create connection profile: ${createStderr}` 
+            });
           }
+
+          // Now try to activate the connection with a timeout
+          const connectCmd = `timeout 30 sudo nmcli connection up "${profileName}"`;
+          
+          exec('sudo systemctl stop raspapd.service', () => {
+            exec(connectCmd, (err, stdout, stderr) => {
+              // Clean up the temporary profile
+              exec(`sudo nmcli connection delete "${profileName}"`, () => {
+                // Profile cleanup done, now handle the connection result
+              });
+
+              if (err) {
+                // Connection failed, but we didn't lose current connection
+                const errorMessage = stderr.includes('Secrets were required') ? 
+                  'Invalid password for network' : 
+                  stderr.includes('No network with SSID') ?
+                  'Network not found' :
+                  `Connection failed: ${stderr}`;
+                
+                resolve({ success: false, message: errorMessage });
+              } else {
+                // Connection successful, create permanent profile
+                const permanentCmd = `sudo nmcli connection add type wifi con-name "${connection.ssid}" ssid "${connection.ssid}" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "${connection.password}" autoconnect yes`;
+                
+                exec(permanentCmd, (permErr) => {
+                  if (permErr) {
+                    console.warn('Failed to create permanent profile, but connection is active');
+                  }
+                  
+                  // Reboot after successful connection
+                  setTimeout(() => exec('sudo reboot'), 1000);
+                  resolve({ success: true, message: `Connected to ${connection.ssid}` });
+                });
+              }
+            });
+          });
         });
+      } catch (error) {
+        resolve({ 
+          success: false, 
+          message: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        });
+      }
+    });
+  }
+
+  static async getCurrentConnection(): Promise<{ ssid: string; uuid: string } | null> {
+    return new Promise((resolve) => {
+      exec('nmcli -t -f NAME,UUID,TYPE,DEVICE connection show --active | grep "wifi"', (err, stdout) => {
+        if (err || !stdout.trim()) {
+          return resolve(null);
+        }
+        
+        const lines = stdout.trim().split('\n');
+        const wifiConnection = lines.find(line => line.includes(':wifi:'));
+        
+        if (wifiConnection) {
+          const parts = wifiConnection.split(':');
+          resolve({
+            ssid: parts[0],
+            uuid: parts[1]
+          });
+        } else {
+          resolve(null);
+        }
       });
+    });
+  }
+
+  static async connectWithFallback(connection: WiFiConnection): Promise<{ success: boolean; message: string }> {
+    return new Promise(async (resolve) => {
+      try {
+        // Backup current connection
+        const currentConnection = await this.getCurrentConnection();
+        
+        // Try the new connection
+        const result = await this.connect(connection);
+        
+        if (!result.success && currentConnection) {
+          // If new connection failed and we had a previous connection, 
+          // try to restore it (though this is rare since we use a safer approach above)
+          exec(`sudo nmcli connection up uuid ${currentConnection.uuid}`, (restoreErr) => {
+            if (restoreErr) {
+              resolve({
+                success: false,
+                message: `${result.message}. Warning: Could not restore previous connection.`
+              });
+            } else {
+              resolve({
+                success: false,
+                message: `${result.message}. Restored previous connection to ${currentConnection.ssid}.`
+              });
+            }
+          });
+        } else {
+          resolve(result);
+        }
+      } catch (error) {
+        resolve({
+          success: false,
+          message: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        });
+      }
     });
   }
 
