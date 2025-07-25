@@ -13,6 +13,7 @@ app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Routes
 app.use('/api', wifiRoutes);
+app.use('/', wifiRoutes); // Add this line to expose /setup at root
 app.use('/', staticRoutes);
 
 // Start server

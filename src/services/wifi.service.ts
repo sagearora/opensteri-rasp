@@ -152,6 +152,37 @@ export class WiFiService {
     });
   }
 
+  /**
+   * Scan for available WiFi networks and return detailed info (SSID, signal, security)
+   */
+  static async scanNetworksDetailed(): Promise<Array<{ ssid: string; signal: number; security: string }>> {
+    return new Promise((resolve) => {
+      this.getWiFiDevice((device) => {
+        // nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname <device> --rescan yes
+        const cmd = `nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname ${device} --rescan yes`;
+        exec(cmd, (err, stdout) => {
+          if (err || !stdout) {
+            return resolve([]);
+          }
+          const networks: Array<{ ssid: string; signal: number; security: string }> = stdout
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line && line !== '*' && line !== '--')
+            .map(line => {
+              const [ssid, signal, security] = line.split(':');
+              return {
+                ssid: ssid || '',
+                signal: signal ? Number(signal) : 0,
+                security: security || 'NONE',
+              };
+            })
+            .filter(n => n.ssid && n.ssid !== '--' && n.ssid !== '\\x00');
+          resolve(networks);
+        });
+      });
+    });
+  }
+
   private static getWiFiDevice(callback: (device: string) => void): void {
     exec('nmcli device | grep wifi | grep -v "p2p" | head -1 | awk \'{print $1}\'', (err, stdout) => {
       const device = stdout.trim() || 'wlan0';

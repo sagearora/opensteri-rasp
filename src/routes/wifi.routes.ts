@@ -48,4 +48,15 @@ router.post('/connect', async (req: Request, res: Response) => {
   }
 });
 
+// Setup endpoint: list available WiFi networks with details
+router.get('/setup', async (req: Request, res: Response) => {
+  try {
+    const networks = await WiFiService.scanNetworksDetailed();
+    res.json(networks);
+  } catch (error) {
+    console.error('WiFi setup scan error:', error);
+    res.status(500).json({ error: 'Failed to scan WiFi networks' });
+  }
+});
+
 export default router; 
