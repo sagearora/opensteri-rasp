@@ -158,13 +158,9 @@ export class WiFiService {
   static async scanNetworksDetailed(): Promise<Array<{ ssid: string; signal: number; security: string }>> {
     return new Promise((resolve) => {
       this.getWiFiDevice((device) => {
-        // nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname <device> --rescan yes
-        const cmd = `nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname ${device} --rescan yes`;
-        exec(cmd, (err, stdout) => {
-          if (err || !stdout) {
-            return resolve([]);
-          }
-          const networks: Array<{ ssid: string; signal: number; security: string }> = stdout
+        // Helper to parse nmcli output with SSID, SIGNAL, SECURITY
+        const parseDetailed = (stdout: string) => {
+          return stdout
             .split('\n')
             .map(line => line.trim())
             .filter(line => line && line !== '*' && line !== '--')
@@ -177,8 +173,85 @@ export class WiFiService {
               };
             })
             .filter(n => n.ssid && n.ssid !== '--' && n.ssid !== '\\x00');
-          resolve(networks);
-        });
+        };
+
+        // Helper to merge and deduplicate by SSID
+        const mergeNetworks = (arrs: Array<Array<{ ssid: string; signal: number; security: string }>>) => {
+          const map = new Map<string, { ssid: string; signal: number; security: string }>();
+          for (const arr of arrs) {
+            for (const net of arr) {
+              if (!map.has(net.ssid) || (map.get(net.ssid)?.signal ?? 0) < net.signal) {
+                map.set(net.ssid, net);
+              }
+            }
+          }
+          return Array.from(map.values());
+        };
+
+        // Try nmcli with rescan, then without, then fallback to iwlist (SSID only, no signal/security), then fallback to nmcli SSID only
+        const results: Array<Array<{ ssid: string; signal: number; security: string }>> = [];
+        const tryNext = (step: number) => {
+          if (step === 0) {
+            // Method 1: nmcli with rescan
+            const cmd = `nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname ${device} --rescan yes`;
+            exec(cmd, (err, stdout) => {
+              if (!err && stdout) {
+                const parsed = parseDetailed(stdout);
+                if (parsed.length > 1) {
+                  results.push(parsed);
+                  return resolve(mergeNetworks(results));
+                }
+                results.push(parsed);
+              }
+              tryNext(1);
+            });
+          } else if (step === 1) {
+            // Method 2: nmcli without rescan
+            const cmd = `nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname ${device}`;
+            exec(cmd, (err, stdout) => {
+              if (!err && stdout) {
+                const parsed = parseDetailed(stdout);
+                if (parsed.length > 1) {
+                  results.push(parsed);
+                  return resolve(mergeNetworks(results));
+                }
+                results.push(parsed);
+              }
+              tryNext(2);
+            });
+          } else if (step === 2) {
+            // Method 3: iwlist fallback (SSID only, no signal/security)
+            const cmd = `sudo iwlist ${device} scan | grep "ESSID:" | grep -v '""'`;
+            exec(cmd, (err, stdout) => {
+              if (!err && stdout) {
+                const lines = stdout.split('\n').map(l => l.trim()).filter(l => l);
+                const ssids = [];
+                for (const line of lines) {
+                  const match = line.match(/ESSID:"([^"]+)"/);
+                  if (match && match[1] && match[1] !== '<hidden>') {
+                    ssids.push(match[1]);
+                  }
+                }
+                const parsed = ssids.map(ssid => ({ ssid, signal: 0, security: 'UNKNOWN' }));
+                if (parsed.length > 0) {
+                  results.push(parsed);
+                  return resolve(mergeNetworks(results));
+                }
+                results.push(parsed);
+              }
+              tryNext(3);
+            });
+          } else if (step === 3) {
+            // Final fallback: nmcli SSID only
+            const cmd = `nmcli -t -f SSID device wifi list`;
+            exec(cmd, (err, stdout) => {
+              const parsed = (stdout || '').split('\n').map(line => line.trim()).filter(line => line && line !== '*' && line !== '--').map(ssid => ({ ssid, signal: 0, security: 'UNKNOWN' })).filter(n => n.ssid && n.ssid !== '--' && n.ssid !== '\\x00');
+              results.push(parsed);
+              resolve(mergeNetworks(results));
+            });
+          }
+        };
+        tryNext(0);
       });
     });
   }
