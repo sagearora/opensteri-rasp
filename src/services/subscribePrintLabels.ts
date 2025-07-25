@@ -2,6 +2,7 @@ import { client } from './graphqlClient';
 import { loadToken } from './graphqlTokenStore';
 import { setLatestPrinterInfo } from '../routes/wifi.routes';
 import fetch from 'node-fetch';
+import { isPrinterConnected } from './checkPrinter';
 
 // Heartbeat: update last_seen_at every HEARTBEAT_INTERVAL_SECONDS
 const HEARTBEAT_INTERVAL_SECONDS = parseInt(process.env.HEARTBEAT_INTERVAL_SECONDS || '60', 10);
@@ -34,6 +35,7 @@ export async function startPrinterHeartbeat(printerId: string) {
   if (heartbeatInterval) clearInterval(heartbeatInterval);
   heartbeatInterval = setInterval(() => {
     updatePrinterLastSeen(printerId);
+    console.log(isPrinterConnected())
   }, HEARTBEAT_INTERVAL_SECONDS * 1000);
   // Immediately send first heartbeat
   await updatePrinterLastSeen(printerId);
