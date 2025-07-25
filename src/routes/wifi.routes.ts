@@ -44,59 +44,75 @@ router.post('/connect', async (req: Request, res: Response) => {
     const connection: WiFiConnection = req.body;
     
     if (!connection.ssid || !connection.password) {
-      return res.status(400).send('<h1>Error</h1><p>SSID and password are required</p>');
+      return res.status(400).json({ error: 'SSID and password are required' });
     }
 
-    const result = await WiFiService.connect(connection);
-    
-    if (result.success) {
-      res.send(`<h1>Connected to ${connection.ssid}</h1><p>Rebooting...</p>`);
-    } else {
-      res.send(`<h1>Failed to connect</h1><pre>${result.message}</pre>`);
-    }
+    // Respond immediately to acknowledge the request
+    res.status(200).json({ success: true, message: 'WiFi connection request received, attempting to connect...' });
+
+    // Run the connection logic asynchronously
+    (async () => {
+      try {
+        // 1. Try to connect to WiFi
+        console.log(`Attempting to connect to WiFi: ${connection.ssid}`);
+        const wifiResult = await WiFiService.connect(connection);
+        if (!wifiResult.success) {
+          // If WiFi connection fails, restore AP
+          console.error('WiFi connection failed:', wifiResult.message);
+          await WiFiService.startAccessPoint();
+          return;
+        }
+
+        console.log('WiFi connected successfully, waiting for network setup...');
+        
+        // 2. Wait a bit for network to stabilize, then check connectivity
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        const status = await WiFiService.getStatus();
+        if (!status.connected || !status.ip) {
+          console.error('Connected to WiFi but no internet access');
+          await WiFiService.startAccessPoint();
+          return;
+        }
+
+        console.log('Internet connectivity confirmed, WiFi setup complete!');
+      } catch (error) {
+        console.error('Error in WiFi connection process:', error);
+        try {
+          await WiFiService.startAccessPoint();
+        } catch (apError) {
+          console.error('Failed to restore access point:', apError);
+        }
+      }
+    })();
   } catch (error) {
     console.error('WiFi connect error:', error);
-    res.status(500).send('<h1>Error</h1><p>Connection failed</p>');
+    res.status(500).json({ error: 'Connection failed' });
   }
 });
 
 router.post('/join', async (req, res) => {
-  const { printer_id, join_code, ssid, password } = req.body;
-  if (!printer_id || !join_code || !ssid) {
-    return res.status(400).json({ error: 'printer_id, join_code and ssid are required' });
+  const { printer_id, join_code } = req.body;
+  if (!printer_id || !join_code) {
+    return res.status(400).json({ error: 'printer_id and join_code are required' });
   }
 
   // Respond immediately to acknowledge the request
-  res.status(200).json({ success: true, message: 'Join request received, attempting to connect...' });
+  res.status(200).json({ success: true, message: 'Join request received, attempting to authenticate printer...' });
 
-  // Run the connection and join logic asynchronously
+  // Run the join logic asynchronously
   (async () => {
     try {
-      // 1. Try to connect to WiFi first
-      console.log(`Attempting to connect to WiFi: ${ssid}`);
-      const wifiResult = await WiFiService.connect({ ssid, password });
-      if (!wifiResult.success) {
-        // If WiFi connection fails, restore AP
-        console.error('WiFi connection failed:', wifiResult.message);
-        await WiFiService.startAccessPoint();
-        return;
-      }
-
-      console.log('WiFi connected successfully, waiting for network setup...');
-      
-      // 2. Wait a bit for network to stabilize, then check connectivity
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
+      // Check if we have internet connectivity first
       const status = await WiFiService.getStatus();
       if (!status.connected || !status.ip) {
-        console.error('Connected to WiFi but no internet access');
-        await WiFiService.startAccessPoint();
+        console.error('No internet connectivity available for printer join');
         return;
       }
 
-      console.log('Internet connectivity confirmed, proceeding to printer join...');
+      console.log('Proceeding to printer join...');
 
-      // 3. Proceed to printer join
+      // Proceed to printer join
       const joinUrl = process.env.JOIN_URL;
       if (!joinUrl) {
         console.error('JOIN_URL must be set in environment');
@@ -123,11 +139,6 @@ router.post('/join', async (req, res) => {
       }
     } catch (error) {
       console.error('Error in join process:', error);
-      try {
-        await WiFiService.startAccessPoint();
-      } catch (apError) {
-        console.error('Failed to restore access point:', apError);
-      }
     }
   })();
 });
