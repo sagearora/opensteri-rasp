@@ -1,5 +1,6 @@
 import { createClient } from 'graphql-ws';
 import { loadToken } from './graphqlTokenStore';
+import WebSocket from 'ws'; // 👈 required in Node
 
 const HASURA_WS_URL = process.env.HASURA_GRAPHQL_WS;
 const HASURA_ADMIN_SECRET = process.env.HASURA_ADMIN_SECRET; // or use JWT
@@ -19,6 +20,7 @@ async function getAuthHeader() {
 
 export const client = createClient({
   url: HASURA_WS_URL,
+  webSocketImpl: WebSocket, // 👈 key line
   connectionParams: async () => ({
     headers: {
       'Authorization': await getAuthHeader(),
