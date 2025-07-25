@@ -66,58 +66,70 @@ router.post('/join', async (req, res) => {
     return res.status(400).json({ error: 'printer_id, join_code and ssid are required' });
   }
 
-  // 1. Try to connect to WiFi first
-  try {
-    const wifiResult = await WiFiService.connect({ ssid, password });
-    if (!wifiResult.success) {
-      // If WiFi connection fails, restore AP and return error
-      await WiFiService.startAccessPoint();
-      return res.status(500).json({ error: 'Failed to connect to WiFi: ' + wifiResult.message });
-    }
-  } catch (err) {
-    await WiFiService.startAccessPoint();
-    return res.status(500).json({ error: 'WiFi connection error' });
-  }
+  // Respond immediately to acknowledge the request
+  res.status(200).json({ success: true, message: 'Join request received, attempting to connect...' });
 
-  // 2. Check for internet connectivity before proceeding
-  try {
-    const status = await WiFiService.getStatus();
-    if (!status.connected || !status.ip) {
-      await WiFiService.startAccessPoint();
-      return res.status(500).json({ error: 'Connected to WiFi but no internet access' });
-    }
-  } catch (err) {
-    await WiFiService.startAccessPoint();
-    return res.status(500).json({ error: 'Failed to verify internet connection' });
-  }
+  // Run the connection and join logic asynchronously
+  (async () => {
+    try {
+      // 1. Try to connect to WiFi first
+      console.log(`Attempting to connect to WiFi: ${ssid}`);
+      const wifiResult = await WiFiService.connect({ ssid, password });
+      if (!wifiResult.success) {
+        // If WiFi connection fails, restore AP
+        console.error('WiFi connection failed:', wifiResult.message);
+        await WiFiService.startAccessPoint();
+        return;
+      }
 
-  // 3. Proceed to printer join
-  const joinUrl = process.env.JOIN_URL;
-  if (!joinUrl) {
-    return res.status(500).json({ error: 'JOIN_URL must be set in environment' });
-  }
+      console.log('WiFi connected successfully, waiting for network setup...');
+      
+      // 2. Wait a bit for network to stabilize, then check connectivity
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      const status = await WiFiService.getStatus();
+      if (!status.connected || !status.ip) {
+        console.error('Connected to WiFi but no internet access');
+        await WiFiService.startAccessPoint();
+        return;
+      }
 
-  try {
-    const response = await fetch(joinUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ printer_id, join_code }),
-    });
-    const data = await response.json();
-    // Save token and printer_id if join was successful
-    if (data.ok && typeof data.token === 'string' && typeof data.printer_id === 'string') {
-      await saveToken(data.token, data.printer_id);
-      // Start subscription after join
-      startPrinterSubscription(data.printer_id, (labels) => {
-        console.log('New labels after join:', labels);
+      console.log('Internet connectivity confirmed, proceeding to printer join...');
+
+      // 3. Proceed to printer join
+      const joinUrl = process.env.JOIN_URL;
+      if (!joinUrl) {
+        console.error('JOIN_URL must be set in environment');
+        return;
+      }
+
+      const response = await fetch(joinUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ printer_id, join_code }),
       });
+      const data = await response.json();
+      
+      // Save token and printer_id if join was successful
+      if (data.ok && typeof data.token === 'string' && typeof data.printer_id === 'string') {
+        await saveToken(data.token, data.printer_id);
+        // Start subscription after join
+        startPrinterSubscription(data.printer_id, (labels) => {
+          console.log('New labels after join:', labels);
+        });
+        console.log('Printer join successful!');
+      } else {
+        console.error('Printer join failed:', data);
+      }
+    } catch (error) {
+      console.error('Error in join process:', error);
+      try {
+        await WiFiService.startAccessPoint();
+      } catch (apError) {
+        console.error('Failed to restore access point:', apError);
+      }
     }
-    console.log('Join URL response:', data);
-    return res.status(200).json({ success: true, join_response: data });
-  } catch (error) {
-    console.error('Error calling join URL:', error);
-    return res.status(500).json({ error: 'Failed to call join URL' });
-  }
+  })();
 });
 
 
