@@ -124,6 +124,6 @@ export const createLabelCmd = ({
     }) => {
     return `^L\nDy2-me-dd\nTh:m:s\nAA,4,9,1,1,0,0,#${id} - ${category}\nAC,4,29,1,1,0,0,${name
         .slice(0, MaxContentSize)}\nAC,4,59,1,1,0,0,${name
-            .slice(MaxContentSize, MaxContentSize * 2)}\nAC,4,100,1,1,0,0,${user_name}\nAA,4,135,1,1,0,0,Date: ${format(created_at, 'yyyy-MM-DD HH:mm')}\nAA,4,162,1,1,0,0,Exp: ${format(expiry_at, 'yyyy-MM-DD HH:mm')}\nW218,9,5,2,M0,8,6,${qr.length},0\n${qr}\nE\n`
+            .slice(MaxContentSize, MaxContentSize * 2)}\nAC,4,100,1,1,0,0,${user_name}\nAA,4,135,1,1,0,0,Date: ${format(created_at, 'yyyy-MM-dd HH:mm')}\nAA,4,162,1,1,0,0,Exp: ${format(expiry_at, 'yyyy-MM-dd HH:mm')}\nW218,9,5,2,M0,8,6,${qr.length},0\n${qr}\nE\n`
 
 }
