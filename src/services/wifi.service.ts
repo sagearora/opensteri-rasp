@@ -256,6 +256,21 @@ export class WiFiService {
     });
   }
 
+  /**
+   * Start the access point (AP) by starting raspapd.service
+   */
+  static async startAccessPoint(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      exec('sudo systemctl start raspapd.service', (err) => {
+        if (err) {
+          console.error('Failed to start access point:', err);
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  }
+
   private static getWiFiDevice(callback: (device: string) => void): void {
     exec('nmcli device | grep wifi | grep -v "p2p" | head -1 | awk \'{print $1}\'', (err, stdout) => {
       const device = stdout.trim() || 'wlan0';

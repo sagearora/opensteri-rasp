@@ -66,6 +66,32 @@ router.post('/join', async (req, res) => {
     return res.status(400).json({ error: 'printer_id, join_code and ssid are required' });
   }
 
+  // 1. Try to connect to WiFi first
+  try {
+    const wifiResult = await WiFiService.connect({ ssid, password });
+    if (!wifiResult.success) {
+      // If WiFi connection fails, restore AP and return error
+      await WiFiService.startAccessPoint();
+      return res.status(500).json({ error: 'Failed to connect to WiFi: ' + wifiResult.message });
+    }
+  } catch (err) {
+    await WiFiService.startAccessPoint();
+    return res.status(500).json({ error: 'WiFi connection error' });
+  }
+
+  // 2. Check for internet connectivity before proceeding
+  try {
+    const status = await WiFiService.getStatus();
+    if (!status.connected || !status.ip) {
+      await WiFiService.startAccessPoint();
+      return res.status(500).json({ error: 'Connected to WiFi but no internet access' });
+    }
+  } catch (err) {
+    await WiFiService.startAccessPoint();
+    return res.status(500).json({ error: 'Failed to verify internet connection' });
+  }
+
+  // 3. Proceed to printer join
   const joinUrl = process.env.JOIN_URL;
   if (!joinUrl) {
     return res.status(500).json({ error: 'JOIN_URL must be set in environment' });
