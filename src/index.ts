@@ -3,7 +3,7 @@ import 'dotenv/config';
 import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
-import wifiRoutes from './routes/wifi.routes';
+import wifiRoutes from './routes/routes';
 import { loadToken } from './services/graphqlTokenStore';
 import { startPrinterSubscription } from './services/subscribePrintLabels';
 

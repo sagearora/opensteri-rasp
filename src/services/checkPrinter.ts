@@ -7,8 +7,25 @@ const PRINTER_PRODUCT_ID = 1;
 let device: Device | undefined;
 let out_endpoint: OutEndpoint | undefined;
 
+// Store the last known printer connection state
+let printerConnectionState = {
+    connected: false,
+    lastUpdated: new Date().toISOString(),
+    vendorId: PRINTER_VENDOR_ID,
+    productId: PRINTER_PRODUCT_ID
+};
+
+const updatePrinterState = (connected: boolean) => {
+    printerConnectionState = {
+        ...printerConnectionState,
+        connected,
+        lastUpdated: new Date().toISOString()
+    };
+    console.log(`Printer state updated: ${connected ? 'connected' : 'disconnected'} at ${printerConnectionState.lastUpdated}`);
+};
+
 const initDevice = (_device: Device) => {
-    console.log('Init GODEX printer')
+    console.log('Check GoDEX printer status')
     _device.open()
     const ifc = _device.interface(0)
     if (ifc.isKernelDriverActive()) {
@@ -17,6 +34,7 @@ const initDevice = (_device: Device) => {
         } catch (e) {
             console.error('Error detaching kernel driver', e)
             _device.close()
+            updatePrinterState(false);
             return
         }
     }
@@ -26,10 +44,12 @@ const initDevice = (_device: Device) => {
         ifc.release()
         _device.close()
         console.error('Failed to get out endpoint for GODEX printer')
+        updatePrinterState(false);
         return
     }
     out_endpoint = endpoint
     device = _device
+    updatePrinterState(true);
 }
 
 
@@ -44,12 +64,15 @@ usb.on('detach', () => {
     if (!_device) {
         device = undefined
         out_endpoint = undefined
+        updatePrinterState(false);
     }
 })
 
 const connected = findByIds(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID)
 if (connected) {
     initDevice(connected)
+} else {
+    updatePrinterState(false);
 }
 
 export const isPrinterConnected = () => {
@@ -57,6 +80,11 @@ export const isPrinterConnected = () => {
         return true
     }
     return false
+}
+
+// Export function to get the current printer state
+export const getPrinterState = () => {
+    return printerConnectionState;
 }
 
 export const sendToPrinter = async (cmd: string) => {
