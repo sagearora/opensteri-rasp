@@ -3,6 +3,7 @@
 cd /home/pi/opensteri-rasp || exit 1
 
 # Pull latest changes
+git reset --hard
 git pull
 
 npm install

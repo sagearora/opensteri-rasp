@@ -9,6 +9,7 @@
  * @version 1.0.0
  */
 
+import { exec } from "child_process";
 import { Printer_Command_Type_Enum, PrinterCommandFragment, Sdk } from "../__generated/graphql";
 import { LabelData, PrinterService, PrintResult } from "./printerService";
 
@@ -36,9 +37,9 @@ export interface CommandResult {
 export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): Promise<void> => {
   try {
     console.log(`Processing printer command: ${command.command} (ID: ${command.id})`);
-    
+
     let result: CommandResult | null = null;
-    
+
     // Execute command based on type
     switch (command.command) {
       case Printer_Command_Type_Enum.PrintTest:
@@ -57,7 +58,7 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
           message: `Unknown command type: ${command.command}`
         };
     }
-    
+
     // Update command status in backend
     await sdk.updatePrinterCommand({
       id: command.id,
@@ -66,11 +67,11 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
         result: result ? JSON.stringify(result) : null,
       }
     });
-    
+
     console.log(`Command ${command.id} processed successfully`);
   } catch (error) {
     console.error(`Failed to handle command ${command.id}:`, error);
-    
+
     // Update command status with error
     try {
       await sdk.updatePrinterCommand({
@@ -86,15 +87,28 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
     } catch (updateError) {
       console.error('Failed to update command status:', updateError);
     }
-    
+
     throw error;
   }
 };
 
 async function runUpdate() {
-  console.log('Running update');
-  return {
-    success: true,
-    message: 'Update run successfully'
-  }
+  return new Promise<CommandResult>((resolve, reject) => {
+    // first make the self-update.sh executable
+    exec('chmod +x /home/pi/opensteri-rasp/self-update.sh', (error, stdout, stderr) => {
+      if (error) {
+        return reject(error);
+      }
+      exec('bash /home/pi/opensteri-rasp/self-update.sh', (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve({
+          success: true,
+          message: 'Update run successfully'
+        });
+      });
+    });
+    // then run the update script
+  });
 }
