@@ -1,6 +1,6 @@
 {
     "name": "printer-management-system",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A comprehensive Node.js application for managing GoDEX printers, WiFi connections, and label printing functionality",
     "main": "dist/index.js",
     "scripts": {
