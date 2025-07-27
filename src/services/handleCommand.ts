@@ -49,7 +49,7 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
         result = await PrinterService.printLabels(command.data as LabelData[]);
         break;
       case Printer_Command_Type_Enum.RunUpdate:
-        result = await runUpdate();
+        result = await runUpdate(sdk, command.printer_id);
         break;
       default:
         console.warn(`Unknown command type: ${command.command}`);
@@ -92,7 +92,26 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
   }
 };
 
-async function runUpdate() {
+async function runUpdate(sdk: Sdk, printer_id: string) {
+  const { printer_by_pk: printer } = await sdk.getPrinter({ printerId: printer_id });
+  if (!printer) {
+    return {
+      success: false,
+      message: 'Printer not found or update already started'
+    };
+  }
+  if (printer.update_started_at) {
+    return {
+      success: false,
+      message: 'Update already started'
+    };
+  }
+  await sdk.updatePrinter({
+    printerId: printer_id,
+    set: {
+      update_started_at: 'now()'
+    }
+  });
   return new Promise<CommandResult>((resolve, reject) => {
     // first make the self-update.sh executable
     exec('chmod +x /home/pi/opensteri-rasp/self-update.sh', (error, stdout, stderr) => {
@@ -100,11 +119,17 @@ async function runUpdate() {
         return reject(error);
       }
       console.log('self-update.sh is now executable');
-      exec('bash /home/pi/opensteri-rasp/self-update.sh', (error, stdout, stderr) => {
+      exec('bash /home/pi/opensteri-rasp/self-update.sh', async (error, stdout, stderr) => {
         if (error) {
           return reject(error);
         }
         console.log('Update script executed successfully');
+        await sdk.updatePrinter({
+          printerId: printer_id,
+          set: {
+            update_started_at: null
+          }
+        });
         resolve({
           success: true,
           message: 'Update run successfully'

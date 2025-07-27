@@ -34,16 +34,16 @@ let heartbeatInterval: NodeJS.Timeout | null = null;
 async function updatePrinterHeartbeat(sdk: Sdk, printerId: string): Promise<any> {
   try {
     console.log(`Sending heartbeat for printer: ${printerId}`);
-    
+
     // Get current version number
     const version_number = getCurrentVersionNumber();
     console.log(`Current version number: ${version_number}`);
-    
-    const { update_printer_by_pk } = await sdk.UpdatePrinterLastSeen({
+
+    const { update_printer_by_pk } = await sdk.updatePrinter({
       printerId,
-      version_number,
+      set: { version_number, last_seen_at: "now()" }
     });
-    
+
     console.log('Heartbeat sent successfully');
     return update_printer_by_pk;
   } catch (error) {
@@ -70,9 +70,9 @@ export async function startPrinterHeartbeat(sdk: Sdk, printerId: string): Promis
       clearInterval(heartbeatInterval);
       console.log('Cleared existing heartbeat interval');
     }
-    
+
     console.log(`Starting printer heartbeat with ${HEARTBEAT_INTERVAL_SECONDS}s interval`);
-    
+
     // Set up periodic heartbeat
     heartbeatInterval = setInterval(async () => {
       try {
@@ -82,10 +82,10 @@ export async function startPrinterHeartbeat(sdk: Sdk, printerId: string): Promis
         // Don't throw here to prevent interval from stopping
       }
     }, HEARTBEAT_INTERVAL_SECONDS * 1000);
-    
+
     // Send initial heartbeat immediately
     await updatePrinterHeartbeat(sdk, printerId);
-    
+
     console.log('Printer heartbeat started successfully');
   } catch (error) {
     console.error('Failed to start printer heartbeat:', error);

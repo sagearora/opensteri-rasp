@@ -4,6 +4,7 @@ fragment Printer on printer {
   paired_at
   last_seen_at
   version_number
+  update_started_at
 }
 
 query getPrinter($printerId: uuid!) {
@@ -12,8 +13,8 @@ query getPrinter($printerId: uuid!) {
   }
 }
 
-mutation UpdatePrinterLastSeen($printerId: uuid!, $version_number: Int!) {
-  update_printer_by_pk(pk_columns: {id: $printerId}, _set: {version_number: $version_number, last_seen_at: "now()"}) {
+mutation updatePrinter($printerId: uuid!, $set: printer_set_input!) {
+  update_printer_by_pk(pk_columns: {id: $printerId}, _set: $set) {
     id
     last_seen_at
   }
@@ -22,6 +23,7 @@ mutation UpdatePrinterLastSeen($printerId: uuid!, $version_number: Int!) {
 fragment PrinterCommand on printer_command {
     id
     created_at
+    printer_id
     command
     data
     executed_at

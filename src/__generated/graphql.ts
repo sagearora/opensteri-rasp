@@ -2159,6 +2159,7 @@ export type Printer = {
   last_seen_at?: Maybe<Scalars['timestamptz']['output']>;
   name: Scalars['String']['output'];
   paired_at?: Maybe<Scalars['timestamp']['output']>;
+  update_started_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at: Scalars['timestamptz']['output'];
   version_number: Scalars['Int']['output'];
 };
@@ -2252,6 +2253,7 @@ export type Printer_Bool_Exp = {
   last_seen_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   paired_at?: InputMaybe<Timestamp_Comparison_Exp>;
+  update_started_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   version_number?: InputMaybe<Int_Comparison_Exp>;
 };
@@ -2756,6 +2758,7 @@ export type Printer_Insert_Input = {
   last_seen_at?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   paired_at?: InputMaybe<Scalars['timestamp']['input']>;
+  update_started_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   version_number?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2772,6 +2775,7 @@ export type Printer_Max_Fields = {
   last_seen_at?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   paired_at?: Maybe<Scalars['timestamp']['output']>;
+  update_started_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   version_number?: Maybe<Scalars['Int']['output']>;
 };
@@ -2787,6 +2791,7 @@ export type Printer_Max_Order_By = {
   last_seen_at?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   paired_at?: InputMaybe<Order_By>;
+  update_started_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   version_number?: InputMaybe<Order_By>;
 };
@@ -2803,6 +2808,7 @@ export type Printer_Min_Fields = {
   last_seen_at?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   paired_at?: Maybe<Scalars['timestamp']['output']>;
+  update_started_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   version_number?: Maybe<Scalars['Int']['output']>;
 };
@@ -2818,6 +2824,7 @@ export type Printer_Min_Order_By = {
   last_seen_at?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   paired_at?: InputMaybe<Order_By>;
+  update_started_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   version_number?: InputMaybe<Order_By>;
 };
@@ -2857,6 +2864,7 @@ export type Printer_Order_By = {
   last_seen_at?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   paired_at?: InputMaybe<Order_By>;
+  update_started_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   version_number?: InputMaybe<Order_By>;
 };
@@ -2887,6 +2895,8 @@ export enum Printer_Select_Column {
   /** column name */
   PairedAt = 'paired_at',
   /** column name */
+  UpdateStartedAt = 'update_started_at',
+  /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
   VersionNumber = 'version_number'
@@ -2903,6 +2913,7 @@ export type Printer_Set_Input = {
   last_seen_at?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   paired_at?: InputMaybe<Scalars['timestamp']['input']>;
+  update_started_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   version_number?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2959,6 +2970,7 @@ export type Printer_Stream_Cursor_Value_Input = {
   last_seen_at?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   paired_at?: InputMaybe<Scalars['timestamp']['input']>;
+  update_started_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   version_number?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2994,6 +3006,8 @@ export enum Printer_Update_Column {
   Name = 'name',
   /** column name */
   PairedAt = 'paired_at',
+  /** column name */
+  UpdateStartedAt = 'update_started_at',
   /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
@@ -7240,31 +7254,31 @@ export type Uuid_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['uuid']['input']>>;
 };
 
-export type PrinterFragment = { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number };
+export type PrinterFragment = { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null };
 
 export type GetPrinterQueryVariables = Exact<{
   printerId: Scalars['uuid']['input'];
 }>;
 
 
-export type GetPrinterQuery = { __typename?: 'query_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number } | null };
+export type GetPrinterQuery = { __typename?: 'query_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null } | null };
 
-export type UpdatePrinterLastSeenMutationVariables = Exact<{
+export type UpdatePrinterMutationVariables = Exact<{
   printerId: Scalars['uuid']['input'];
-  version_number: Scalars['Int']['input'];
+  set: Printer_Set_Input;
 }>;
 
 
-export type UpdatePrinterLastSeenMutation = { __typename?: 'mutation_root', update_printer_by_pk?: { __typename?: 'printer', id: any, last_seen_at?: any | null } | null };
+export type UpdatePrinterMutation = { __typename?: 'mutation_root', update_printer_by_pk?: { __typename?: 'printer', id: any, last_seen_at?: any | null } | null };
 
-export type PrinterCommandFragment = { __typename?: 'printer_command', id: any, created_at: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null };
+export type PrinterCommandFragment = { __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null };
 
 export type WatchPrinterCommandsSubscriptionVariables = Exact<{
   printerId: Scalars['uuid']['input'];
 }>;
 
 
-export type WatchPrinterCommandsSubscription = { __typename?: 'subscription_root', printer_command: Array<{ __typename?: 'printer_command', id: any, created_at: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null }> };
+export type WatchPrinterCommandsSubscription = { __typename?: 'subscription_root', printer_command: Array<{ __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null }> };
 
 export type UpdatePrinterCommandMutationVariables = Exact<{
   id: Scalars['bigint']['input'];
@@ -7281,12 +7295,14 @@ export const PrinterFragmentDoc = gql`
   paired_at
   last_seen_at
   version_number
+  update_started_at
 }
     `;
 export const PrinterCommandFragmentDoc = gql`
     fragment PrinterCommand on printer_command {
   id
   created_at
+  printer_id
   command
   data
   executed_at
@@ -7299,12 +7315,9 @@ export const GetPrinterDocument = gql`
   }
 }
     ${PrinterFragmentDoc}`;
-export const UpdatePrinterLastSeenDocument = gql`
-    mutation UpdatePrinterLastSeen($printerId: uuid!, $version_number: Int!) {
-  update_printer_by_pk(
-    pk_columns: {id: $printerId}
-    _set: {version_number: $version_number, last_seen_at: "now()"}
-  ) {
+export const UpdatePrinterDocument = gql`
+    mutation updatePrinter($printerId: uuid!, $set: printer_set_input!) {
+  update_printer_by_pk(pk_columns: {id: $printerId}, _set: $set) {
     id
     last_seen_at
   }
@@ -7339,8 +7352,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     getPrinter(variables: GetPrinterQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPrinterQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetPrinterQuery>({ document: GetPrinterDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getPrinter', 'query', variables);
     },
-    UpdatePrinterLastSeen(variables: UpdatePrinterLastSeenMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdatePrinterLastSeenMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdatePrinterLastSeenMutation>({ document: UpdatePrinterLastSeenDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdatePrinterLastSeen', 'mutation', variables);
+    updatePrinter(variables: UpdatePrinterMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdatePrinterMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdatePrinterMutation>({ document: UpdatePrinterDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'updatePrinter', 'mutation', variables);
     },
     watchPrinterCommands(variables: WatchPrinterCommandsSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<WatchPrinterCommandsSubscription> {
       return withWrapper((wrappedRequestHeaders) => client.request<WatchPrinterCommandsSubscription>({ document: WatchPrinterCommandsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'watchPrinterCommands', 'subscription', variables);
