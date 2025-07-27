@@ -47,6 +47,9 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
       case Printer_Command_Type_Enum.PrintLabels:
         result = await PrinterService.printLabels(command.data as LabelData[]);
         break;
+      case Printer_Command_Type_Enum.RunUpdate:
+        result = await runUpdate();
+        break;
       default:
         console.warn(`Unknown command type: ${command.command}`);
         result = {
@@ -87,3 +90,11 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
     throw error;
   }
 };
+
+async function runUpdate() {
+  console.log('Running update');
+  return {
+    success: true,
+    message: 'Update run successfully'
+  }
+}
