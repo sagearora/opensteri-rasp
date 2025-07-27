@@ -1886,6 +1886,7 @@ export type Mutation_RootUpdate_Count_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_PrinterArgs = {
+  _inc?: InputMaybe<Printer_Inc_Input>;
   _set?: InputMaybe<Printer_Set_Input>;
   where: Printer_Bool_Exp;
 };
@@ -1893,6 +1894,7 @@ export type Mutation_RootUpdate_PrinterArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Printer_By_PkArgs = {
+  _inc?: InputMaybe<Printer_Inc_Input>;
   _set?: InputMaybe<Printer_Set_Input>;
   pk_columns: Printer_Pk_Columns_Input;
 };
@@ -2158,6 +2160,7 @@ export type Printer = {
   name: Scalars['String']['output'];
   paired_at?: Maybe<Scalars['timestamp']['output']>;
   updated_at: Scalars['timestamptz']['output'];
+  version_number: Scalars['Int']['output'];
 };
 
 /** aggregated selection of "printer" */
@@ -2181,9 +2184,17 @@ export type Printer_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "printer" */
 export type Printer_Aggregate_Fields = {
   __typename?: 'printer_aggregate_fields';
+  avg?: Maybe<Printer_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Printer_Max_Fields>;
   min?: Maybe<Printer_Min_Fields>;
+  stddev?: Maybe<Printer_Stddev_Fields>;
+  stddev_pop?: Maybe<Printer_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Printer_Stddev_Samp_Fields>;
+  sum?: Maybe<Printer_Sum_Fields>;
+  var_pop?: Maybe<Printer_Var_Pop_Fields>;
+  var_samp?: Maybe<Printer_Var_Samp_Fields>;
+  variance?: Maybe<Printer_Variance_Fields>;
 };
 
 
@@ -2195,9 +2206,17 @@ export type Printer_Aggregate_FieldsCountArgs = {
 
 /** order by aggregate values of table "printer" */
 export type Printer_Aggregate_Order_By = {
+  avg?: InputMaybe<Printer_Avg_Order_By>;
   count?: InputMaybe<Order_By>;
   max?: InputMaybe<Printer_Max_Order_By>;
   min?: InputMaybe<Printer_Min_Order_By>;
+  stddev?: InputMaybe<Printer_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Printer_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Printer_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Printer_Sum_Order_By>;
+  var_pop?: InputMaybe<Printer_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Printer_Var_Samp_Order_By>;
+  variance?: InputMaybe<Printer_Variance_Order_By>;
 };
 
 /** input type for inserting array relation for remote table "printer" */
@@ -2205,6 +2224,17 @@ export type Printer_Arr_Rel_Insert_Input = {
   data: Array<Printer_Insert_Input>;
   /** upsert condition */
   on_conflict?: InputMaybe<Printer_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Printer_Avg_Fields = {
+  __typename?: 'printer_avg_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "printer" */
+export type Printer_Avg_Order_By = {
+  version_number?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "printer". All fields are combined with a logical 'AND'. */
@@ -2223,6 +2253,7 @@ export type Printer_Bool_Exp = {
   name?: InputMaybe<String_Comparison_Exp>;
   paired_at?: InputMaybe<Timestamp_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  version_number?: InputMaybe<Int_Comparison_Exp>;
 };
 
 /** columns and relationships of "printer_command" */
@@ -2708,6 +2739,11 @@ export enum Printer_Constraint {
   PrinterPkey = 'printer_pkey'
 }
 
+/** input type for incrementing numeric columns in table "printer" */
+export type Printer_Inc_Input = {
+  version_number?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "printer" */
 export type Printer_Insert_Input = {
   archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -2721,6 +2757,7 @@ export type Printer_Insert_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   paired_at?: InputMaybe<Scalars['timestamp']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  version_number?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate max on columns */
@@ -2736,6 +2773,7 @@ export type Printer_Max_Fields = {
   name?: Maybe<Scalars['String']['output']>;
   paired_at?: Maybe<Scalars['timestamp']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
+  version_number?: Maybe<Scalars['Int']['output']>;
 };
 
 /** order by max() on columns of table "printer" */
@@ -2750,6 +2788,7 @@ export type Printer_Max_Order_By = {
   name?: InputMaybe<Order_By>;
   paired_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  version_number?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -2765,6 +2804,7 @@ export type Printer_Min_Fields = {
   name?: Maybe<Scalars['String']['output']>;
   paired_at?: Maybe<Scalars['timestamp']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
+  version_number?: Maybe<Scalars['Int']['output']>;
 };
 
 /** order by min() on columns of table "printer" */
@@ -2779,6 +2819,7 @@ export type Printer_Min_Order_By = {
   name?: InputMaybe<Order_By>;
   paired_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  version_number?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "printer" */
@@ -2817,6 +2858,7 @@ export type Printer_Order_By = {
   name?: InputMaybe<Order_By>;
   paired_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  version_number?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: printer */
@@ -2845,7 +2887,9 @@ export enum Printer_Select_Column {
   /** column name */
   PairedAt = 'paired_at',
   /** column name */
-  UpdatedAt = 'updated_at'
+  UpdatedAt = 'updated_at',
+  /** column name */
+  VersionNumber = 'version_number'
 }
 
 /** input type for updating data in table "printer" */
@@ -2860,6 +2904,40 @@ export type Printer_Set_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   paired_at?: InputMaybe<Scalars['timestamp']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  version_number?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Printer_Stddev_Fields = {
+  __typename?: 'printer_stddev_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "printer" */
+export type Printer_Stddev_Order_By = {
+  version_number?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Printer_Stddev_Pop_Fields = {
+  __typename?: 'printer_stddev_pop_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "printer" */
+export type Printer_Stddev_Pop_Order_By = {
+  version_number?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Printer_Stddev_Samp_Fields = {
+  __typename?: 'printer_stddev_samp_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "printer" */
+export type Printer_Stddev_Samp_Order_By = {
+  version_number?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "printer" */
@@ -2882,6 +2960,18 @@ export type Printer_Stream_Cursor_Value_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   paired_at?: InputMaybe<Scalars['timestamp']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  version_number?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Printer_Sum_Fields = {
+  __typename?: 'printer_sum_fields';
+  version_number?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "printer" */
+export type Printer_Sum_Order_By = {
+  version_number?: InputMaybe<Order_By>;
 };
 
 /** update columns of table "printer" */
@@ -2905,14 +2995,51 @@ export enum Printer_Update_Column {
   /** column name */
   PairedAt = 'paired_at',
   /** column name */
-  UpdatedAt = 'updated_at'
+  UpdatedAt = 'updated_at',
+  /** column name */
+  VersionNumber = 'version_number'
 }
 
 export type Printer_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Printer_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Printer_Set_Input>;
   /** filter the rows which have to be updated */
   where: Printer_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Printer_Var_Pop_Fields = {
+  __typename?: 'printer_var_pop_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "printer" */
+export type Printer_Var_Pop_Order_By = {
+  version_number?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Printer_Var_Samp_Fields = {
+  __typename?: 'printer_var_samp_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "printer" */
+export type Printer_Var_Samp_Order_By = {
+  version_number?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Printer_Variance_Fields = {
+  __typename?: 'printer_variance_fields';
+  version_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "printer" */
+export type Printer_Variance_Order_By = {
+  version_number?: InputMaybe<Order_By>;
 };
 
 export type Query_Root = {
@@ -7113,15 +7240,18 @@ export type Uuid_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['uuid']['input']>>;
 };
 
+export type PrinterFragment = { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number };
+
 export type GetPrinterQueryVariables = Exact<{
   printerId: Scalars['uuid']['input'];
 }>;
 
 
-export type GetPrinterQuery = { __typename?: 'query_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null } | null };
+export type GetPrinterQuery = { __typename?: 'query_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number } | null };
 
 export type UpdatePrinterLastSeenMutationVariables = Exact<{
   printerId: Scalars['uuid']['input'];
+  version_number: Scalars['Int']['input'];
 }>;
 
 
@@ -7144,6 +7274,15 @@ export type UpdatePrinterCommandMutationVariables = Exact<{
 
 export type UpdatePrinterCommandMutation = { __typename?: 'mutation_root', update_printer_command_by_pk?: { __typename?: 'printer_command', id: any } | null };
 
+export const PrinterFragmentDoc = gql`
+    fragment Printer on printer {
+  id
+  clinic_id
+  paired_at
+  last_seen_at
+  version_number
+}
+    `;
 export const PrinterCommandFragmentDoc = gql`
     fragment PrinterCommand on printer_command {
   id
@@ -7154,20 +7293,17 @@ export const PrinterCommandFragmentDoc = gql`
 }
     `;
 export const GetPrinterDocument = gql`
-    query GetPrinter($printerId: uuid!) {
+    query getPrinter($printerId: uuid!) {
   printer_by_pk(id: $printerId) {
-    id
-    clinic_id
-    paired_at
-    last_seen_at
+    ...Printer
   }
 }
-    `;
+    ${PrinterFragmentDoc}`;
 export const UpdatePrinterLastSeenDocument = gql`
-    mutation UpdatePrinterLastSeen($printerId: uuid!) {
+    mutation UpdatePrinterLastSeen($printerId: uuid!, $version_number: Int!) {
   update_printer_by_pk(
     pk_columns: {id: $printerId}
-    _set: {last_seen_at: "now()"}
+    _set: {version_number: $version_number, last_seen_at: "now()"}
   ) {
     id
     last_seen_at
@@ -7200,8 +7336,8 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    GetPrinter(variables: GetPrinterQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPrinterQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetPrinterQuery>({ document: GetPrinterDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPrinter', 'query', variables);
+    getPrinter(variables: GetPrinterQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPrinterQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPrinterQuery>({ document: GetPrinterDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getPrinter', 'query', variables);
     },
     UpdatePrinterLastSeen(variables: UpdatePrinterLastSeenMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdatePrinterLastSeenMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdatePrinterLastSeenMutation>({ document: UpdatePrinterLastSeenDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdatePrinterLastSeen', 'mutation', variables);

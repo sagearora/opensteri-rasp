@@ -1,14 +1,19 @@
-query GetPrinter($printerId: uuid!) {
+fragment Printer on printer {
+  id
+  clinic_id
+  paired_at
+  last_seen_at
+  version_number
+}
+
+query getPrinter($printerId: uuid!) {
   printer_by_pk(id: $printerId) {
-    id
-    clinic_id
-    paired_at
-    last_seen_at
+    ...Printer  
   }
 }
 
-mutation UpdatePrinterLastSeen($printerId: uuid!) {
-  update_printer_by_pk(pk_columns: {id: $printerId}, _set: {last_seen_at: "now()"}) {
+mutation UpdatePrinterLastSeen($printerId: uuid!, $version_number: Int!) {
+  update_printer_by_pk(pk_columns: {id: $printerId}, _set: {version_number: $version_number, last_seen_at: "now()"}) {
     id
     last_seen_at
   }
