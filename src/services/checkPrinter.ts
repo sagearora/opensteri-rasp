@@ -6,7 +6,7 @@
  * 
  * Supports GoDEX printers with vendor ID 6495 and product ID 1.
  * 
- * @author Printer Management System
+ * @author Dr. Saj Arora
  * @version 1.0.0
  */
 

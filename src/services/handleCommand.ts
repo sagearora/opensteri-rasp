@@ -5,11 +5,12 @@
  * executing the appropriate actions based on command type and updating
  * command status after execution.
  * 
- * @author Printer Management System
+ * @author Dr. Saj Arora
  * @version 1.0.0
  */
 
 import { Printer_Command_Type_Enum, PrinterCommandFragment, Sdk } from "../__generated/graphql";
+import { LabelData, PrinterService, PrintResult } from "./printerService";
 
 /**
  * Interface for command execution result
@@ -41,7 +42,10 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
     // Execute command based on type
     switch (command.command) {
       case Printer_Command_Type_Enum.PrintTest:
-        result = await printTestLabel(command.data);
+        result = await PrinterService.printTestLabel();;
+        break;
+      case Printer_Command_Type_Enum.PrintLabels:
+        result = await PrinterService.printLabels(command.data as LabelData[]);
         break;
       default:
         console.warn(`Unknown command type: ${command.command}`);
@@ -81,35 +85,5 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
     }
     
     throw error;
-  }
-};
-
-/**
- * Execute a test label print command
- * 
- * This function handles the PrintTest command type by generating
- * and printing a test label with sample data.
- * 
- * @param data - Optional command data (currently unused)
- * @returns Promise<CommandResult> - Result of the test print operation
- */
-const printTestLabel = async (data: any): Promise<CommandResult> => {
-  try {
-    console.log('Printing test label with data:', data);
-    
-    // TODO: Implement actual test label printing logic
-    // This would typically involve calling the printer service
-    
-    return {
-      success: true,
-      message: 'Test label printed successfully',
-      data: { testLabel: true }
-    };
-  } catch (error) {
-    console.error('Test label print failed:', error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Unknown error during test print'
-    };
   }
 };

@@ -6,23 +6,24 @@
  * - Label printing functionality
  * - Printer authentication and joining
  * - Status monitoring
+ * 
+ * @author Dr. Saj Arora
+ * @version 1.0.0
  */
 
 import fetch from 'node-fetch';
-import { createLabelCmd, getPrinterState as getPrinterStateFromCheck, PrinterLayoutCmd, sendToPrinter } from './checkPrinter';
+import { 
+  createLabelCmd, 
+  getPrinterState as getPrinterStateFromCheck, 
+  PrinterLayoutCmd, 
+  sendToPrinter,
+  LabelData as CheckPrinterLabelData
+} from './checkPrinter';
 
 /**
  * Interface for label data structure
  */
-export interface LabelData {
-  id: string;
-  name: string;
-  category: string;
-  user_name: string;
-  created_at: string;
-  expiry_at: string;
-  qr: string;
-}
+export interface LabelData extends CheckPrinterLabelData {}
 
 /**
  * Interface for printer join result
@@ -45,123 +46,7 @@ export interface PrintResult {
 }
 
 /**
- * Join a printer to the system using provided credentials
- * 
- * @param printerId - The unique identifier for the printer
- * @param joinCode - The authentication code for joining
- * @returns Promise<PrinterJoinResult> - Result of the join operation
- */
-export async function joinPrinter(printerId: string, joinCode: string): Promise<PrinterJoinResult> {
-  try {
-    const joinUrl = process.env.JOIN_URL;
-    if (!joinUrl) {
-      return {
-        success: false,
-        error: 'JOIN_URL must be set in environment'
-      };
-    }
-
-    const response = await fetch(joinUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ printer_id: printerId, join_code: joinCode }),
-    });
-
-    const data = await response.json();
-
-    // Validate response and return credentials if successful
-    if (data.ok && typeof data.token === 'string' && typeof data.printer_id === 'string') {
-      return {
-        success: true,
-        token: data.token,
-        printer_id: data.printer_id
-      };
-    } else {
-      return {
-        success: false,
-        error: 'Invalid response from join server'
-      };
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error during printer join'
-    };
-  }
-}
-
-/**
- * Get the current printer connection state
- * 
- * @returns Object containing printer connection status
- */
-export function getPrinterState() {
-  return getPrinterStateFromCheck();
-}
-
-/**
- * Print multiple labels
- * 
- * @param labels - Array of label data objects to print
- * @returns Promise<PrintResult> - Result of the print operation
- */
-export async function printLabels(labels: LabelData[]): Promise<PrintResult> {
-  try {
-    const labelCommands = labels.map(label => createLabelCmd(label));
-    const commandString = [PrinterLayoutCmd, ...labelCommands].join('\n');
-    
-    const bytesSent = await sendToPrinter(commandString);
-    
-    return {
-      success: true,
-      message: `Successfully printed ${labels.length} labels`,
-      bytesSent: typeof bytesSent === 'number' ? bytesSent : undefined
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Unknown error during printing'
-    };
-  }
-}
-
-/**
- * Print a test label
- * 
- * @returns Promise<PrintResult> - Result of the test print operation
- */
-export async function printTestLabel(): Promise<PrintResult> {
-  try {
-    const testLabel: LabelData = {
-      id: '1',
-      name: 'WELCOME',
-      category: 'Test Category',
-      user_name: 'Test User',
-      created_at: new Date().toISOString(),
-      expiry_at: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-      qr: 'https://www.google.com',
-    };
-
-    const labelCommand = createLabelCmd(testLabel);
-    const commandString = [PrinterLayoutCmd, labelCommand].join('\n');
-    
-    const bytesSent = await sendToPrinter(commandString);
-    
-    return {
-      success: true,
-      message: 'Test label printed successfully',
-      bytesSent: typeof bytesSent === 'number' ? bytesSent : undefined
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Unknown error during test printing'
-    };
-  }
-}
-
-/**
- * Printer Service class for better organization
+ * Printer Service class for centralized printer operations
  */
 export class PrinterService {
   /**
@@ -172,23 +57,115 @@ export class PrinterService {
   }
 
   /**
-   * Join a printer to the system
+   * Join a printer to the system using provided credentials
+   * 
+   * @param printerId - The unique identifier for the printer
+   * @param joinCode - The authentication code for joining
+   * @returns Promise<PrinterJoinResult> - Result of the join operation
    */
   static async joinPrinter(printerId: string, joinCode: string): Promise<PrinterJoinResult> {
-    return joinPrinter(printerId, joinCode);
+    try {
+      const joinUrl = process.env.JOIN_URL;
+      if (!joinUrl) {
+        return {
+          success: false,
+          error: 'JOIN_URL must be set in environment'
+        };
+      }
+
+      const response = await fetch(joinUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ printer_id: printerId, join_code: joinCode }),
+      });
+
+      const data = await response.json();
+
+      // Validate response and return credentials if successful
+      if (data.ok && typeof data.token === 'string' && typeof data.printer_id === 'string') {
+        return {
+          success: true,
+          token: data.token,
+          printer_id: data.printer_id
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Invalid response from join server'
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error during printer join'
+      };
+    }
   }
 
   /**
    * Print multiple labels
+   * 
+   * @param labels - Array of label data objects to print
+   * @returns Promise<PrintResult> - Result of the print operation
    */
   static async printLabels(labels: LabelData[]): Promise<PrintResult> {
-    return printLabels(labels);
+    try {
+      const labelCommands = labels.map(label => createLabelCmd(label));
+      const commandString = [PrinterLayoutCmd, ...labelCommands].join('\n');
+      
+      const bytesSent = await sendToPrinter(commandString);
+      
+      return {
+        success: true,
+        message: `Successfully printed ${labels.length} labels`,
+        bytesSent: typeof bytesSent === 'number' ? bytesSent : undefined
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error during printing'
+      };
+    }
   }
 
   /**
    * Print a test label
+   * 
+   * @returns Promise<PrintResult> - Result of the test print operation
    */
   static async printTestLabel(): Promise<PrintResult> {
-    return printTestLabel();
+    try {
+      const testLabel: LabelData = {
+        id: '1',
+        name: 'WELCOME',
+        category: 'Test Category',
+        user_name: 'Test User',
+        created_at: new Date().toISOString(),
+        expiry_at: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+        qr: 'https://www.google.com',
+      };
+
+      const labelCommand = createLabelCmd(testLabel);
+      const commandString = [PrinterLayoutCmd, labelCommand].join('\n');
+      
+      const bytesSent = await sendToPrinter(commandString);
+      
+      return {
+        success: true,
+        message: 'Test label printed successfully',
+        bytesSent: typeof bytesSent === 'number' ? bytesSent : undefined
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error during test printing'
+      };
+    }
   }
-} 
+}
+
+// Export individual functions for backward compatibility
+export const getPrinterState = PrinterService.getPrinterState;
+export const joinPrinter = PrinterService.joinPrinter;
+export const printLabels = PrinterService.printLabels;
+export const printTestLabel = PrinterService.printTestLabel; 
