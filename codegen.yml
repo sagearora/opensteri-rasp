@@ -1,0 +1,17 @@
+overwrite: true
+require:
+  - dotenv/config
+schema: 
+  - "${HASURA_GRAPHQL_URL}":
+      headers: 
+        x-hasura-admin-secret: "${HASURA_ADMIN_SECRET}"
+
+generates:
+  src/__generated/graphql.ts:
+    documents: "./**/*.graphql"
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"
+    config:
+      

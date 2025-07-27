@@ -1,10 +1,10 @@
-import { Router, Request, Response, response } from 'express';
+import { Request, Response, Router } from 'express';
+import fetch from 'node-fetch';
+import { createLabelCmd, getPrinterState, PrinterLayoutCmd, sendToPrinter } from '../services/checkPrinter';
+import { startPrinterSubscription } from '../services/subscribePrinterCommands';
+import { saveToken } from '../services/tokenStore';
 import { WiFiService } from '../services/wifi.service';
 import { WiFiConnection } from '../types';
-import fetch from 'node-fetch';
-import { saveToken } from '../services/graphqlTokenStore';
-import { startPrinterSubscription } from '../services/subscribePrintLabels';
-import { createLabelCmd, getPrinterState, PrinterLayoutCmd, sendToPrinter } from '../services/checkPrinter';
 
 const router = Router();
 
@@ -131,11 +131,9 @@ router.post('/join', async (req, res) => {
       if (data.ok && typeof data.token === 'string' && typeof data.printer_id === 'string') {
         await saveToken(data.token, data.printer_id);
         // Start subscription after join
-        setLatestPrinterInfo(
-          await startPrinterSubscription(data.printer_id, (labels) => {
-            console.log('New labels after join:', labels);
-          })
-        );
+        // setLatestPrinterInfo(
+        await startPrinterSubscription(data.printer_id, data.token)
+        // );
         console.log('Printer join successful!');
       } else {
         console.error('Printer join failed:', data);

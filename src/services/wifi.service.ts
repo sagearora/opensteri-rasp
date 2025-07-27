@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { WiFiStatus, WiFiConnection } from '../types';
 
 export class WiFiService {
-  
+
   static async scanNetworks(): Promise<string[]> {
     return new Promise((resolve) => {
       this.getWiFiDevice((device) => {
@@ -13,17 +13,23 @@ export class WiFiService {
 
   static async getStatus(): Promise<WiFiStatus> {
     return new Promise((resolve) => {
-      // Get active Wi-Fi connection SSID
-      exec('nmcli -t -f active,ssid dev wifi | grep "^yes" | cut -d\':\' -f2', (err, ssidStdout) => {
-        const ssid = ssidStdout.trim() || null;
-        if (!ssid) {
-          return resolve({ connected: false, ssid: null, ip: null });
+      // check if we are on a raspberry pi
+      exec('uname -a | grep -i raspberry', (err, stdout) => {
+        if (err) {
+          return resolve({ connected: true, ssid: 'WIFI_AP', ip: '127.0.0.1' });
         }
-        
-        // Get IP address for wlan0
-        exec('nmcli -t -f IP4.ADDRESS dev show wlan0 | grep -oP "(?<=:)[^/]+"', (ipErr, ipStdout) => {
-          const ip = ipStdout.trim() || null;
-          resolve({ connected: true, ssid, ip });
+        // Get active Wi-Fi connection SSID
+        exec('nmcli -t -f active,ssid dev wifi | grep "^yes" | cut -d\':\' -f2', (err, ssidStdout) => {
+          const ssid = ssidStdout.trim() || null;
+          if (!ssid) {
+            return resolve({ connected: false, ssid: null, ip: null });
+          }
+
+          // Get IP address for wlan0
+          exec('nmcli -t -f IP4.ADDRESS dev show wlan0 | grep -oP "(?<=:)[^/]+"', (ipErr, ipStdout) => {
+            const ip = ipStdout.trim() || null;
+            resolve({ connected: true, ssid, ip });
+          });
         });
       });
     });
@@ -34,22 +40,22 @@ export class WiFiService {
       try {
         // Get current connection info for backup
         const currentStatus = await this.getStatus();
-        
+
         // Create connection profile without auto-connecting first
         const profileName = `temp-${connection.ssid}-${Date.now()}`;
         const createCmd = `sudo nmcli connection add type wifi con-name "${profileName}" ssid "${connection.ssid}" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "${connection.password}" autoconnect no`;
-        
+
         exec(createCmd, (createErr, createStdout, createStderr) => {
           if (createErr) {
-            return resolve({ 
-              success: false, 
-              message: `Failed to create connection profile: ${createStderr}` 
+            return resolve({
+              success: false,
+              message: `Failed to create connection profile: ${createStderr}`
             });
           }
 
           // Now try to activate the connection with a timeout
           const connectCmd = `timeout 30 sudo nmcli connection up "${profileName}"`;
-          
+
           exec('sudo systemctl stop raspapd.service', () => {
             exec(connectCmd, (err, stdout, stderr) => {
               // Clean up the temporary profile
@@ -59,22 +65,22 @@ export class WiFiService {
 
               if (err) {
                 // Connection failed, but we didn't lose current connection
-                const errorMessage = stderr.includes('Secrets were required') ? 
-                  'Invalid password for network' : 
+                const errorMessage = stderr.includes('Secrets were required') ?
+                  'Invalid password for network' :
                   stderr.includes('No network with SSID') ?
-                  'Network not found' :
-                  `Connection failed: ${stderr}`;
-                
+                    'Network not found' :
+                    `Connection failed: ${stderr}`;
+
                 resolve({ success: false, message: errorMessage });
               } else {
                 // Connection successful, create permanent profile
                 const permanentCmd = `sudo nmcli connection add type wifi con-name "${connection.ssid}" ssid "${connection.ssid}" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "${connection.password}" autoconnect yes`;
-                
+
                 exec(permanentCmd, (permErr) => {
                   if (permErr) {
                     console.warn('Failed to create permanent profile, but connection is active');
                   }
-                  
+
                   // Reboot after successful connection
                   setTimeout(() => exec('sudo reboot'), 1000);
                   resolve({ success: true, message: `Connected to ${connection.ssid}` });
@@ -84,9 +90,9 @@ export class WiFiService {
           });
         });
       } catch (error) {
-        resolve({ 
-          success: false, 
-          message: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        resolve({
+          success: false,
+          message: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`
         });
       }
     });
@@ -98,10 +104,10 @@ export class WiFiService {
         if (err || !stdout.trim()) {
           return resolve(null);
         }
-        
+
         const lines = stdout.trim().split('\n');
         const wifiConnection = lines.find(line => line.includes(':wifi:'));
-        
+
         if (wifiConnection) {
           const parts = wifiConnection.split(':');
           resolve({
@@ -120,10 +126,10 @@ export class WiFiService {
       try {
         // Backup current connection
         const currentConnection = await this.getCurrentConnection();
-        
+
         // Try the new connection
         const result = await this.connect(connection);
-        
+
         if (!result.success && currentConnection) {
           // If new connection failed and we had a previous connection, 
           // try to restore it (though this is rare since we use a safer approach above)
@@ -344,7 +350,7 @@ export class WiFiService {
 
     lines.forEach(line => {
       const colonIndex = line.indexOf(':');
-      
+
       if (colonIndex === -1) {
         const ssid = line.trim();
         if (ssid && ssid !== '--') {
@@ -355,10 +361,10 @@ export class WiFiService {
 
       const ssid = line.substring(0, colonIndex).trim();
       const remainder = line.substring(colonIndex + 1);
-      
+
       let signal = 0;
       const parts = remainder.split(':');
-      
+
       for (const part of parts) {
         const trimmedPart = part.trim();
         if (trimmedPart && !isNaN(Number(trimmedPart))) {

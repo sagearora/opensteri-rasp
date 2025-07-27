@@ -1,0 +1,35 @@
+query GetPrinter($printerId: uuid!) {
+  printer_by_pk(id: $printerId) {
+    id
+    clinic_id
+    paired_at
+    last_seen_at
+  }
+}
+
+mutation UpdatePrinterLastSeen($printerId: uuid!) {
+  update_printer_by_pk(pk_columns: {id: $printerId}, _set: {last_seen_at: "now()"}) {
+    id
+    last_seen_at
+  }
+}
+
+fragment PrinterCommand on printer_command {
+    id
+    created_at
+    command
+    data
+    executed_at
+}
+
+subscription watchPrinterCommands($printerId: uuid!) {
+  printer_command(where: {printer_id: {_eq: $printerId}, executed_at: {_is_null: true}}, order_by: {id: asc}, limit: 1) {
+    ...PrinterCommand
+  }
+} 
+
+mutation updatePrinterCommand($id: bigint!, $set: printer_command_set_input!) {
+  update_printer_command_by_pk(pk_columns: {id: $id}, _set: $set) {
+    id
+  }
+}
