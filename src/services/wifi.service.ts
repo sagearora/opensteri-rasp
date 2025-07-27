@@ -14,7 +14,7 @@ export class WiFiService {
   static async getStatus(): Promise<WiFiStatus> {
     return new Promise((resolve) => {
       // check if we are on a raspberry pi
-      exec('uname -a | grep -i raspberry', (err, stdout) => {
+      exec('uname -a | grep -i rpi', (err, stdout) => {
         if (err) {
           return resolve({ connected: true, ssid: 'WIFI_AP', ip: '127.0.0.1' });
         }
