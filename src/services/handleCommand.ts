@@ -99,10 +99,12 @@ async function runUpdate() {
       if (error) {
         return reject(error);
       }
+      console.log('self-update.sh is now executable');
       exec('bash /home/pi/opensteri-rasp/self-update.sh', (error, stdout, stderr) => {
         if (error) {
           return reject(error);
         }
+        console.log('Update script executed successfully');
         resolve({
           success: true,
           message: 'Update run successfully'
