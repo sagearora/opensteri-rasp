@@ -67,11 +67,12 @@ async function fetchPrinterInfo(printerId: string, token?: string) {
 
 export function subscribeToSteriLabels(printerId: string, onLabel: (label: any) => void) {
   const query = `
-    subscription steriLabelSub($printerId: uuid!) {
-      steri_label(where: {printer_id: {_eq: $printerId}, printed_at: {_is_null: true}}) {
+    subscription printerCommands($printerId: uuid!) {
+      printer_command(where: {printer_id: {_eq: $printerId}, executed_at: {_is_null: true}}, order_by: {id: asc}) {
         id
-        steri_item_id
-        expiry_at
+        created_at
+        command
+        data
       }
     }
   `;
