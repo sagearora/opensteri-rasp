@@ -77,6 +77,13 @@ export async function initializePrinterConnection(): Promise<void> {
     
     // Start heartbeat monitoring
     startPrinterHeartbeat(httpClient, stored.printer_id);
+
+    await httpClient.updatePrinter({
+      printerId: stored.printer_id,
+      set: {
+        update_started_at: null
+      }
+    });
     
     console.log('Printer connection restored successfully');
   } catch (error) {

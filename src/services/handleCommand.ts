@@ -124,12 +124,6 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
           return reject(error);
         }
         console.log('Update script executed successfully');
-        await sdk.updatePrinter({
-          printerId: printer_id,
-          set: {
-            update_started_at: null
-          }
-        });
         resolve({
           success: true,
           message: 'Update run successfully'
