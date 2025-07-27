@@ -1,6 +1,5 @@
 import { client } from './graphqlClient';
 import { loadToken } from './graphqlTokenStore';
-import { setLatestPrinterInfo } from '../routes/routes';
 import fetch from 'node-fetch';
 
 // Heartbeat: update last_seen_at every HEARTBEAT_INTERVAL_SECONDS
@@ -20,9 +19,9 @@ async function updatePrinterLastSeen(printerId: string) {
     await client.subscribe(
       { query: mutation, variables: { printerId } },
       {
-        next: () => {},
+        next: () => { },
         error: (err: unknown) => console.error('Heartbeat mutation error:', err),
-        complete: () => {},
+        complete: () => { },
       }
     );
   } catch (err) {
@@ -94,15 +93,12 @@ export async function startPrinterSubscription(printerId: string, onLabel: (labe
   const tokenObj = await loadToken();
   const token = tokenObj?.token;
   if (tokenObj) {
-    // Fetch printer info once
-    const printerInfo = await fetchPrinterInfo(printerId, token);
-    if (printerInfo) {
-      console.log('Printer info:', printerInfo);
-      setLatestPrinterInfo(printerInfo);
-    }
     // Subscribe to steri_label for this printer
     subscribeToSteriLabels(printerId, onLabel);
     startPrinterHeartbeat(printerId);
+    // Fetch printer info once
+    const printerInfo = await fetchPrinterInfo(printerId, token);
+    return printerInfo
   } else {
     console.log('No token found, not subscribing to printer.');
   }

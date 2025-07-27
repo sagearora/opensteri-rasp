@@ -98,8 +98,9 @@ export const sendToPrinter = async (cmd: string) => {
                 res(size)
                 return
             })
+        } else {
+            rej('Printer not available.')
         }
-        rej('Printer not available.')
     })
 }
 

@@ -43,7 +43,7 @@ router.get('/', async (req, res) => {
 router.post('/connect', async (req: Request, res: Response) => {
   try {
     const connection: WiFiConnection = req.body;
-    
+
     if (!connection.ssid || !connection.password) {
       return res.status(400).json({ error: 'SSID and password are required' });
     }
@@ -65,10 +65,10 @@ router.post('/connect', async (req: Request, res: Response) => {
         }
 
         console.log('WiFi connected successfully, waiting for network setup...');
-        
+
         // 2. Wait a bit for network to stabilize, then check connectivity
         await new Promise(resolve => setTimeout(resolve, 5000));
-        
+
         const status = await WiFiService.getStatus();
         if (!status.connected || !status.ip) {
           console.error('Connected to WiFi but no internet access');
@@ -126,14 +126,16 @@ router.post('/join', async (req, res) => {
         body: JSON.stringify({ printer_id, join_code }),
       });
       const data = await response.json();
-      
+
       // Save token and printer_id if join was successful
       if (data.ok && typeof data.token === 'string' && typeof data.printer_id === 'string') {
         await saveToken(data.token, data.printer_id);
         // Start subscription after join
-        startPrinterSubscription(data.printer_id, (labels) => {
-          console.log('New labels after join:', labels);
-        });
+        setLatestPrinterInfo(
+          await startPrinterSubscription(data.printer_id, (labels) => {
+            console.log('New labels after join:', labels);
+          })
+        );
         console.log('Printer join successful!');
       } else {
         console.error('Printer join failed:', data);
@@ -176,7 +178,7 @@ router.post('/test-print', async (req: Request, res: Response) => {
   }
   const labelCmd = createLabelCmd({
     id: '1',
-    name: 'Test Label',
+    name: 'WELCOME',
     category: 'Test Category',
     user_name: 'Test User',
     created_at: new Date().toISOString(),
