@@ -8,10 +8,7 @@
  * @version 1.0.0
  */
 
-import { config } from 'dotenv';
-
-// Load environment variables
-config({ path: '.config' });
+import 'dotenv/config';
 
 // Import services
 import { initializePrinterConnection } from './services/printerConnectionService';
