@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/pi/opensteri-rasp || exit 1
+cd /home/pi/opensteri || exit 1
 
 # Pull latest changes
 git reset --hard
