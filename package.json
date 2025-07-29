@@ -1,7 +1,7 @@
 {
     "name": "printer-management-system",
     "version": "1.0.8",
-    "description": "A comprehensive Node.js application for managing GoDEX printers, WiFi connections, and label printing functionality",
+    "description": "A comprehensive Node.js application for managing GoDEX printers and label printing functionality using environment-based authentication",
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc",
@@ -24,14 +24,12 @@
     "keywords": [
         "printer",
         "goddex",
-        "wifi",
         "graphql",
         "websocket",
         "label-printing",
         "raspberry-pi",
         "usb",
-        "typescript",
-        "express"
+        "typescript"
     ],
     "author": "Printer Management System Team",
     "license": "MIT",
@@ -49,11 +47,8 @@
     },
     "dependencies": {
         "@types/node-fetch": "^2.6.12",
-        "body-parser": "^2.2.0",
-        "cors": "^2.8.5",
         "date-fns": "^4.1.0",
         "dotenv": "^17.2.1",
-        "express": "^5.1.0",
         "graphql": "^16.11.0",
         "graphql-request": "^7.2.0",
         "graphql-ws": "^6.0.6",
@@ -68,9 +63,6 @@
         "@graphql-codegen/typescript-graphql-request": "^6.3.0",
         "@graphql-codegen/typescript-operations": "^4.6.1",
         "@graphql-codegen/typescript-resolvers": "^4.5.1",
-        "@types/body-parser": "^1.19.6",
-        "@types/cors": "^2.8.19",
-        "@types/express": "^4.17.23",
         "@types/node": "^20.19.9",
         "@types/ws": "^8.18.1",
         "nodemon": "^3.1.10",

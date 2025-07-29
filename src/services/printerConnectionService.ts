@@ -3,16 +3,37 @@
  * 
  * Handles the initialization and management of printer connections,
  * including GraphQL client setup, command subscriptions, and heartbeat monitoring.
+ * Now uses environment-based authentication instead of stored tokens.
  */
 
-import { setLatestPrinterInfo } from '../routes/routes';
 import { fetchPrinterInfo } from './fetchPrinterInfo';
 import { getClient } from './graphqlClient';
 import { handleCommand } from './handleCommand';
 import { startPrinterHeartbeat } from './startHeartbeat';
 import { subscribeToCommands } from './subscribePrinterCommands';
-import { loadToken, saveToken } from './tokenStore';
 import { getCurrentVersion, getCurrentVersionNumber } from './versionManager';
+import { initializeEnvironmentAuth } from './environmentAuth';
+
+// Global state for latest printer information
+let latestPrinterInfo: any = null;
+
+/**
+ * Set the latest printer information for status monitoring
+ * 
+ * @param info - The latest printer information object
+ */
+export function setLatestPrinterInfo(info: any): void {
+  latestPrinterInfo = info;
+}
+
+/**
+ * Get the latest printer information
+ * 
+ * @returns The latest printer information or null if not available
+ */
+export function getLatestPrinterInfo(): any {
+  return latestPrinterInfo;
+}
 
 /**
  * Log version information to console
@@ -41,11 +62,12 @@ function logVersionInfo(): void {
 }
 
 /**
- * Initialize printer connection using stored credentials
+ * Initialize printer connection using environment authentication
  * 
- * This function attempts to restore a previous printer connection
- * by loading stored token and printer_id, then establishing
- * GraphQL connections and setting up monitoring.
+ * This function attempts to establish a printer connection
+ * using the environment file created on boot with printer_id and join token.
+ * It authenticates using the join token to get an access token,
+ * then establishes GraphQL connections and sets up monitoring.
  * 
  * @returns Promise<void>
  */
@@ -54,38 +76,41 @@ export async function initializePrinterConnection(): Promise<void> {
     // Log version information on startup
     logVersionInfo();
     
-    const stored = await loadToken();
+    console.log('Initializing printer connection using environment authentication...');
     
-    if (!stored || !stored.token || !stored.printer_id) {
-      console.log('No stored printer credentials found. Printer will remain disconnected until manual connection.');
+    // Initialize environment authentication
+    const authResult = await initializeEnvironmentAuth();
+    
+    if (!authResult.success || !authResult.access_token || !authResult.printer_id) {
+      console.log('No valid authentication data found. Printer will remain disconnected until environment is configured.');
       return;
     }
 
-    console.log('Found stored printer credentials, attempting to restore connection...');
+    console.log('Authentication successful, establishing GraphQL connections...');
     
-    // Establish GraphQL connections
-    const { wsClient, httpClient } = await getClient(stored.token);
+    // Establish GraphQL connections using access token
+    const { wsClient, httpClient } = await getClient(authResult.access_token);
     
     // Set up command subscription
-    subscribeToCommands(wsClient, stored.printer_id, (command) => 
+    subscribeToCommands(wsClient, authResult.printer_id, (command) => 
       handleCommand(httpClient, command)
     );
     
     // Fetch and store latest printer information
-    const printerInfo = await fetchPrinterInfo(httpClient, stored.printer_id);
+    const printerInfo = await fetchPrinterInfo(httpClient, authResult.printer_id);
     setLatestPrinterInfo(printerInfo);
     
     // Start heartbeat monitoring
-    startPrinterHeartbeat(httpClient, stored.printer_id);
+    startPrinterHeartbeat(httpClient, authResult.printer_id);
 
     await httpClient.updatePrinter({
-      printerId: stored.printer_id,
+      printerId: authResult.printer_id,
       set: {
         update_started_at: null
       }
     });
     
-    console.log('Printer connection restored successfully');
+    console.log('Printer connection established successfully using environment authentication');
   } catch (error) {
     console.error('Failed to initialize printer connection:', error);
     throw error;
@@ -145,9 +170,6 @@ export async function initializePrinterConnectionWithCredentials(token: string, 
  */
 export async function saveCredentialsAndInitializeConnection(token: string, printerId: string): Promise<any> {
   try {
-    // Save the credentials first
-    await saveToken(token, printerId);
-    
     // Initialize the connection using the service
     const printerInfo = await initializePrinterConnectionWithCredentials(token, printerId);
     
