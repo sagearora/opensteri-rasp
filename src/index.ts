@@ -12,12 +12,13 @@ import 'dotenv/config';
 
 // Import services
 import { initializePrinterConnection } from './services/printerConnectionService';
+import { stopPrinterHeartbeat } from './services/startHeartbeat';
 
 /**
  * Initialize the application
  * - Loads environment authentication data
  * - Establishes GraphQL connections
- * - Sets up printer monitoring
+ * - Sets up printer monitoring with archived_at watching
  */
 async function initializeApplication(): Promise<void> {
   try {
@@ -33,6 +34,18 @@ async function initializeApplication(): Promise<void> {
   }
 }
 
+/**
+ * Cleanup function for graceful shutdown
+ */
+function cleanup(): void {
+  console.log('Performing cleanup...');
+  
+  // Stop heartbeat monitoring
+  stopPrinterHeartbeat();
+  
+  console.log('Cleanup completed');
+}
+
 // Application startup
 (async () => {
   await initializeApplication();
@@ -41,10 +54,26 @@ async function initializeApplication(): Promise<void> {
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully...');
+  cleanup();
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully...');
+  cleanup();
   process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  cleanup();
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  cleanup();
+  process.exit(1);
 });

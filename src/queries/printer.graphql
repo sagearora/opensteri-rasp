@@ -1,3 +1,13 @@
+
+fragment PrinterCommand on printer_command {
+    id
+    created_at
+    printer_id
+    command
+    data
+    executed_at
+}
+
 fragment Printer on printer {
   id
   clinic_id
@@ -5,6 +15,10 @@ fragment Printer on printer {
   last_seen_at
   version_number
   update_started_at
+  archived_at
+  commands(where: {executed_at: {_is_null: true}}, order_by: {id: asc}, limit: 1) {
+    ...PrinterCommand
+  }
 }
 
 query getPrinter($printerId: uuid!) {
@@ -20,20 +34,12 @@ mutation updatePrinter($printerId: uuid!, $set: printer_set_input!) {
   }
 }
 
-fragment PrinterCommand on printer_command {
-    id
-    created_at
-    printer_id
-    command
-    data
-    executed_at
-}
 
-subscription watchPrinterCommands($printerId: uuid!) {
-  printer_command(where: {printer_id: {_eq: $printerId}, executed_at: {_is_null: true}}, order_by: {id: asc}, limit: 1) {
-    ...PrinterCommand
+subscription watchPrinter($printerId: uuid!) {
+  printer_by_pk(id: $printerId) {
+    ...Printer
   }
-} 
+}
 
 mutation updatePrinterCommand($id: bigint!, $set: printer_command_set_input!) {
   update_printer_command_by_pk(pk_columns: {id: $id}, _set: $set) {

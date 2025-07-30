@@ -87,18 +87,46 @@ export type String_Comparison_Exp = {
 export type Appointment = {
   __typename?: 'appointment';
   archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  clinic: Clinic;
   clinic_id: Scalars['uuid']['output'];
   created_at: Scalars['timestamptz']['output'];
-  creator_id?: Maybe<Scalars['uuid']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  creator: User;
+  creator_id: Scalars['uuid']['output'];
+  emr_id?: Maybe<Scalars['String']['output']>;
   endtime_at: Scalars['timestamptz']['output'];
   id: Scalars['bigint']['output'];
-  name: Scalars['String']['output'];
-  provider?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  patient: Patient;
+  patient_id: Scalars['uuid']['output'];
   starttime_at: Scalars['timestamptz']['output'];
-  state?: Maybe<Scalars['String']['output']>;
-  sync_id?: Maybe<Scalars['String']['output']>;
+  state?: Maybe<Appointment_State_Enum>;
+  /** An array relationship */
+  steri_labels: Array<Steri_Label>;
+  /** An aggregate relationship */
+  steri_labels_aggregate: Steri_Label_Aggregate;
   updated_at: Scalars['timestamptz']['output'];
+};
+
+
+/** columns and relationships of "appointment" */
+export type AppointmentSteri_LabelsArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Label_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Label_Order_By>>;
+  where?: InputMaybe<Steri_Label_Bool_Exp>;
+};
+
+
+/** columns and relationships of "appointment" */
+export type AppointmentSteri_Labels_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Label_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Label_Order_By>>;
+  where?: InputMaybe<Steri_Label_Bool_Exp>;
 };
 
 /** aggregated selection of "appointment" */
@@ -143,23 +171,26 @@ export type Appointment_Bool_Exp = {
   _not?: InputMaybe<Appointment_Bool_Exp>;
   _or?: InputMaybe<Array<Appointment_Bool_Exp>>;
   archived_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  clinic?: InputMaybe<Clinic_Bool_Exp>;
   clinic_id?: InputMaybe<Uuid_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  creator?: InputMaybe<User_Bool_Exp>;
   creator_id?: InputMaybe<Uuid_Comparison_Exp>;
-  description?: InputMaybe<String_Comparison_Exp>;
+  emr_id?: InputMaybe<String_Comparison_Exp>;
   endtime_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
-  name?: InputMaybe<String_Comparison_Exp>;
-  provider?: InputMaybe<String_Comparison_Exp>;
+  patient?: InputMaybe<Patient_Bool_Exp>;
+  patient_id?: InputMaybe<Uuid_Comparison_Exp>;
   starttime_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  state?: InputMaybe<String_Comparison_Exp>;
-  sync_id?: InputMaybe<String_Comparison_Exp>;
+  state?: InputMaybe<Appointment_State_Enum_Comparison_Exp>;
+  steri_labels?: InputMaybe<Steri_Label_Bool_Exp>;
+  steri_labels_aggregate?: InputMaybe<Steri_Label_Aggregate_Bool_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "appointment" */
 export enum Appointment_Constraint {
-  /** unique or primary key constraint on columns "clinic_id", "sync_id" */
+  /** unique or primary key constraint on columns "emr_id", "clinic_id" */
   AppointmentClinicIdSyncIdKey = 'appointment_clinic_id_sync_id_key',
   /** unique or primary key constraint on columns "id" */
   AppointmentPkey = 'appointment_pkey'
@@ -173,17 +204,19 @@ export type Appointment_Inc_Input = {
 /** input type for inserting data into table "appointment" */
 export type Appointment_Insert_Input = {
   archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  clinic?: InputMaybe<Clinic_Obj_Rel_Insert_Input>;
   clinic_id?: InputMaybe<Scalars['uuid']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator?: InputMaybe<User_Obj_Rel_Insert_Input>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
+  emr_id?: InputMaybe<Scalars['String']['input']>;
   endtime_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  provider?: InputMaybe<Scalars['String']['input']>;
+  patient?: InputMaybe<Patient_Obj_Rel_Insert_Input>;
+  patient_id?: InputMaybe<Scalars['uuid']['input']>;
   starttime_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  state?: InputMaybe<Scalars['String']['input']>;
-  sync_id?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Appointment_State_Enum>;
+  steri_labels?: InputMaybe<Steri_Label_Arr_Rel_Insert_Input>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -194,14 +227,11 @@ export type Appointment_Max_Fields = {
   clinic_id?: Maybe<Scalars['uuid']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   creator_id?: Maybe<Scalars['uuid']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
+  emr_id?: Maybe<Scalars['String']['output']>;
   endtime_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
-  name?: Maybe<Scalars['String']['output']>;
-  provider?: Maybe<Scalars['String']['output']>;
+  patient_id?: Maybe<Scalars['uuid']['output']>;
   starttime_at?: Maybe<Scalars['timestamptz']['output']>;
-  state?: Maybe<Scalars['String']['output']>;
-  sync_id?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
 };
 
@@ -212,14 +242,11 @@ export type Appointment_Min_Fields = {
   clinic_id?: Maybe<Scalars['uuid']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   creator_id?: Maybe<Scalars['uuid']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
+  emr_id?: Maybe<Scalars['String']['output']>;
   endtime_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
-  name?: Maybe<Scalars['String']['output']>;
-  provider?: Maybe<Scalars['String']['output']>;
+  patient_id?: Maybe<Scalars['uuid']['output']>;
   starttime_at?: Maybe<Scalars['timestamptz']['output']>;
-  state?: Maybe<Scalars['String']['output']>;
-  sync_id?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
 };
 
@@ -249,17 +276,19 @@ export type Appointment_On_Conflict = {
 /** Ordering options when selecting data from "appointment". */
 export type Appointment_Order_By = {
   archived_at?: InputMaybe<Order_By>;
+  clinic?: InputMaybe<Clinic_Order_By>;
   clinic_id?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
+  creator?: InputMaybe<User_Order_By>;
   creator_id?: InputMaybe<Order_By>;
-  description?: InputMaybe<Order_By>;
+  emr_id?: InputMaybe<Order_By>;
   endtime_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  name?: InputMaybe<Order_By>;
-  provider?: InputMaybe<Order_By>;
+  patient?: InputMaybe<Patient_Order_By>;
+  patient_id?: InputMaybe<Order_By>;
   starttime_at?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
-  sync_id?: InputMaybe<Order_By>;
+  steri_labels_aggregate?: InputMaybe<Steri_Label_Aggregate_Order_By>;
   updated_at?: InputMaybe<Order_By>;
 };
 
@@ -279,21 +308,17 @@ export enum Appointment_Select_Column {
   /** column name */
   CreatorId = 'creator_id',
   /** column name */
-  Description = 'description',
+  EmrId = 'emr_id',
   /** column name */
   EndtimeAt = 'endtime_at',
   /** column name */
   Id = 'id',
   /** column name */
-  Name = 'name',
-  /** column name */
-  Provider = 'provider',
+  PatientId = 'patient_id',
   /** column name */
   StarttimeAt = 'starttime_at',
   /** column name */
   State = 'state',
-  /** column name */
-  SyncId = 'sync_id',
   /** column name */
   UpdatedAt = 'updated_at'
 }
@@ -304,15 +329,150 @@ export type Appointment_Set_Input = {
   clinic_id?: InputMaybe<Scalars['uuid']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
+  emr_id?: InputMaybe<Scalars['String']['input']>;
   endtime_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  provider?: InputMaybe<Scalars['String']['input']>;
+  patient_id?: InputMaybe<Scalars['uuid']['input']>;
   starttime_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  state?: InputMaybe<Scalars['String']['input']>;
-  sync_id?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Appointment_State_Enum>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** columns and relationships of "appointment_state" */
+export type Appointment_State = {
+  __typename?: 'appointment_state';
+  id: Scalars['String']['output'];
+};
+
+/** aggregated selection of "appointment_state" */
+export type Appointment_State_Aggregate = {
+  __typename?: 'appointment_state_aggregate';
+  aggregate?: Maybe<Appointment_State_Aggregate_Fields>;
+  nodes: Array<Appointment_State>;
+};
+
+/** aggregate fields of "appointment_state" */
+export type Appointment_State_Aggregate_Fields = {
+  __typename?: 'appointment_state_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Appointment_State_Max_Fields>;
+  min?: Maybe<Appointment_State_Min_Fields>;
+};
+
+
+/** aggregate fields of "appointment_state" */
+export type Appointment_State_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Appointment_State_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "appointment_state". All fields are combined with a logical 'AND'. */
+export type Appointment_State_Bool_Exp = {
+  _and?: InputMaybe<Array<Appointment_State_Bool_Exp>>;
+  _not?: InputMaybe<Appointment_State_Bool_Exp>;
+  _or?: InputMaybe<Array<Appointment_State_Bool_Exp>>;
+  id?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "appointment_state" */
+export enum Appointment_State_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AppointmentStatePkey = 'appointment_state_pkey'
+}
+
+export enum Appointment_State_Enum {
+  Finished = 'finished',
+  InProgress = 'in_progress',
+  NotStarted = 'not_started'
+}
+
+/** Boolean expression to compare columns of type "appointment_state_enum". All fields are combined with logical 'AND'. */
+export type Appointment_State_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Appointment_State_Enum>;
+  _in?: InputMaybe<Array<Appointment_State_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Appointment_State_Enum>;
+  _nin?: InputMaybe<Array<Appointment_State_Enum>>;
+};
+
+/** input type for inserting data into table "appointment_state" */
+export type Appointment_State_Insert_Input = {
+  id?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Appointment_State_Max_Fields = {
+  __typename?: 'appointment_state_max_fields';
+  id?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Appointment_State_Min_Fields = {
+  __typename?: 'appointment_state_min_fields';
+  id?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "appointment_state" */
+export type Appointment_State_Mutation_Response = {
+  __typename?: 'appointment_state_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Appointment_State>;
+};
+
+/** on_conflict condition type for table "appointment_state" */
+export type Appointment_State_On_Conflict = {
+  constraint: Appointment_State_Constraint;
+  update_columns?: Array<Appointment_State_Update_Column>;
+  where?: InputMaybe<Appointment_State_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "appointment_state". */
+export type Appointment_State_Order_By = {
+  id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: appointment_state */
+export type Appointment_State_Pk_Columns_Input = {
+  id: Scalars['String']['input'];
+};
+
+/** select columns of table "appointment_state" */
+export enum Appointment_State_Select_Column {
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "appointment_state" */
+export type Appointment_State_Set_Input = {
+  id?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "appointment_state" */
+export type Appointment_State_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Appointment_State_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Appointment_State_Stream_Cursor_Value_Input = {
+  id?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "appointment_state" */
+export enum Appointment_State_Update_Column {
+  /** column name */
+  Id = 'id'
+}
+
+export type Appointment_State_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Appointment_State_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Appointment_State_Bool_Exp;
 };
 
 /** aggregate stddev on columns */
@@ -347,14 +507,12 @@ export type Appointment_Stream_Cursor_Value_Input = {
   clinic_id?: InputMaybe<Scalars['uuid']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
+  emr_id?: InputMaybe<Scalars['String']['input']>;
   endtime_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  provider?: InputMaybe<Scalars['String']['input']>;
+  patient_id?: InputMaybe<Scalars['uuid']['input']>;
   starttime_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  state?: InputMaybe<Scalars['String']['input']>;
-  sync_id?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Appointment_State_Enum>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -375,21 +533,17 @@ export enum Appointment_Update_Column {
   /** column name */
   CreatorId = 'creator_id',
   /** column name */
-  Description = 'description',
+  EmrId = 'emr_id',
   /** column name */
   EndtimeAt = 'endtime_at',
   /** column name */
   Id = 'id',
   /** column name */
-  Name = 'name',
-  /** column name */
-  Provider = 'provider',
+  PatientId = 'patient_id',
   /** column name */
   StarttimeAt = 'starttime_at',
   /** column name */
   State = 'state',
-  /** column name */
-  SyncId = 'sync_id',
   /** column name */
   UpdatedAt = 'updated_at'
 }
@@ -1230,6 +1384,10 @@ export enum Cursor_Ordering {
   Desc = 'DESC'
 }
 
+export type Fuzzy_Search_Patient_Args = {
+  query?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Jsonb_Cast_Exp = {
   String?: InputMaybe<String_Comparison_Exp>;
 };
@@ -1275,6 +1433,10 @@ export type Mutation_Root = {
   delete_appointment?: Maybe<Appointment_Mutation_Response>;
   /** delete single row from the table: "appointment" */
   delete_appointment_by_pk?: Maybe<Appointment>;
+  /** delete data from the table: "appointment_state" */
+  delete_appointment_state?: Maybe<Appointment_State_Mutation_Response>;
+  /** delete single row from the table: "appointment_state" */
+  delete_appointment_state_by_pk?: Maybe<Appointment_State>;
   /** delete data from the table: "clinic" */
   delete_clinic?: Maybe<Clinic_Mutation_Response>;
   /** delete single row from the table: "clinic" */
@@ -1283,6 +1445,10 @@ export type Mutation_Root = {
   delete_count?: Maybe<Count_Mutation_Response>;
   /** delete single row from the table: "count" */
   delete_count_by_pk?: Maybe<Count>;
+  /** delete data from the table: "patient" */
+  delete_patient?: Maybe<Patient_Mutation_Response>;
+  /** delete single row from the table: "patient" */
+  delete_patient_by_pk?: Maybe<Patient>;
   /** delete data from the table: "printer" */
   delete_printer?: Maybe<Printer_Mutation_Response>;
   /** delete single row from the table: "printer" */
@@ -1327,6 +1493,10 @@ export type Mutation_Root = {
   insert_appointment?: Maybe<Appointment_Mutation_Response>;
   /** insert a single row into the table: "appointment" */
   insert_appointment_one?: Maybe<Appointment>;
+  /** insert data into the table: "appointment_state" */
+  insert_appointment_state?: Maybe<Appointment_State_Mutation_Response>;
+  /** insert a single row into the table: "appointment_state" */
+  insert_appointment_state_one?: Maybe<Appointment_State>;
   /** insert data into the table: "clinic" */
   insert_clinic?: Maybe<Clinic_Mutation_Response>;
   /** insert a single row into the table: "clinic" */
@@ -1335,6 +1505,10 @@ export type Mutation_Root = {
   insert_count?: Maybe<Count_Mutation_Response>;
   /** insert a single row into the table: "count" */
   insert_count_one?: Maybe<Count>;
+  /** insert data into the table: "patient" */
+  insert_patient?: Maybe<Patient_Mutation_Response>;
+  /** insert a single row into the table: "patient" */
+  insert_patient_one?: Maybe<Patient>;
   /** insert data into the table: "printer" */
   insert_printer?: Maybe<Printer_Mutation_Response>;
   /** insert data into the table: "printer_command" */
@@ -1383,6 +1557,12 @@ export type Mutation_Root = {
   update_appointment_by_pk?: Maybe<Appointment>;
   /** update multiples rows of table: "appointment" */
   update_appointment_many?: Maybe<Array<Maybe<Appointment_Mutation_Response>>>;
+  /** update data of the table: "appointment_state" */
+  update_appointment_state?: Maybe<Appointment_State_Mutation_Response>;
+  /** update single row of the table: "appointment_state" */
+  update_appointment_state_by_pk?: Maybe<Appointment_State>;
+  /** update multiples rows of table: "appointment_state" */
+  update_appointment_state_many?: Maybe<Array<Maybe<Appointment_State_Mutation_Response>>>;
   /** update data of the table: "clinic" */
   update_clinic?: Maybe<Clinic_Mutation_Response>;
   /** update single row of the table: "clinic" */
@@ -1395,6 +1575,12 @@ export type Mutation_Root = {
   update_count_by_pk?: Maybe<Count>;
   /** update multiples rows of table: "count" */
   update_count_many?: Maybe<Array<Maybe<Count_Mutation_Response>>>;
+  /** update data of the table: "patient" */
+  update_patient?: Maybe<Patient_Mutation_Response>;
+  /** update single row of the table: "patient" */
+  update_patient_by_pk?: Maybe<Patient>;
+  /** update multiples rows of table: "patient" */
+  update_patient_many?: Maybe<Array<Maybe<Patient_Mutation_Response>>>;
   /** update data of the table: "printer" */
   update_printer?: Maybe<Printer_Mutation_Response>;
   /** update single row of the table: "printer" */
@@ -1471,6 +1657,18 @@ export type Mutation_RootDelete_Appointment_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Appointment_StateArgs = {
+  where: Appointment_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Appointment_State_By_PkArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_ClinicArgs = {
   where: Clinic_Bool_Exp;
 };
@@ -1491,6 +1689,18 @@ export type Mutation_RootDelete_CountArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Count_By_PkArgs = {
   id: Scalars['bigint']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_PatientArgs = {
+  where: Patient_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Patient_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -1629,6 +1839,20 @@ export type Mutation_RootInsert_Appointment_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Appointment_StateArgs = {
+  objects: Array<Appointment_State_Insert_Input>;
+  on_conflict?: InputMaybe<Appointment_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Appointment_State_OneArgs = {
+  object: Appointment_State_Insert_Input;
+  on_conflict?: InputMaybe<Appointment_State_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_ClinicArgs = {
   objects: Array<Clinic_Insert_Input>;
   on_conflict?: InputMaybe<Clinic_On_Conflict>;
@@ -1653,6 +1877,20 @@ export type Mutation_RootInsert_CountArgs = {
 export type Mutation_RootInsert_Count_OneArgs = {
   object: Count_Insert_Input;
   on_conflict?: InputMaybe<Count_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_PatientArgs = {
+  objects: Array<Patient_Insert_Input>;
+  on_conflict?: InputMaybe<Patient_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Patient_OneArgs = {
+  object: Patient_Insert_Input;
+  on_conflict?: InputMaybe<Patient_On_Conflict>;
 };
 
 
@@ -1831,6 +2069,26 @@ export type Mutation_RootUpdate_Appointment_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Appointment_StateArgs = {
+  _set?: InputMaybe<Appointment_State_Set_Input>;
+  where: Appointment_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Appointment_State_By_PkArgs = {
+  _set?: InputMaybe<Appointment_State_Set_Input>;
+  pk_columns: Appointment_State_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Appointment_State_ManyArgs = {
+  updates: Array<Appointment_State_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_ClinicArgs = {
   _inc?: InputMaybe<Clinic_Inc_Input>;
   _set?: InputMaybe<Clinic_Set_Input>;
@@ -1881,6 +2139,26 @@ export type Mutation_RootUpdate_Count_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Count_ManyArgs = {
   updates: Array<Count_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_PatientArgs = {
+  _set?: InputMaybe<Patient_Set_Input>;
+  where: Patient_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Patient_By_PkArgs = {
+  _set?: InputMaybe<Patient_Set_Input>;
+  pk_columns: Patient_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Patient_ManyArgs = {
+  updates: Array<Patient_Updates>;
 };
 
 
@@ -2145,6 +2423,230 @@ export enum Order_By {
   DescNullsLast = 'desc_nulls_last'
 }
 
+/** columns and relationships of "patient" */
+export type Patient = {
+  __typename?: 'patient';
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  clinic: Clinic;
+  clinic_id: Scalars['uuid']['output'];
+  created_at: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  creator: User;
+  creator_id: Scalars['uuid']['output'];
+  emr_id?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  name: Scalars['citext']['output'];
+  updated_at: Scalars['timestamptz']['output'];
+};
+
+export type Patient_Aggregate = {
+  __typename?: 'patient_aggregate';
+  aggregate?: Maybe<Patient_Aggregate_Fields>;
+  nodes: Array<Patient>;
+};
+
+/** aggregate fields of "patient" */
+export type Patient_Aggregate_Fields = {
+  __typename?: 'patient_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Patient_Max_Fields>;
+  min?: Maybe<Patient_Min_Fields>;
+};
+
+
+/** aggregate fields of "patient" */
+export type Patient_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Patient_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "patient". All fields are combined with a logical 'AND'. */
+export type Patient_Bool_Exp = {
+  _and?: InputMaybe<Array<Patient_Bool_Exp>>;
+  _not?: InputMaybe<Patient_Bool_Exp>;
+  _or?: InputMaybe<Array<Patient_Bool_Exp>>;
+  archived_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  clinic?: InputMaybe<Clinic_Bool_Exp>;
+  clinic_id?: InputMaybe<Uuid_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  creator?: InputMaybe<User_Bool_Exp>;
+  creator_id?: InputMaybe<Uuid_Comparison_Exp>;
+  emr_id?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  name?: InputMaybe<Citext_Comparison_Exp>;
+  updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "patient" */
+export enum Patient_Constraint {
+  /** unique or primary key constraint on columns "emr_id", "clinic_id" */
+  PatientEmrIdClinicIdKey = 'patient_emr_id_clinic_id_key',
+  /** unique or primary key constraint on columns "id" */
+  PatientPkey = 'patient_pkey'
+}
+
+/** input type for inserting data into table "patient" */
+export type Patient_Insert_Input = {
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  clinic?: InputMaybe<Clinic_Obj_Rel_Insert_Input>;
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  emr_id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['citext']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Patient_Max_Fields = {
+  __typename?: 'patient_max_fields';
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  creator_id?: Maybe<Scalars['uuid']['output']>;
+  emr_id?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  name?: Maybe<Scalars['citext']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Patient_Min_Fields = {
+  __typename?: 'patient_min_fields';
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  creator_id?: Maybe<Scalars['uuid']['output']>;
+  emr_id?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  name?: Maybe<Scalars['citext']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "patient" */
+export type Patient_Mutation_Response = {
+  __typename?: 'patient_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Patient>;
+};
+
+/** input type for inserting object relation for remote table "patient" */
+export type Patient_Obj_Rel_Insert_Input = {
+  data: Patient_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Patient_On_Conflict>;
+};
+
+/** on_conflict condition type for table "patient" */
+export type Patient_On_Conflict = {
+  constraint: Patient_Constraint;
+  update_columns?: Array<Patient_Update_Column>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "patient". */
+export type Patient_Order_By = {
+  archived_at?: InputMaybe<Order_By>;
+  clinic?: InputMaybe<Clinic_Order_By>;
+  clinic_id?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  creator?: InputMaybe<User_Order_By>;
+  creator_id?: InputMaybe<Order_By>;
+  emr_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: patient */
+export type Patient_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "patient" */
+export enum Patient_Select_Column {
+  /** column name */
+  ArchivedAt = 'archived_at',
+  /** column name */
+  ClinicId = 'clinic_id',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  CreatorId = 'creator_id',
+  /** column name */
+  EmrId = 'emr_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+/** input type for updating data in table "patient" */
+export type Patient_Set_Input = {
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  emr_id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['citext']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** Streaming cursor of the table "patient" */
+export type Patient_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Patient_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Patient_Stream_Cursor_Value_Input = {
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  emr_id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['citext']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** update columns of table "patient" */
+export enum Patient_Update_Column {
+  /** column name */
+  ArchivedAt = 'archived_at',
+  /** column name */
+  ClinicId = 'clinic_id',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  CreatorId = 'creator_id',
+  /** column name */
+  EmrId = 'emr_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+export type Patient_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Patient_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Patient_Bool_Exp;
+};
+
 /** columns and relationships of "printer" */
 export type Printer = {
   __typename?: 'printer';
@@ -2152,6 +2654,10 @@ export type Printer = {
   /** An object relationship */
   clinic: Clinic;
   clinic_id: Scalars['uuid']['output'];
+  /** An array relationship */
+  commands: Array<Printer_Command>;
+  /** An aggregate relationship */
+  commands_aggregate: Printer_Command_Aggregate;
   created_at: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   join_code?: Maybe<Scalars['String']['output']>;
@@ -2162,6 +2668,26 @@ export type Printer = {
   update_started_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at: Scalars['timestamptz']['output'];
   version_number: Scalars['Int']['output'];
+};
+
+
+/** columns and relationships of "printer" */
+export type PrinterCommandsArgs = {
+  distinct_on?: InputMaybe<Array<Printer_Command_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Printer_Command_Order_By>>;
+  where?: InputMaybe<Printer_Command_Bool_Exp>;
+};
+
+
+/** columns and relationships of "printer" */
+export type PrinterCommands_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Printer_Command_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Printer_Command_Order_By>>;
+  where?: InputMaybe<Printer_Command_Bool_Exp>;
 };
 
 /** aggregated selection of "printer" */
@@ -2246,6 +2772,8 @@ export type Printer_Bool_Exp = {
   archived_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   clinic?: InputMaybe<Clinic_Bool_Exp>;
   clinic_id?: InputMaybe<Uuid_Comparison_Exp>;
+  commands?: InputMaybe<Printer_Command_Bool_Exp>;
+  commands_aggregate?: InputMaybe<Printer_Command_Aggregate_Bool_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   join_code?: InputMaybe<String_Comparison_Exp>;
@@ -2295,6 +2823,17 @@ export type Printer_Command_Aggregate = {
   nodes: Array<Printer_Command>;
 };
 
+export type Printer_Command_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Printer_Command_Aggregate_Bool_Exp_Count>;
+};
+
+export type Printer_Command_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Printer_Command_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Printer_Command_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
 /** aggregate fields of "printer_command" */
 export type Printer_Command_Aggregate_Fields = {
   __typename?: 'printer_command_aggregate_fields';
@@ -2318,16 +2857,43 @@ export type Printer_Command_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** order by aggregate values of table "printer_command" */
+export type Printer_Command_Aggregate_Order_By = {
+  avg?: InputMaybe<Printer_Command_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Printer_Command_Max_Order_By>;
+  min?: InputMaybe<Printer_Command_Min_Order_By>;
+  stddev?: InputMaybe<Printer_Command_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Printer_Command_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Printer_Command_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Printer_Command_Sum_Order_By>;
+  var_pop?: InputMaybe<Printer_Command_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Printer_Command_Var_Samp_Order_By>;
+  variance?: InputMaybe<Printer_Command_Variance_Order_By>;
+};
+
 /** append existing jsonb value of filtered columns with new jsonb value */
 export type Printer_Command_Append_Input = {
   data?: InputMaybe<Scalars['jsonb']['input']>;
   result?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
+/** input type for inserting array relation for remote table "printer_command" */
+export type Printer_Command_Arr_Rel_Insert_Input = {
+  data: Array<Printer_Command_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Printer_Command_On_Conflict>;
+};
+
 /** aggregate avg on columns */
 export type Printer_Command_Avg_Fields = {
   __typename?: 'printer_command_avg_fields';
   id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "printer_command" */
+export type Printer_Command_Avg_Order_By = {
+  id?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "printer_command". All fields are combined with a logical 'AND'. */
@@ -2403,6 +2969,16 @@ export type Printer_Command_Max_Fields = {
   user_id?: Maybe<Scalars['uuid']['output']>;
 };
 
+/** order by max() on columns of table "printer_command" */
+export type Printer_Command_Max_Order_By = {
+  created_at?: InputMaybe<Order_By>;
+  executed_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  printer_id?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+  user_id?: InputMaybe<Order_By>;
+};
+
 /** aggregate min on columns */
 export type Printer_Command_Min_Fields = {
   __typename?: 'printer_command_min_fields';
@@ -2412,6 +2988,16 @@ export type Printer_Command_Min_Fields = {
   printer_id?: Maybe<Scalars['uuid']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   user_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "printer_command" */
+export type Printer_Command_Min_Order_By = {
+  created_at?: InputMaybe<Order_By>;
+  executed_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  printer_id?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+  user_id?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "printer_command" */
@@ -2497,16 +3083,31 @@ export type Printer_Command_Stddev_Fields = {
   id?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by stddev() on columns of table "printer_command" */
+export type Printer_Command_Stddev_Order_By = {
+  id?: InputMaybe<Order_By>;
+};
+
 /** aggregate stddev_pop on columns */
 export type Printer_Command_Stddev_Pop_Fields = {
   __typename?: 'printer_command_stddev_pop_fields';
   id?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by stddev_pop() on columns of table "printer_command" */
+export type Printer_Command_Stddev_Pop_Order_By = {
+  id?: InputMaybe<Order_By>;
+};
+
 /** aggregate stddev_samp on columns */
 export type Printer_Command_Stddev_Samp_Fields = {
   __typename?: 'printer_command_stddev_samp_fields';
   id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "printer_command" */
+export type Printer_Command_Stddev_Samp_Order_By = {
+  id?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "printer_command" */
@@ -2534,6 +3135,11 @@ export type Printer_Command_Stream_Cursor_Value_Input = {
 export type Printer_Command_Sum_Fields = {
   __typename?: 'printer_command_sum_fields';
   id?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "printer_command" */
+export type Printer_Command_Sum_Order_By = {
+  id?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "printer_command_type" */
@@ -2579,6 +3185,7 @@ export enum Printer_Command_Type_Constraint {
 }
 
 export enum Printer_Command_Type_Enum {
+  Ping = 'ping',
   PrintLabels = 'print_labels',
   PrintTest = 'print_test',
   Reboot = 'reboot',
@@ -2721,16 +3328,31 @@ export type Printer_Command_Var_Pop_Fields = {
   id?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by var_pop() on columns of table "printer_command" */
+export type Printer_Command_Var_Pop_Order_By = {
+  id?: InputMaybe<Order_By>;
+};
+
 /** aggregate var_samp on columns */
 export type Printer_Command_Var_Samp_Fields = {
   __typename?: 'printer_command_var_samp_fields';
   id?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by var_samp() on columns of table "printer_command" */
+export type Printer_Command_Var_Samp_Order_By = {
+  id?: InputMaybe<Order_By>;
+};
+
 /** aggregate variance on columns */
 export type Printer_Command_Variance_Fields = {
   __typename?: 'printer_command_variance_fields';
   id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "printer_command" */
+export type Printer_Command_Variance_Order_By = {
+  id?: InputMaybe<Order_By>;
 };
 
 /** unique or primary key constraints on table "printer" */
@@ -2751,6 +3373,7 @@ export type Printer_Insert_Input = {
   archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
   clinic?: InputMaybe<Clinic_Obj_Rel_Insert_Input>;
   clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  commands?: InputMaybe<Printer_Command_Arr_Rel_Insert_Input>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   join_code?: InputMaybe<Scalars['String']['input']>;
@@ -2857,6 +3480,7 @@ export type Printer_Order_By = {
   archived_at?: InputMaybe<Order_By>;
   clinic?: InputMaybe<Clinic_Order_By>;
   clinic_id?: InputMaybe<Order_By>;
+  commands_aggregate?: InputMaybe<Printer_Command_Aggregate_Order_By>;
   created_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   join_code?: InputMaybe<Order_By>;
@@ -3064,6 +3688,12 @@ export type Query_Root = {
   appointment_aggregate: Appointment_Aggregate;
   /** fetch data from the table: "appointment" using primary key columns */
   appointment_by_pk?: Maybe<Appointment>;
+  /** fetch data from the table: "appointment_state" */
+  appointment_state: Array<Appointment_State>;
+  /** fetch aggregated fields from the table: "appointment_state" */
+  appointment_state_aggregate: Appointment_State_Aggregate;
+  /** fetch data from the table: "appointment_state" using primary key columns */
+  appointment_state_by_pk?: Maybe<Appointment_State>;
   /** fetch data from the table: "clinic" */
   clinic: Array<Clinic>;
   /** fetch aggregated fields from the table: "clinic" */
@@ -3076,6 +3706,16 @@ export type Query_Root = {
   count_aggregate: Count_Aggregate;
   /** fetch data from the table: "count" using primary key columns */
   count_by_pk?: Maybe<Count>;
+  /** execute function "fuzzy_search_patient" which returns "patient" */
+  fuzzy_search_patient: Array<Patient>;
+  /** execute function "fuzzy_search_patient" and query aggregates on result of table type "patient" */
+  fuzzy_search_patient_aggregate: Patient_Aggregate;
+  /** fetch data from the table: "patient" */
+  patient: Array<Patient>;
+  /** fetch aggregated fields from the table: "patient" */
+  patient_aggregate: Patient_Aggregate;
+  /** fetch data from the table: "patient" using primary key columns */
+  patient_by_pk?: Maybe<Patient>;
   /** fetch data from the table: "printer" */
   printer: Array<Printer>;
   /** fetch aggregated fields from the table: "printer" */
@@ -3166,6 +3806,29 @@ export type Query_RootAppointment_By_PkArgs = {
 };
 
 
+export type Query_RootAppointment_StateArgs = {
+  distinct_on?: InputMaybe<Array<Appointment_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Appointment_State_Order_By>>;
+  where?: InputMaybe<Appointment_State_Bool_Exp>;
+};
+
+
+export type Query_RootAppointment_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Appointment_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Appointment_State_Order_By>>;
+  where?: InputMaybe<Appointment_State_Bool_Exp>;
+};
+
+
+export type Query_RootAppointment_State_By_PkArgs = {
+  id: Scalars['String']['input'];
+};
+
+
 export type Query_RootClinicArgs = {
   distinct_on?: InputMaybe<Array<Clinic_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -3209,6 +3872,49 @@ export type Query_RootCount_AggregateArgs = {
 
 export type Query_RootCount_By_PkArgs = {
   id: Scalars['bigint']['input'];
+};
+
+
+export type Query_RootFuzzy_Search_PatientArgs = {
+  args: Fuzzy_Search_Patient_Args;
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Query_RootFuzzy_Search_Patient_AggregateArgs = {
+  args: Fuzzy_Search_Patient_Args;
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Query_RootPatientArgs = {
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Query_RootPatient_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Query_RootPatient_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -6232,6 +6938,14 @@ export type Subscription_Root = {
   appointment_aggregate: Appointment_Aggregate;
   /** fetch data from the table: "appointment" using primary key columns */
   appointment_by_pk?: Maybe<Appointment>;
+  /** fetch data from the table: "appointment_state" */
+  appointment_state: Array<Appointment_State>;
+  /** fetch aggregated fields from the table: "appointment_state" */
+  appointment_state_aggregate: Appointment_State_Aggregate;
+  /** fetch data from the table: "appointment_state" using primary key columns */
+  appointment_state_by_pk?: Maybe<Appointment_State>;
+  /** fetch data from the table in a streaming manner: "appointment_state" */
+  appointment_state_stream: Array<Appointment_State>;
   /** fetch data from the table in a streaming manner: "appointment" */
   appointment_stream: Array<Appointment>;
   /** fetch data from the table: "clinic" */
@@ -6250,6 +6964,18 @@ export type Subscription_Root = {
   count_by_pk?: Maybe<Count>;
   /** fetch data from the table in a streaming manner: "count" */
   count_stream: Array<Count>;
+  /** execute function "fuzzy_search_patient" which returns "patient" */
+  fuzzy_search_patient: Array<Patient>;
+  /** execute function "fuzzy_search_patient" and query aggregates on result of table type "patient" */
+  fuzzy_search_patient_aggregate: Patient_Aggregate;
+  /** fetch data from the table: "patient" */
+  patient: Array<Patient>;
+  /** fetch aggregated fields from the table: "patient" */
+  patient_aggregate: Patient_Aggregate;
+  /** fetch data from the table: "patient" using primary key columns */
+  patient_by_pk?: Maybe<Patient>;
+  /** fetch data from the table in a streaming manner: "patient" */
+  patient_stream: Array<Patient>;
   /** fetch data from the table: "printer" */
   printer: Array<Printer>;
   /** fetch aggregated fields from the table: "printer" */
@@ -6362,6 +7088,36 @@ export type Subscription_RootAppointment_By_PkArgs = {
 };
 
 
+export type Subscription_RootAppointment_StateArgs = {
+  distinct_on?: InputMaybe<Array<Appointment_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Appointment_State_Order_By>>;
+  where?: InputMaybe<Appointment_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootAppointment_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Appointment_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Appointment_State_Order_By>>;
+  where?: InputMaybe<Appointment_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootAppointment_State_By_PkArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAppointment_State_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Appointment_State_Stream_Cursor_Input>>;
+  where?: InputMaybe<Appointment_State_Bool_Exp>;
+};
+
+
 export type Subscription_RootAppointment_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Appointment_Stream_Cursor_Input>>;
@@ -6426,6 +7182,56 @@ export type Subscription_RootCount_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Count_Stream_Cursor_Input>>;
   where?: InputMaybe<Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootFuzzy_Search_PatientArgs = {
+  args: Fuzzy_Search_Patient_Args;
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Subscription_RootFuzzy_Search_Patient_AggregateArgs = {
+  args: Fuzzy_Search_Patient_Args;
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Subscription_RootPatientArgs = {
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Subscription_RootPatient_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Patient_Order_By>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
+};
+
+
+export type Subscription_RootPatient_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootPatient_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Patient_Stream_Cursor_Input>>;
+  where?: InputMaybe<Patient_Bool_Exp>;
 };
 
 
@@ -7254,14 +8060,16 @@ export type Uuid_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['uuid']['input']>>;
 };
 
-export type PrinterFragment = { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null };
+export type PrinterCommandFragment = { __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null };
+
+export type PrinterFragment = { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null, archived_at?: any | null, commands: Array<{ __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null }> };
 
 export type GetPrinterQueryVariables = Exact<{
   printerId: Scalars['uuid']['input'];
 }>;
 
 
-export type GetPrinterQuery = { __typename?: 'query_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null } | null };
+export type GetPrinterQuery = { __typename?: 'query_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null, archived_at?: any | null, commands: Array<{ __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null }> } | null };
 
 export type UpdatePrinterMutationVariables = Exact<{
   printerId: Scalars['uuid']['input'];
@@ -7271,14 +8079,12 @@ export type UpdatePrinterMutationVariables = Exact<{
 
 export type UpdatePrinterMutation = { __typename?: 'mutation_root', update_printer_by_pk?: { __typename?: 'printer', id: any, last_seen_at?: any | null } | null };
 
-export type PrinterCommandFragment = { __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null };
-
-export type WatchPrinterCommandsSubscriptionVariables = Exact<{
+export type WatchPrinterSubscriptionVariables = Exact<{
   printerId: Scalars['uuid']['input'];
 }>;
 
 
-export type WatchPrinterCommandsSubscription = { __typename?: 'subscription_root', printer_command: Array<{ __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null }> };
+export type WatchPrinterSubscription = { __typename?: 'subscription_root', printer_by_pk?: { __typename?: 'printer', id: any, clinic_id: any, paired_at?: any | null, last_seen_at?: any | null, version_number: number, update_started_at?: any | null, archived_at?: any | null, commands: Array<{ __typename?: 'printer_command', id: any, created_at: any, printer_id: any, command: Printer_Command_Type_Enum, data?: any | null, executed_at?: any | null }> } | null };
 
 export type UpdatePrinterCommandMutationVariables = Exact<{
   id: Scalars['bigint']['input'];
@@ -7288,16 +8094,6 @@ export type UpdatePrinterCommandMutationVariables = Exact<{
 
 export type UpdatePrinterCommandMutation = { __typename?: 'mutation_root', update_printer_command_by_pk?: { __typename?: 'printer_command', id: any } | null };
 
-export const PrinterFragmentDoc = gql`
-    fragment Printer on printer {
-  id
-  clinic_id
-  paired_at
-  last_seen_at
-  version_number
-  update_started_at
-}
-    `;
 export const PrinterCommandFragmentDoc = gql`
     fragment PrinterCommand on printer_command {
   id
@@ -7308,6 +8104,20 @@ export const PrinterCommandFragmentDoc = gql`
   executed_at
 }
     `;
+export const PrinterFragmentDoc = gql`
+    fragment Printer on printer {
+  id
+  clinic_id
+  paired_at
+  last_seen_at
+  version_number
+  update_started_at
+  archived_at
+  commands(where: {executed_at: {_is_null: true}}, order_by: {id: asc}, limit: 1) {
+    ...PrinterCommand
+  }
+}
+    ${PrinterCommandFragmentDoc}`;
 export const GetPrinterDocument = gql`
     query getPrinter($printerId: uuid!) {
   printer_by_pk(id: $printerId) {
@@ -7323,17 +8133,13 @@ export const UpdatePrinterDocument = gql`
   }
 }
     `;
-export const WatchPrinterCommandsDocument = gql`
-    subscription watchPrinterCommands($printerId: uuid!) {
-  printer_command(
-    where: {printer_id: {_eq: $printerId}, executed_at: {_is_null: true}}
-    order_by: {id: asc}
-    limit: 1
-  ) {
-    ...PrinterCommand
+export const WatchPrinterDocument = gql`
+    subscription watchPrinter($printerId: uuid!) {
+  printer_by_pk(id: $printerId) {
+    ...Printer
   }
 }
-    ${PrinterCommandFragmentDoc}`;
+    ${PrinterFragmentDoc}`;
 export const UpdatePrinterCommandDocument = gql`
     mutation updatePrinterCommand($id: bigint!, $set: printer_command_set_input!) {
   update_printer_command_by_pk(pk_columns: {id: $id}, _set: $set) {
@@ -7355,8 +8161,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     updatePrinter(variables: UpdatePrinterMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdatePrinterMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdatePrinterMutation>({ document: UpdatePrinterDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'updatePrinter', 'mutation', variables);
     },
-    watchPrinterCommands(variables: WatchPrinterCommandsSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<WatchPrinterCommandsSubscription> {
-      return withWrapper((wrappedRequestHeaders) => client.request<WatchPrinterCommandsSubscription>({ document: WatchPrinterCommandsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'watchPrinterCommands', 'subscription', variables);
+    watchPrinter(variables: WatchPrinterSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<WatchPrinterSubscription> {
+      return withWrapper((wrappedRequestHeaders) => client.request<WatchPrinterSubscription>({ document: WatchPrinterDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'watchPrinter', 'subscription', variables);
     },
     updatePrinterCommand(variables: UpdatePrinterCommandMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdatePrinterCommandMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdatePrinterCommandMutation>({ document: UpdatePrinterCommandDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'updatePrinterCommand', 'mutation', variables);

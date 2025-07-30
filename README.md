@@ -11,6 +11,7 @@ A comprehensive Node.js application for managing GoDEX printers and label printi
 - **Hardware Integration**: Direct USB communication with GoDEX printers
 - **Heartbeat Monitoring**: Periodic status updates to maintain printer online status
 - **Environment Configuration**: Boot-time environment file creation with authentication data
+- **Archived Printer Monitoring**: Automatic cleanup when printer is archived (archived_at field)
 
 ## 📋 Prerequisites
 
@@ -75,7 +76,7 @@ A comprehensive Node.js application for managing GoDEX printers and label printi
 | `fetchPrinterInfo.ts` | Printer information retrieval from backend |
 | `handleCommand.ts` | Incoming command processing and execution |
 | `startHeartbeat.ts` | Periodic status updates to backend |
-| `subscribePrinterCommands.ts` | Real-time command subscription management |
+| `subscribePrinter.ts` | Real-time printer monitoring with archived_at watching |
 
 ## 🚀 Usage
 
@@ -92,7 +93,8 @@ The system will automatically:
 1. Load the authentication data from the environment file
 2. Authenticate using the join token to get an access token
 3. Establish GraphQL connections for real-time communication
-4. Set up command subscriptions and heartbeat monitoring
+4. Set up printer monitoring with archived_at field watching
+5. Set up command subscriptions and heartbeat monitoring
 
 ### Label Printing
 
@@ -101,6 +103,17 @@ The system automatically processes print commands received through the GraphQL s
 ### Printer Status
 
 The system automatically monitors printer status and maintains heartbeat connections to keep the printer online.
+
+### Archived Printer Handling
+
+When a printer's `archived_at` field is set to a non-null value, the system automatically:
+
+1. **Stops heartbeat monitoring** - Prevents further status updates
+2. **Clears environment variables** - Removes `PRINTER_ID` and `PRINTER_JOIN_TOKEN` from `.env` file
+3. **Disconnects subscriptions** - Stops all GraphQL subscriptions
+4. **Logs cleanup actions** - Provides detailed logging of cleanup operations
+
+This ensures that archived printers are properly disconnected and the system is ready for new printer configurations.
 
 ## 🔧 Configuration
 
@@ -150,6 +163,11 @@ The system is configured for GoDEX printers with:
    - Run with sudo for USB operations
    - Add user to appropriate groups: `sudo usermod -a -G dialout $USER`
 
+5. **Archived printer not cleaning up**
+   - Check that the `archived_at` field is properly set in the database
+   - Verify GraphQL subscription is receiving updates
+   - Check logs for cleanup operation details
+
 ### Logs
 
 The application provides detailed logging for debugging:
@@ -158,12 +176,14 @@ The application provides detailed logging for debugging:
 - Command processing logs
 - Error details with stack traces
 - Heartbeat and subscription status
+- Archived printer cleanup operations
 
 ## 🔒 Security
 
 - **Environment Authentication**: Authentication data is loaded from environment file
 - **USB Security**: Direct USB communication with hardware validation
 - **API Security**: Bearer token authentication for GraphQL operations
+- **Automatic Cleanup**: Archived printers are automatically disconnected and cleaned up
 
 ## 📝 Development
 
@@ -181,40 +201,51 @@ src/
 │   ├── fetchPrinterInfo.ts
 │   ├── handleCommand.ts
 │   ├── startHeartbeat.ts
-│   └── subscribePrinterCommands.ts
+│   └── subscribePrinter.ts  # New: Printer monitoring with archived_at watching
+├── queries/
+│   └── printer.graphql      # Updated: Includes printer subscription
 └── __generated/
-    └── graphql.ts          # Generated GraphQL types
+    └── graphql.ts          # Auto-generated GraphQL types
 ```
 
-### Adding New Features
+### Key Features
 
-1. **New Services**: Create in `src/services/` with proper documentation
-2. **New Commands**: Extend `src/services/handleCommand.ts`
-3. **Authentication**: Extend `src/services/environmentAuth.ts`
+#### Archived Printer Monitoring
 
-### Code Style
+The system now includes comprehensive monitoring of the `archived_at` field:
 
-- Use TypeScript for all new code
-- Add comprehensive JSDoc documentation
-- Follow error handling patterns established in existing code
-- Use async/await for all asynchronous operations
-- Implement proper logging for debugging
+- **Real-time Monitoring**: GraphQL subscription watches for changes to `archived_at`
+- **Automatic Cleanup**: When `archived_at` is set, the system automatically:
+  - Stops heartbeat monitoring
+  - Clears environment authentication data
+  - Disconnects all subscriptions
+  - Logs cleanup operations
+- **Graceful Handling**: Cleanup operations are performed safely without affecting other system components
 
-## 📄 License
+#### Updated GraphQL Schema
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+The GraphQL schema has been updated to include:
 
-## 🤝 Contributing
+```graphql
+subscription watchPrinter($printerId: uuid!) {
+  printer_by_pk(id: $printerId) {
+    id
+    clinic_id
+    paired_at
+    last_seen_at
+    version_number
+    update_started_at
+    archived_at
+    commands(where: {executed_at: {_is_null: true}}, order_by: {id: asc}, limit: 1) {
+      id
+      created_at
+      printer_id
+      command
+      data
+      executed_at
+    }
+  }
+}
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with proper documentation
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📞 Support
-
-For support and questions:
-- Check the troubleshooting section
-- Review the logs for error details
-- Open an issue with detailed error information 
+This allows the system to monitor the entire printer object and handle commands within the printer subscription. 

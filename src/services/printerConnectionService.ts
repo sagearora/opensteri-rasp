@@ -10,12 +10,13 @@ import { fetchPrinterInfo } from './fetchPrinterInfo';
 import { getClient } from './graphqlClient';
 import { handleCommand } from './handleCommand';
 import { startPrinterHeartbeat } from './startHeartbeat';
-import { subscribeToCommands } from './subscribePrinterCommands';
+import { subscribeToPrinter } from './subscribePrinter';
 import { getCurrentVersion, getCurrentVersionNumber } from './versionManager';
 import { initializeEnvironmentAuth } from './environmentAuth';
 
 // Global state for latest printer information
 let latestPrinterInfo: any = null;
+let currentSubscription: ReturnType<typeof subscribeToPrinter> | null = null;
 
 /**
  * Set the latest printer information for status monitoring
@@ -36,29 +37,17 @@ export function getLatestPrinterInfo(): any {
 }
 
 /**
- * Log version information to console
- * 
- * This function logs the current version information to the console
- * for debugging and monitoring purposes.
+ * Log version information on startup
  */
 function logVersionInfo(): void {
-  try {
-    const version = getCurrentVersion();
-    const versionNumber = getCurrentVersionNumber();
-    
-    console.log('=== Version Information ===');
-    console.log(`Version: ${version}`);
-    console.log(`Version Number: ${versionNumber}`);
-    console.log(`Timestamp: ${new Date().toISOString()}`);
-    console.log('==========================');
-  } catch (error) {
-    console.error('Failed to log version info:', error);
-    console.log('=== Version Information ===');
-    console.log('Version: unknown');
-    console.log('Version Number: 0');
-    console.log(`Timestamp: ${new Date().toISOString()}`);
-    console.log('==========================');
-  }
+  const version = getCurrentVersion();
+  const versionNumber = getCurrentVersionNumber();
+  
+  console.log('==========================');
+  console.log('Printer Management System');
+  console.log(`Version: ${version}`);
+  console.log(`Version Number: ${versionNumber}`);
+  console.log('==========================');
 }
 
 /**
@@ -91,9 +80,17 @@ export async function initializePrinterConnection(): Promise<void> {
     // Establish GraphQL connections using access token
     const { wsClient, httpClient } = await getClient(authResult.access_token);
     
-    // Set up command subscription
-    subscribeToCommands(wsClient, authResult.printer_id, (command) => 
-      handleCommand(httpClient, command)
+    // Set up printer subscription (includes command handling and archived monitoring)
+    currentSubscription = subscribeToPrinter(
+      wsClient, 
+      authResult.printer_id, 
+      (command) => handleCommand(httpClient, command),
+      {
+        onArchived: () => {
+          console.log('Printer archived callback triggered');
+          // The subscription will be automatically cleaned up when archived
+        }
+      }
     );
     
     // Fetch and store latest printer information
@@ -115,7 +112,7 @@ export async function initializePrinterConnection(): Promise<void> {
     console.error('Failed to initialize printer connection:', error);
     throw error;
   }
-} 
+}
 
 /**
  * Initialize printer connection with fresh credentials
@@ -137,9 +134,17 @@ export async function initializePrinterConnectionWithCredentials(token: string, 
     // Establish GraphQL connections
     const { wsClient, httpClient } = await getClient(token);
     
-    // Set up command subscription
-    subscribeToCommands(wsClient, printerId, (command) => 
-      handleCommand(httpClient, command)
+    // Set up printer subscription (includes command handling and archived monitoring)
+    currentSubscription = subscribeToPrinter(
+      wsClient, 
+      printerId, 
+      (command) => handleCommand(httpClient, command),
+      {
+        onArchived: () => {
+          console.log('Printer archived callback triggered');
+          // The subscription will be automatically cleaned up when archived
+        }
+      }
     );
     
     // Fetch and store latest printer information

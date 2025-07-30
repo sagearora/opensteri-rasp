@@ -67,6 +67,55 @@ export async function loadEnvironmentAuth(): Promise<EnvironmentAuthData | null>
 }
 
 /**
+ * Clear authentication data from environment file
+ * 
+ * This function clears the printer_id and printer_token from the .env file
+ * by setting them to empty strings. This is used when a printer is archived.
+ * 
+ * @returns Promise<void>
+ */
+export async function clearEnvironmentAuth(): Promise<void> {
+  try {
+    console.log('Clearing environment authentication data...');
+    
+    const envPath = path.join(process.cwd(), '.env');
+    
+    // Read current .env file
+    let envContent = '';
+    try {
+      envContent = await fs.readFile(envPath, 'utf8');
+    } catch (error) {
+      console.log('No .env file found to clear');
+      return;
+    }
+    
+    // Split into lines and clear printer authentication variables
+    const lines = envContent.split('\n');
+    const updatedLines = lines.map(line => {
+      if (line.startsWith('PRINTER_ID=')) {
+        return 'PRINTER_ID=';
+      }
+      if (line.startsWith('PRINTER_JOIN_TOKEN=')) {
+        return 'PRINTER_JOIN_TOKEN=';
+      }
+      return line;
+    });
+    
+    // Write back to .env file
+    await fs.writeFile(envPath, updatedLines.join('\n'));
+    
+    // Clear from process.env as well
+    delete process.env.PRINTER_ID;
+    delete process.env.PRINTER_JOIN_TOKEN;
+    
+    console.log('Environment authentication data cleared successfully');
+  } catch (error) {
+    console.error('Failed to clear environment authentication data:', error);
+    throw new Error(`Failed to clear environment auth: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
  * Authenticate using join token to get access token
  * 
  * This function uses the join token from the environment file
