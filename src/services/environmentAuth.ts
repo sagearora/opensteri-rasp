@@ -13,6 +13,9 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getClient } from './graphqlClient';
+import fetch from 'node-fetch';
+import { JOIN_URL } from '../constant';
+import { PrinterService } from './printerService';
 
 /**
  * Interface for environment authentication data
@@ -32,9 +35,6 @@ export interface AuthResult {
   error?: string;
 }
 
-// Configuration
-const ENV_FILE = path.resolve(process.cwd(), '.env');
-
 /**
  * Load authentication data from environment file
  * 
@@ -46,26 +46,14 @@ const ENV_FILE = path.resolve(process.cwd(), '.env');
 export async function loadEnvironmentAuth(): Promise<EnvironmentAuthData | null> {
   try {
     // First try to read from .env file
-    const envData = await fs.readFile(ENV_FILE, 'utf-8');
-    const lines = envData.split('\n');
-    
-    let printer_id: string | undefined;
-    let join_token: string | undefined;
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('PRINTER_ID=')) {
-        printer_id = trimmed.substring('PRINTER_ID='.length);
-      } else if (trimmed.startsWith('PRINTER_JOIN_TOKEN=')) {
-        join_token = trimmed.substring('PRINTER_JOIN_TOKEN='.length);
-      }
-    }
-    
+    const printer_id: string | undefined = process.env.PRINTER_ID;
+    const join_token: string | undefined = process.env.PRINTER_JOIN_TOKEN;
+
     if (printer_id && join_token) {
       console.log('Environment authentication data loaded successfully');
       return { printer_id, join_token };
     }
-    
+
     console.warn('Incomplete environment authentication data found');
     return null;
   } catch (error) {
@@ -92,21 +80,19 @@ export async function loadEnvironmentAuth(): Promise<EnvironmentAuthData | null>
 export async function authenticateWithJoinToken(joinToken: string, printerId: string): Promise<AuthResult> {
   try {
     console.log('Authenticating with join token...');
-    
-    // Create a temporary GraphQL client to authenticate
-    const { httpClient } = await getClient(joinToken);
-    
-    // Use the join token to authenticate and get access token
-    // This would typically involve a GraphQL mutation to exchange join token for access token
-    // For now, we'll assume the join token can be used directly as an access token
-    // In a real implementation, you would call a specific authentication mutation
-    
-    console.log('Authentication successful');
-    return {
-      success: true,
-      access_token: joinToken, // In real implementation, this would be the actual access token
-      printer_id: printerId
-    };
+    const joinResult = await PrinterService.joinPrinter(printerId, joinToken);
+    if (joinResult.success) {
+      return {
+        success: true,
+        access_token: joinResult.token,
+        printer_id: joinResult.printer_id
+      };
+    } else {
+      return {
+        success: false,
+        error: joinResult.error
+      };
+    }
   } catch (error) {
     console.error('Authentication failed:', error);
     return {
@@ -128,10 +114,10 @@ export async function authenticateWithJoinToken(joinToken: string, printerId: st
 export async function initializeEnvironmentAuth(): Promise<AuthResult> {
   try {
     console.log('Initializing environment authentication...');
-    
+
     // Load authentication data from environment file
     const authData = await loadEnvironmentAuth();
-    
+
     if (!authData) {
       console.log('No environment authentication data available');
       return {
@@ -139,16 +125,16 @@ export async function initializeEnvironmentAuth(): Promise<AuthResult> {
         error: 'No environment authentication data found'
       };
     }
-    
+
     // Authenticate using join token
     const authResult = await authenticateWithJoinToken(authData.join_token, authData.printer_id);
-    
+
     if (authResult.success) {
       console.log('Environment authentication initialized successfully');
     } else {
       console.error('Environment authentication failed:', authResult.error);
     }
-    
+
     return authResult;
   } catch (error) {
     console.error('Failed to initialize environment authentication:', error);

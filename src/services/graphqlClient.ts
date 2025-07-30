@@ -14,17 +14,7 @@ import { GraphQLClient } from 'graphql-request';
 import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
 import { getSdk } from '../__generated/graphql';
-
-// Environment configuration
-const HASURA_WS_URL = process.env.HASURA_GRAPHQL_WS;
-const HASURA_GRAPHQL_URL = process.env.HASURA_GRAPHQL_URL;
-
-// Validate required environment variables
-if (!HASURA_WS_URL || !HASURA_GRAPHQL_URL) {
-  throw new Error(
-    'HASURA_GRAPHQL_WS and HASURA_GRAPHQL_URL environment variables must be set to your Hasura GraphQL endpoints.'
-  );
-}
+import { HASURA_GRAPHQL_URL, HASURA_GRAPHQL_WS } from '../constant';
 
 /**
  * Interface for GraphQL client configuration
@@ -51,7 +41,7 @@ export const getClient = async (token: string): Promise<GraphQLClientConfig> => 
     
     // Create WebSocket client for real-time subscriptions
     const wsClient = createClient({
-      url: HASURA_WS_URL,
+      url: HASURA_GRAPHQL_WS,
       webSocketImpl: WebSocket,
       shouldRetry: () => true, // Enable automatic retry
       connectionParams: {

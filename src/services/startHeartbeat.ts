@@ -11,10 +11,8 @@
  */
 
 import { Sdk } from "../__generated/graphql";
+import { HEARTBEAT_INTERVAL_SECONDS } from "../constant";
 import { getCurrentVersionNumber } from "./versionManager";
-
-// Configuration
-const HEARTBEAT_INTERVAL_SECONDS = parseInt(process.env.HEARTBEAT_INTERVAL_SECONDS || '60', 10);
 
 // Global state
 let heartbeatInterval: NodeJS.Timeout | null = null;

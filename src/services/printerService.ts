@@ -19,6 +19,7 @@ import {
   sendToPrinter,
   LabelData as CheckPrinterLabelData
 } from './checkPrinter';
+import { JOIN_URL } from '../constant';
 
 /**
  * Interface for label data structure
@@ -65,14 +66,8 @@ export class PrinterService {
    */
   static async joinPrinter(printerId: string, joinCode: string): Promise<PrinterJoinResult> {
     try {
-      const joinUrl = process.env.JOIN_URL;
-      if (!joinUrl) {
-        return {
-          success: false,
-          error: 'JOIN_URL must be set in environment'
-        };
-      }
-
+      const joinUrl = JOIN_URL;
+      
       const response = await fetch(joinUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
