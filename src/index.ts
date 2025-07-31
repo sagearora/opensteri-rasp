@@ -14,11 +14,15 @@ import 'dotenv/config';
 import { initializePrinterConnection } from './services/printerConnectionService';
 import { stopPrinterHeartbeat } from './services/startHeartbeat';
 
+// Import Express server
+import { createServer, startServer } from './server';
+
 /**
  * Initialize the application
  * - Loads environment authentication data
  * - Establishes GraphQL connections
  * - Sets up printer monitoring with archived_at watching
+ * - Starts Express server for WiFi management
  */
 async function initializeApplication(): Promise<void> {
   try {
@@ -26,6 +30,10 @@ async function initializeApplication(): Promise<void> {
     
     // Initialize printer connection using environment authentication
     await initializePrinterConnection();
+    
+    // Start Express server for WiFi management
+    const app = createServer();
+    startServer(app, 3001);
     
     console.log('Application initialization completed successfully');
   } catch (error) {
