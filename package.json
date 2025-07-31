@@ -4,7 +4,7 @@
     "description": "A comprehensive Node.js application for managing GoDEX printers and label printing functionality using environment-based authentication",
     "main": "dist/index.js",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && cp -r src/views dist/",
         "start": "node dist/index.js",
         "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
         "codegen": "graphql-codegen --require dotenv/config --config codegen.yml",

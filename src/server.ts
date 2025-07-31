@@ -16,15 +16,36 @@ export function createServer(): express.Application {
 
   // Serve static HTML form
   app.get('/', (req, res) => {
-    const viewPath = path.join(__dirname, 'views', 'index.html');
+    // Try multiple possible paths for the view file
+    const possiblePaths = [
+      path.join(__dirname, 'views', 'index.html'),
+      path.join(__dirname, '..', 'src', 'views', 'index.html'),
+      path.join(process.cwd(), 'src', 'views', 'index.html'),
+      path.join(process.cwd(), 'dist', 'views', 'index.html')
+    ];
     
-    try {
-      const html = fs.readFileSync(viewPath, 'utf8');
-      res.send(html);
-    } catch (error) {
-      console.error('Error reading view file:', error);
-      res.status(500).send('Error loading page');
+    let html = '';
+    let found = false;
+    
+    for (const viewPath of possiblePaths) {
+      try {
+        if (fs.existsSync(viewPath)) {
+          html = fs.readFileSync(viewPath, 'utf8');
+          found = true;
+          console.log(`Found view file at: ${viewPath}`);
+          break;
+        }
+      } catch (error) {
+        console.log(`Tried path: ${viewPath} - not found`);
+      }
     }
+    
+    if (!found) {
+      console.error('Could not find index.html in any of the expected locations:', possiblePaths);
+      return res.status(500).send('Error: View file not found');
+    }
+    
+    res.send(html);
   });
 
   // Endpoint to scan for WiFi networks
