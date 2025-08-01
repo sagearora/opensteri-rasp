@@ -129,7 +129,8 @@ async function scanWiFiNetworks() {
             data.networks.forEach(network => {
                 const option = document.createElement('option');
                 option.value = network.ssid;
-                option.textContent = `${network.ssid} (${network.signal}%)`;
+                const securityText = network.security && network.security !== 'Unknown' ? ` • ${network.security}` : '';
+                option.textContent = `${network.ssid} (${network.signal}%${securityText})`;
                 networkSelect.appendChild(option);
             });
             
@@ -163,7 +164,8 @@ async function loadNetworksForEdit() {
             data.networks.forEach(network => {
                 const option = document.createElement('option');
                 option.value = network.ssid;
-                option.textContent = `${network.ssid} (${network.signal}%)`;
+                const securityText = network.security && network.security !== 'Unknown' ? ` • ${network.security}` : '';
+                option.textContent = `${network.ssid} (${network.signal}%${securityText})`;
                 editNetworkSelect.appendChild(option);
             });
         } else {

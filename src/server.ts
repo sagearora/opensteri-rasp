@@ -70,22 +70,24 @@ export function createServer(): express.Application {
   // Endpoint to scan for WiFi networks
   app.get('/scan', async (req, res) => {
     try {
-      // Use nmcli to scan for WiFi networks
-      const { stdout } = await execAsync('nmcli -t -f SSID,SIGNAL device wifi list');
+      // Force a rescan and get all available WiFi networks
+      // Use --rescan yes to force a fresh scan
+      const { stdout } = await execAsync('nmcli -t -f SSID,SIGNAL,SECURITY device wifi list --rescan yes');
       
-      // Parse the output to extract SSID and signal strength
+      // Parse the output to extract SSID, signal strength, and security
       const networks = stdout
         .trim()
         .split('\n')
         .filter(line => line && !line.startsWith('*')) // Filter out connected network
         .map(line => {
-          const [ssid, signal] = line.split(':');
+          const [ssid, signal, security] = line.split(':');
           return {
             ssid: ssid || 'Hidden Network',
-            signal: signal ? parseInt(signal) : 0
+            signal: signal ? parseInt(signal) : 0,
+            security: security || 'Unknown'
           };
         })
-        .filter(network => network.ssid && network.ssid !== '--') // Filter out empty or invalid entries
+        .filter(network => network.ssid && network.ssid !== '--' && network.ssid !== 'SSID') // Filter out empty, invalid entries, and header
         .sort((a, b) => b.signal - a.signal); // Sort by signal strength
       
       res.json({ networks });
