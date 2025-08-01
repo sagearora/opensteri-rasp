@@ -1,60 +1,65 @@
 #!/bin/bash
 
-MOUNTPOINT=/mnt
-CONFIG_FILE="$MOUNTPOINT/OPENSTERI.CFG"
-ENV_FILE="/home/pi/opensteri/.env"
+set -e
 
-echo "[OpenSteri] Mounting pi-share.img..."
-mount -o loop /boot/pi-share.img "$MOUNTPOINT"
+FIRMWARE_DIR="/boot/firmware"
 
-if [ -f "$CONFIG_FILE" ]; then
-  echo "[OpenSteri] Found OPENSTERI.CFG file."
+echo "🔧 Setting up USB auto-switch: default HOST mode → fallback GADGET mode if PC is detected"
 
-  SSID=$(grep '^WIFI_SSID=' "$CONFIG_FILE" | cut -d= -f2-)
-  PASSWORD=$(grep '^WIFI_PSWD=' "$CONFIG_FILE" | cut -d= -f2-)
-  PRINTER_ID=$(grep '^PRINTER_ID=' "$CONFIG_FILE" | cut -d= -f2-)
-  JOIN_TOKEN=$(grep '^PRINTER_JOIN_TOKEN=' "$CONFIG_FILE" | cut -d= -f2-)
+# 1. Create gadget mode config
+echo "Creating $FIRMWARE_DIR/config-gadget.txt"
+cat <<EOF > $FIRMWARE_DIR/config-gadget.txt
+dtoverlay=dwc2
+EOF
 
-  echo "[OpenSteri] Extracted values:"
-  echo "  - SSID: $SSID"
-  echo "  - PASSWORD: (hidden)"
-  echo "  - PRINTER_ID: $PRINTER_ID"
-  echo "  - PRINTER_JOIN_TOKEN: $JOIN_TOKEN"
+echo "Creating $FIRMWARE_DIR/cmdline-gadget.txt"
+CMDLINE=$(cat $FIRMWARE_DIR/cmdline.txt | sed 's/ modules-load=dwc2,g_ether//g')
+echo "$CMDLINE modules-load=dwc2,g_ether" > $FIRMWARE_DIR/cmdline-gadget.txt
 
-  if [[ -n "$SSID" && -n "$PASSWORD" ]]; then
-    echo "[OpenSteri] Connecting to Wi-Fi..."
-    nmcli device wifi connect "$SSID" password "$PASSWORD"
-  else
-    echo "[OpenSteri] Missing Wi-Fi credentials. Skipping Wi-Fi setup."
-  fi
+# 2. Backup current host mode configs
+echo "Creating $FIRMWARE_DIR/config-host.txt"
+cp $FIRMWARE_DIR/config.txt $FIRMWARE_DIR/config-host.txt
 
-  echo "[OpenSteri] Ensuring .env file exists at: $ENV_FILE"
-  mkdir -p "$(dirname "$ENV_FILE")"
-  touch "$ENV_FILE"
+echo "Creating $FIRMWARE_DIR/cmdline-host.txt"
+cp $FIRMWARE_DIR/cmdline.txt $FIRMWARE_DIR/cmdline-host.txt
 
-  echo "[OpenSteri] Updating PRINTER_ID and PRINTER_JOIN_TOKEN in .env..."
+# 3. Clean current config.txt and cmdline.txt
+echo "Setting default boot to HOST mode"
+sed -i '/dtoverlay=dwc2/d' $FIRMWARE_DIR/config.txt
+sed -i 's/ modules-load=dwc2,g_ether//g' $FIRMWARE_DIR/cmdline.txt
 
-  if grep -q '^PRINTER_ID=' "$ENV_FILE"; then
-    echo "[OpenSteri] Replacing existing PRINTER_ID"
-    sed -i "s/^PRINTER_ID=.*/PRINTER_ID=$PRINTER_ID/" "$ENV_FILE"
-  else
-    echo "[OpenSteri] Appending PRINTER_ID"
-    echo "PRINTER_ID=$PRINTER_ID" >> "$ENV_FILE"
-  fi
+# 4. Create detection script
+echo "Creating /boot/usb_mode_switch.sh"
+cat <<'EOF' > /boot/usb_mode_switch.sh
+#!/bin/bash
+VBUS="/sys/class/power_supply/usb/online"
+FIRMWARE_DIR="/boot/firmware"
 
-  if grep -q '^PRINTER_JOIN_TOKEN=' "$ENV_FILE"; then
-    echo "[OpenSteri] Replacing existing PRINTER_JOIN_TOKEN"
-    sed -i "s/^PRINTER_JOIN_TOKEN=.*/PRINTER_JOIN_TOKEN=$JOIN_TOKEN/" "$ENV_FILE"
-  else
-    echo "[OpenSteri] Appending PRINTER_JOIN_TOKEN"
-    echo "PRINTER_JOIN_TOKEN=$JOIN_TOKEN" >> "$ENV_FILE"
-  fi
-
-  echo "[OpenSteri] Final .env contents:"
-  cat "$ENV_FILE"
+if [ -f "$VBUS" ]; then
+    STATE=$(cat $VBUS)
+    if [ "$STATE" -eq 1 ]; then
+        echo "PC detected on USB. Switching to GADGET mode..."
+        cp $FIRMWARE_DIR/config-gadget.txt $FIRMWARE_DIR/config.txt
+        cp $FIRMWARE_DIR/cmdline-gadget.txt $FIRMWARE_DIR/cmdline.txt
+        sync
+        reboot
+    else
+        echo "No PC detected. Staying in HOST mode."
+    fi
 else
-  echo "[OpenSteri] ERROR: Config file not found at $CONFIG_FILE"
+    echo "VBUS not found. Staying in HOST mode."
+fi
+EOF
+
+chmod +x /boot/usb_mode_switch.sh
+
+# 5. Enable script in rc.local
+echo "Patching /etc/rc.local to run switch script"
+RC_LOCAL=/etc/rc.local
+if ! grep -q "/boot/usb_mode_switch.sh" $RC_LOCAL; then
+    sed -i '/^exit 0/i /boot/usb_mode_switch.sh &' $RC_LOCAL
 fi
 
-echo "[OpenSteri] Unmounting pi-share.img"
-umount "$MOUNTPOINT"
+echo "✅ Setup complete. Rebooting into HOST mode..."
+sleep 2
+reboot

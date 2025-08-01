@@ -233,6 +233,120 @@ export function createServer(): express.Application {
     }
   });
 
+  // Endpoint to check USB-OTG gadget mode status
+  app.get('/usb-mode', async (req, res) => {
+    try {
+      let isGadgetMode = false;
+      let gadgetType: string | null = null;
+      let details: {
+        dwc2Overlay?: boolean;
+        configfsGadget?: boolean;
+        gadgetFunctions?: string[];
+        availableFunctions?: string[];
+        deviceTreeStatus?: string;
+        usbDeviceCount?: number;
+        loadedModules?: string[];
+      } = {};
+
+      // Check if dwc2 overlay is loaded (common for USB gadget mode)
+      try {
+        const { stdout: overlays } = await execAsync('vcgencmd get_config str | grep -i dwc2');
+        if (overlays.includes('dwc2')) {
+          isGadgetMode = true;
+          details.dwc2Overlay = true;
+        }
+      } catch (error) {
+        details.dwc2Overlay = false;
+      }
+
+      // Check for USB gadget functions in configfs
+      try {
+        const { stdout: gadgetFunctions } = await execAsync('ls /sys/kernel/config/usb_gadget/ 2>/dev/null || echo ""');
+        if (gadgetFunctions.trim()) {
+          isGadgetMode = true;
+          details.configfsGadget = true;
+          details.gadgetFunctions = gadgetFunctions.trim().split('\n').filter(f => f);
+        } else {
+          details.configfsGadget = false;
+        }
+      } catch (error) {
+        details.configfsGadget = false;
+      }
+
+      // Check for specific gadget functions
+      try {
+        const { stdout: functions } = await execAsync('find /sys/kernel/config/usb_gadget/ -name "functions" -exec ls {} \\; 2>/dev/null || echo ""');
+        if (functions.trim()) {
+          const functionList = functions.trim().split('\n').filter(f => f);
+          details.availableFunctions = functionList;
+          
+          // Determine gadget type based on functions
+          if (functionList.includes('g_ether') || functionList.includes('ecm')) {
+            gadgetType = 'ethernet';
+          } else if (functionList.includes('g_serial')) {
+            gadgetType = 'serial';
+          } else if (functionList.includes('g_mass_storage')) {
+            gadgetType = 'mass_storage';
+          } else if (functionList.includes('g_hid')) {
+            gadgetType = 'hid';
+          } else if (functionList.includes('g_midi')) {
+            gadgetType = 'midi';
+          } else {
+            gadgetType = 'custom';
+          }
+        }
+      } catch (error) {
+        details.availableFunctions = [];
+      }
+
+      // Check USB device mode in device tree
+      try {
+        const { stdout: deviceTree } = await execAsync('cat /proc/device-tree/soc/usb@7e980000/status 2>/dev/null || echo ""');
+        if (deviceTree.trim() === 'okay') {
+          details.deviceTreeStatus = 'okay';
+        } else {
+          details.deviceTreeStatus = deviceTree.trim() || 'not_found';
+        }
+      } catch (error) {
+        details.deviceTreeStatus = 'error';
+      }
+
+      // Check if running as USB device vs host
+      try {
+        const { stdout: usbMode } = await execAsync('cat /sys/kernel/debug/usb/devices 2>/dev/null | grep -c "T:" || echo "0"');
+        const deviceCount = parseInt(usbMode.trim());
+        details.usbDeviceCount = deviceCount;
+      } catch (error) {
+        details.usbDeviceCount = 0;
+      }
+
+      // Check for specific USB gadget modules
+      try {
+        const { stdout: modules } = await execAsync('lsmod | grep -E "(g_|dwc2|libcomposite)" || echo ""');
+        if (modules.trim()) {
+          details.loadedModules = modules.trim().split('\n').filter(m => m);
+        } else {
+          details.loadedModules = [];
+        }
+      } catch (error) {
+        details.loadedModules = [];
+      }
+
+      res.json({
+        isGadgetMode,
+        gadgetType,
+        details,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Error checking USB-OTG gadget mode:', error);
+      res.status(500).json({ 
+        error: 'Failed to check USB-OTG gadget mode status.' 
+      });
+    }
+  });
+
   return app;
 }
 
