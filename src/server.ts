@@ -461,21 +461,21 @@ export function createServer(): express.Application {
       const responseData = await response.json();
       
       // Check if response contains access token
-      if (!responseData.access_token) {
+      if (!responseData.token) {
         return res.status(400).json({ 
           error: 'Invalid response from join server - no access token received' 
         });
       }
       
       // Save the access token and printer_id to .env file
-      saveTokenToEnv(responseData.access_token, responseData.printer_id);
+      saveTokenToEnv(responseData.token, responseData.printer_id);
       
       // Reload environment variables to make the token available
       dotenv.config();
       
       res.json({ 
         message: 'Successfully joined and access token saved',
-        token: responseData.access_token, // Return token in response for immediate use
+        token: responseData.token, // Return token in response for immediate use
         printer_id: responseData.printer_id
       });
       
