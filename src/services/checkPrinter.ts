@@ -5,6 +5,7 @@
  * including device detection, connection management, and command transmission.
  * 
  * Supports GoDEX printers with vendor ID 6495 and product ID 1.
+ * Optimized for Raspberry Pi OS with proper permission handling.
  * 
  * @author Dr. Saj Arora
  * @version 1.0.0
@@ -12,6 +13,10 @@
 
 import { Device, OutEndpoint, findByIds, usb } from 'usb';
 import { format } from 'date-fns';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 // Printer hardware constants
 const PRINTER_VENDOR_ID = 6495;
@@ -29,6 +34,7 @@ export interface PrinterConnectionState {
   lastUpdated: string;
   vendorId: number;
   productId: number;
+  error?: string;
 }
 
 // Store the last known printer connection state
@@ -43,14 +49,61 @@ let printerConnectionState: PrinterConnectionState = {
  * Update the printer connection state
  * 
  * @param connected - Whether the printer is currently connected
+ * @param error - Optional error message
  */
-const updatePrinterState = (connected: boolean): void => {
+const updatePrinterState = (connected: boolean, error?: string): void => {
   printerConnectionState = {
     ...printerConnectionState,
     connected,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
+    error
   };
-  console.log(`Printer state updated: ${connected ? 'connected' : 'disconnected'} at ${printerConnectionState.lastUpdated}`);
+  console.log(`Printer state updated: ${connected ? 'connected' : 'disconnected'} at ${printerConnectionState.lastUpdated}${error ? ` - Error: ${error}` : ''}`);
+};
+
+/**
+ * Check USB permissions on Raspberry Pi OS
+ * 
+ * @returns Promise<boolean> - True if user has proper USB permissions
+ */
+const checkUSBPermissions = async (): Promise<boolean> => {
+  try {
+    // Check if user is in plugdev group
+    const { stdout } = await execAsync('groups');
+    const groups = stdout.trim().split(' ');
+    
+    if (groups.includes('plugdev')) {
+      console.log('User is in plugdev group - USB permissions OK');
+      return true;
+    }
+    
+    // Check if running as root
+    if (process.getuid && process.getuid() === 0) {
+      console.log('Running as root - USB permissions OK');
+      return true;
+    }
+    
+    console.warn('User not in plugdev group and not running as root - USB access may fail');
+    return false;
+  } catch (error) {
+    console.error('Error checking USB permissions:', error);
+    return false;
+  }
+};
+
+/**
+ * List all USB devices for debugging
+ * 
+ * @returns Promise<string> - List of USB devices
+ */
+const listUSBDevices = async (): Promise<string> => {
+  try {
+    const { stdout } = await execAsync('lsusb');
+    return stdout;
+  } catch (error) {
+    console.error('Error listing USB devices:', error);
+    return 'Failed to list USB devices';
+  }
 };
 
 /**
@@ -61,10 +114,19 @@ const updatePrinterState = (connected: boolean): void => {
  * 
  * @param _device - The USB device to initialize
  */
-const initDevice = (_device: Device): void => {
+const initDevice = async (_device: Device): Promise<void> => {
   console.log('Initializing GoDEX printer connection...');
   
   try {
+    // Check USB permissions first
+    const hasPermissions = await checkUSBPermissions();
+    if (!hasPermissions) {
+      const errorMsg = 'USB permissions issue. Add user to plugdev group or run as root.';
+      console.error(errorMsg);
+      updatePrinterState(false, errorMsg);
+      return;
+    }
+    
     _device.open();
     const ifc = _device.interface(0);
     
@@ -72,24 +134,27 @@ const initDevice = (_device: Device): void => {
     if (ifc.isKernelDriverActive()) {
       try {
         ifc.detachKernelDriver();
+        console.log('Detached kernel driver for printer interface');
       } catch (e) {
         console.error('Error detaching kernel driver:', e);
         _device.close();
-        updatePrinterState(false);
+        updatePrinterState(false, `Failed to detach kernel driver: ${e}`);
         return;
       }
     }
     
     // Claim the interface
     ifc.claim();
+    console.log('Claimed printer interface');
     
     // Find the output endpoint
     const endpoint = ifc.endpoints.find(e => e.direction === 'out') as OutEndpoint | undefined;
     if (!endpoint) {
       ifc.release();
       _device.close();
-      console.error('Failed to get out endpoint for GoDEX printer');
-      updatePrinterState(false);
+      const errorMsg = 'Failed to get out endpoint for GoDEX printer';
+      console.error(errorMsg);
+      updatePrinterState(false, errorMsg);
       return;
     }
     
@@ -100,17 +165,18 @@ const initDevice = (_device: Device): void => {
     
     console.log('GoDEX printer initialized successfully');
   } catch (error) {
-    console.error('Error initializing printer device:', error);
-    updatePrinterState(false);
+    const errorMsg = `Error initializing printer device: ${error}`;
+    console.error(errorMsg);
+    updatePrinterState(false, errorMsg);
   }
 };
 
 // USB event handlers
-usb.on('attach', (d: Device) => {
+usb.on('attach', async (d: Device) => {
   if (d.deviceDescriptor.idVendor === PRINTER_VENDOR_ID && 
       d.deviceDescriptor.idProduct === PRINTER_PRODUCT_ID) {
     console.log('GoDEX printer detected, initializing...');
-    initDevice(d);
+    await initDevice(d);
   }
 });
 
@@ -125,14 +191,31 @@ usb.on('detach', () => {
 });
 
 // Initialize printer on startup if connected
-const connected = findByIds(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID);
-if (connected) {
-  console.log('GoDEX printer found on startup, initializing...');
-  initDevice(connected);
-} else {
-  updatePrinterState(false);
-  console.log('No GoDEX printer found on startup');
-}
+const initializePrinterOnStartup = async (): Promise<void> => {
+  try {
+    console.log('Checking for GoDEX printer on startup...');
+    
+    // List USB devices for debugging
+    const usbDevices = await listUSBDevices();
+    console.log('Available USB devices:', usbDevices);
+    
+    const connected = findByIds(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID);
+    if (connected) {
+      console.log('GoDEX printer found on startup, initializing...');
+      await initDevice(connected);
+    } else {
+      updatePrinterState(false, 'No GoDEX printer found on startup');
+      console.log('No GoDEX printer found on startup');
+    }
+  } catch (error) {
+    const errorMsg = `Error during startup printer detection: ${error}`;
+    console.error(errorMsg);
+    updatePrinterState(false, errorMsg);
+  }
+};
+
+// Initialize printer on startup
+initializePrinterOnStartup();
 
 /**
  * Check if the printer is currently connected
@@ -150,6 +233,38 @@ export const isPrinterConnected = (): boolean => {
  */
 export const getPrinterState = (): PrinterConnectionState => {
   return printerConnectionState;
+};
+
+/**
+ * Manually trigger printer detection
+ * This can be called to re-check for connected printers
+ * 
+ * @returns Promise<boolean> - True if printer is found and initialized
+ */
+export const triggerPrinterDetection = async (): Promise<boolean> => {
+  try {
+    console.log('Manually triggering printer detection...');
+    
+    // List USB devices for debugging
+    const usbDevices = await listUSBDevices();
+    console.log('Available USB devices during manual detection:', usbDevices);
+    
+    const connected = findByIds(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID);
+    if (connected) {
+      console.log('GoDEX printer found during manual detection, initializing...');
+      await initDevice(connected);
+      return true;
+    } else {
+      console.log('No GoDEX printer found during manual detection');
+      updatePrinterState(false, 'No GoDEX printer found during manual detection');
+      return false;
+    }
+  } catch (error) {
+    const errorMsg = `Error during manual printer detection: ${error}`;
+    console.error(errorMsg);
+    updatePrinterState(false, errorMsg);
+    return false;
+  }
 };
 
 /**

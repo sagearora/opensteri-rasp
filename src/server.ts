@@ -33,6 +33,11 @@ import dotenv from 'dotenv';
 import { JOIN_URL } from './constant';
 import { initializePrinterConnectionWithCredentials } from './services/printerConnectionService';
 import { getClient } from './services/graphqlClient';
+import { isPrinterConnected, getPrinterState, triggerPrinterDetection } from './services/checkPrinter';
+
+// Import printer constants
+const PRINTER_VENDOR_ID = 6495;
+const PRINTER_PRODUCT_ID = 1;
 
 const execAsync = promisify(exec);
 
@@ -599,6 +604,100 @@ export function createServer(): express.Application {
       console.error('Error in disconnect printer paired endpoint:', error);
       res.status(500).json({ 
         error: 'Internal server error during printer disconnection',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Endpoint to check printer hardware detection status
+  app.get('/printer-status', async (req, res) => {
+    try {
+      const isConnected = isPrinterConnected();
+      const printerState = getPrinterState();
+
+      res.json({
+        connected: isConnected,
+        printer: {
+          name: 'GoDEX Printer',
+          status: isConnected ? 'Ready' : 'Not Connected',
+          port: isConnected ? 'USB' : null
+        },
+        printerState: printerState,
+        message: isConnected ? 'GoDEX printer is connected and ready.' : 'GoDEX printer is not connected or not detected.',
+        debug: {
+          vendorId: PRINTER_VENDOR_ID,
+          productId: PRINTER_PRODUCT_ID,
+          hasError: !!printerState.error,
+          error: printerState.error
+        }
+      });
+    } catch (error) {
+      console.error('Error checking printer status:', error);
+      res.status(500).json({ 
+        error: 'Failed to check printer hardware status',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Endpoint to manually trigger printer detection
+  app.post('/trigger-printer-detection', async (req, res) => {
+    try {
+      const detectionResult = await triggerPrinterDetection();
+      
+      if (detectionResult) {
+        console.log('Successfully triggered printer detection - printer found and initialized.');
+        res.json({ 
+          message: 'Printer detection triggered successfully - GoDEX printer found and initialized.',
+          detected: true
+        });
+      } else {
+        console.log('Printer detection triggered - no GoDEX printer found.');
+        res.json({ 
+          message: 'Printer detection triggered - no GoDEX printer found.',
+          detected: false
+        });
+      }
+    } catch (error) {
+      console.error('Error in trigger printer detection endpoint:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during printer detection trigger',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Endpoint to get detailed USB device information for debugging
+  app.get('/usb-debug', async (req, res) => {
+    try {
+      const { exec } = require('child_process');
+      const { promisify } = require('util');
+      const execAsync = promisify(exec);
+      
+      // Get USB device list
+      const { stdout: lsusbOutput } = await execAsync('lsusb');
+      
+      // Get user groups
+      const { stdout: groupsOutput } = await execAsync('groups');
+      
+      // Get current user
+      const { stdout: whoamiOutput } = await execAsync('whoami');
+      
+      // Get USB device details
+      const { stdout: usbDetails } = await execAsync('lsusb -v 2>/dev/null | head -50');
+      
+      res.json({
+        lsusb: lsusbOutput,
+        groups: groupsOutput.trim(),
+        user: whoamiOutput.trim(),
+        usbDetails: usbDetails,
+        printerState: getPrinterState(),
+        isConnected: isPrinterConnected()
+      });
+    } catch (error) {
+      console.error('Error getting USB debug info:', error);
+      res.status(500).json({ 
+        error: 'Failed to get USB debug information',
         details: error instanceof Error ? error.message : String(error)
       });
     }
