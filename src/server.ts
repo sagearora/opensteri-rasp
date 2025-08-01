@@ -34,6 +34,7 @@ import { JOIN_URL } from './constant';
 import { initializePrinterConnectionWithCredentials } from './services/printerConnectionService';
 import { getClient } from './services/graphqlClient';
 import { isPrinterConnected, getPrinterState, triggerPrinterDetection } from './services/checkPrinter';
+import { PrinterService } from './services/printerService';
 
 // Import printer constants
 const PRINTER_VENDOR_ID = 6495;
@@ -662,6 +663,45 @@ export function createServer(): express.Application {
       console.error('Error in trigger printer detection endpoint:', error);
       res.status(500).json({ 
         error: 'Internal server error during printer detection trigger',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Endpoint to print a test label
+  app.post('/test-print', async (req, res) => {
+    try {
+      console.log('Received test print request');
+      
+      // Check if printer is connected first
+      const isConnected = isPrinterConnected();
+      if (!isConnected) {
+        return res.status(400).json({ 
+          error: 'Printer is not connected',
+          message: 'Please ensure your GoDEX printer is connected via USB and try again.'
+        });
+      }
+      
+      // Call the PrinterService to print a test label
+      const result = await PrinterService.printTestLabel();
+      
+      if (result.success) {
+        console.log('Test print completed successfully:', result.message);
+        res.json({ 
+          message: result.message,
+          bytesSent: result.bytesSent
+        });
+      } else {
+        console.error('Test print failed:', result.message);
+        res.status(500).json({ 
+          error: 'Test print failed',
+          message: result.message
+        });
+      }
+    } catch (error) {
+      console.error('Error in test print endpoint:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during test print',
         details: error instanceof Error ? error.message : String(error)
       });
     }

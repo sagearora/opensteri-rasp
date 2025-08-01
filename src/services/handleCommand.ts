@@ -43,7 +43,7 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
     // Execute command based on type
     switch (command.command) {
       case Printer_Command_Type_Enum.PrintTest:
-        result = await PrinterService.printTestLabel();;
+        result = await PrinterService.printTestLabel();
         break;
       case Printer_Command_Type_Enum.PrintLabels:
         result = await PrinterService.printLabels(command.data as LabelData[]);
