@@ -6,6 +6,13 @@ import fs from 'fs';
 
 const execAsync = promisify(exec);
 
+// Configuration for WiFi operations
+const WIFI_CONFIG = {
+  useSudo: true, // Set to false if running as root or with proper permissions
+  sudoCommand: 'sudo', // Can be changed to 'pkexec' or other privilege escalation methods
+  fallbackToNonSudo: true // Try without sudo if sudo fails
+};
+
 export function createServer(): express.Application {
   const app = express();
   const PORT = 3001;
@@ -108,24 +115,77 @@ export function createServer(): express.Application {
         return res.status(400).json({ error: 'Network name and password are required' });
       }
       
-      // Use nmcli with sudo to connect to the WiFi network
-      const command = `sudo nmcli device wifi connect "${network}" password "${password}"`;
+      // Try different approaches for connecting to WiFi
+      let connected = false;
+      let lastError = null;
       
-      try {
-        await execAsync(command);
+      // Approach 1: Try with sudo
+      if (WIFI_CONFIG.useSudo) {
+        try {
+          const command = `${WIFI_CONFIG.sudoCommand} nmcli device wifi connect "${network}" password "${password}"`;
+          await execAsync(command);
+          connected = true;
+        } catch (error) {
+          lastError = error;
+          console.log('Sudo approach failed, trying alternative methods...');
+        }
+      }
+      
+      // Approach 2: Try without sudo (if running as root or with proper permissions)
+      if (!connected && WIFI_CONFIG.fallbackToNonSudo) {
+        try {
+          const command = `nmcli device wifi connect "${network}" password "${password}"`;
+          await execAsync(command);
+          connected = true;
+        } catch (error) {
+          lastError = error;
+          console.log('Non-sudo approach also failed...');
+        }
+      }
+      
+      // Approach 3: Try with pkexec (alternative to sudo)
+      if (!connected && WIFI_CONFIG.fallbackToNonSudo) {
+        try {
+          const command = `pkexec nmcli device wifi connect "${network}" password "${password}"`;
+          await execAsync(command);
+          connected = true;
+        } catch (error) {
+          lastError = error;
+          console.log('pkexec approach also failed...');
+        }
+      }
+      
+      if (connected) {
         res.json({ message: 'Successfully connected to WiFi network' });
-      } catch (connectError) {
-        console.error('Error connecting to WiFi:', connectError);
+      } else {
+        // Provide helpful error message based on the last error
+        const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
         
-        // Check if it's a sudo permission error
-        const errorMessage = connectError instanceof Error ? connectError.message : String(connectError);
         if (errorMessage.includes('sudo') || errorMessage.includes('Insufficient privileges')) {
           res.status(500).json({ 
-            error: 'Sudo privileges required. Please ensure the application has sudo access or run with appropriate permissions.' 
+            error: 'WiFi connection requires elevated privileges. Please run the application with sudo or configure proper permissions.',
+            details: 'Try running: sudo npm start or configure sudoers to allow nmcli commands without password.',
+            solutions: [
+              'Run the application with sudo: sudo npm start',
+              'Configure sudoers to allow nmcli commands',
+              'Run the application as root user',
+              'Use pkexec instead of sudo'
+            ]
+          });
+        } else if (errorMessage.includes('NetworkManager')) {
+          res.status(500).json({ 
+            error: 'NetworkManager service is not running or not available.',
+            details: 'Please ensure NetworkManager is installed and running.',
+            solutions: [
+              'Install NetworkManager: sudo apt-get install network-manager',
+              'Start NetworkManager service: sudo systemctl start NetworkManager',
+              'Enable NetworkManager: sudo systemctl enable NetworkManager'
+            ]
           });
         } else {
           res.status(500).json({ 
-            error: 'Failed to connect to WiFi network. Please check your credentials and try again.' 
+            error: 'Failed to connect to WiFi network. Please check your credentials and try again.',
+            details: errorMessage
           });
         }
       }
@@ -206,144 +266,73 @@ export function createServer(): express.Application {
   // Endpoint to disconnect from WiFi
   app.post('/disconnect', async (req, res) => {
     try {
-      // Use nmcli to disconnect from the current WiFi network
-      const command = 'sudo nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)';
+      // Try different approaches for disconnecting from WiFi
+      let disconnected = false;
+      let lastError = null;
       
-      try {
-        await execAsync(command);
+      // Approach 1: Try with sudo
+      if (WIFI_CONFIG.useSudo) {
+        try {
+          const command = `${WIFI_CONFIG.sudoCommand} nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)`;
+          await execAsync(command);
+          disconnected = true;
+        } catch (error) {
+          lastError = error;
+          console.log('Sudo disconnect approach failed, trying alternative methods...');
+        }
+      }
+      
+      // Approach 2: Try without sudo
+      if (!disconnected && WIFI_CONFIG.fallbackToNonSudo) {
+        try {
+          const command = `nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)`;
+          await execAsync(command);
+          disconnected = true;
+        } catch (error) {
+          lastError = error;
+          console.log('Non-sudo disconnect approach also failed...');
+        }
+      }
+      
+      // Approach 3: Try with pkexec
+      if (!disconnected && WIFI_CONFIG.fallbackToNonSudo) {
+        try {
+          const command = `pkexec nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)`;
+          await execAsync(command);
+          disconnected = true;
+        } catch (error) {
+          lastError = error;
+          console.log('pkexec disconnect approach also failed...');
+        }
+      }
+      
+      if (disconnected) {
         res.json({ message: 'Successfully disconnected from WiFi network' });
-      } catch (disconnectError) {
-        console.error('Error disconnecting from WiFi:', disconnectError);
+      } else {
+        // Provide helpful error message
+        const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
         
-        // Check if it's a sudo permission error
-        const errorMessage = disconnectError instanceof Error ? disconnectError.message : String(disconnectError);
         if (errorMessage.includes('sudo') || errorMessage.includes('Insufficient privileges')) {
           res.status(500).json({ 
-            error: 'Sudo privileges required. Please ensure the application has sudo access or run with appropriate permissions.' 
+            error: 'WiFi disconnection requires elevated privileges. Please run the application with sudo or configure proper permissions.',
+            details: 'Try running: sudo npm start or configure sudoers to allow nmcli commands without password.',
+            solutions: [
+              'Run the application with sudo: sudo npm start',
+              'Configure sudoers to allow nmcli commands',
+              'Run the application as root user',
+              'Use pkexec instead of sudo'
+            ]
           });
         } else {
           res.status(500).json({ 
-            error: 'Failed to disconnect from WiFi network. Please try again.' 
+            error: 'Failed to disconnect from WiFi network. Please try again.',
+            details: errorMessage
           });
         }
       }
     } catch (error) {
       console.error('Error in disconnect endpoint:', error);
       res.status(500).json({ error: 'Internal server error' });
-    }
-  });
-
-  // Endpoint to check USB-OTG gadget mode status
-  app.get('/usb-mode', async (req, res) => {
-    try {
-      let isGadgetMode = false;
-      let gadgetType: string | null = null;
-      let details: {
-        dwc2Overlay?: boolean;
-        configfsGadget?: boolean;
-        gadgetFunctions?: string[];
-        availableFunctions?: string[];
-        deviceTreeStatus?: string;
-        usbDeviceCount?: number;
-        loadedModules?: string[];
-      } = {};
-
-      // Check if dwc2 overlay is loaded (common for USB gadget mode)
-      try {
-        const { stdout: overlays } = await execAsync('vcgencmd get_config str | grep -i dwc2');
-        if (overlays.includes('dwc2')) {
-          isGadgetMode = true;
-          details.dwc2Overlay = true;
-        }
-      } catch (error) {
-        details.dwc2Overlay = false;
-      }
-
-      // Check for USB gadget functions in configfs
-      try {
-        const { stdout: gadgetFunctions } = await execAsync('ls /sys/kernel/config/usb_gadget/ 2>/dev/null || echo ""');
-        if (gadgetFunctions.trim()) {
-          isGadgetMode = true;
-          details.configfsGadget = true;
-          details.gadgetFunctions = gadgetFunctions.trim().split('\n').filter(f => f);
-        } else {
-          details.configfsGadget = false;
-        }
-      } catch (error) {
-        details.configfsGadget = false;
-      }
-
-      // Check for specific gadget functions
-      try {
-        const { stdout: functions } = await execAsync('find /sys/kernel/config/usb_gadget/ -name "functions" -exec ls {} \\; 2>/dev/null || echo ""');
-        if (functions.trim()) {
-          const functionList = functions.trim().split('\n').filter(f => f);
-          details.availableFunctions = functionList;
-          
-          // Determine gadget type based on functions
-          if (functionList.includes('g_ether') || functionList.includes('ecm')) {
-            gadgetType = 'ethernet';
-          } else if (functionList.includes('g_serial')) {
-            gadgetType = 'serial';
-          } else if (functionList.includes('g_mass_storage')) {
-            gadgetType = 'mass_storage';
-          } else if (functionList.includes('g_hid')) {
-            gadgetType = 'hid';
-          } else if (functionList.includes('g_midi')) {
-            gadgetType = 'midi';
-          } else {
-            gadgetType = 'custom';
-          }
-        }
-      } catch (error) {
-        details.availableFunctions = [];
-      }
-
-      // Check USB device mode in device tree
-      try {
-        const { stdout: deviceTree } = await execAsync('cat /proc/device-tree/soc/usb@7e980000/status 2>/dev/null || echo ""');
-        if (deviceTree.trim() === 'okay') {
-          details.deviceTreeStatus = 'okay';
-        } else {
-          details.deviceTreeStatus = deviceTree.trim() || 'not_found';
-        }
-      } catch (error) {
-        details.deviceTreeStatus = 'error';
-      }
-
-      // Check if running as USB device vs host
-      try {
-        const { stdout: usbMode } = await execAsync('cat /sys/kernel/debug/usb/devices 2>/dev/null | grep -c "T:" || echo "0"');
-        const deviceCount = parseInt(usbMode.trim());
-        details.usbDeviceCount = deviceCount;
-      } catch (error) {
-        details.usbDeviceCount = 0;
-      }
-
-      // Check for specific USB gadget modules
-      try {
-        const { stdout: modules } = await execAsync('lsmod | grep -E "(g_|dwc2|libcomposite)" || echo ""');
-        if (modules.trim()) {
-          details.loadedModules = modules.trim().split('\n').filter(m => m);
-        } else {
-          details.loadedModules = [];
-        }
-      } catch (error) {
-        details.loadedModules = [];
-      }
-
-      res.json({
-        isGadgetMode,
-        gadgetType,
-        details,
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error) {
-      console.error('Error checking USB-OTG gadget mode:', error);
-      res.status(500).json({ 
-        error: 'Failed to check USB-OTG gadget mode status.' 
-      });
     }
   });
 

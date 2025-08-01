@@ -213,6 +213,21 @@ disconnectWifiBtn.addEventListener('click', async () => {
         } catch (err) {
             wifiError.textContent = err.message;
             wifiError.style.display = 'block';
+            
+            // Display additional error details if available
+            if (err.response && err.response.data) {
+                const errorData = err.response.data;
+                if (errorData.details) {
+                    wifiError.innerHTML += `<br><small>${errorData.details}</small>`;
+                }
+                if (errorData.solutions && errorData.solutions.length > 0) {
+                    wifiError.innerHTML += '<br><strong>Solutions:</strong><ul>';
+                    errorData.solutions.forEach(solution => {
+                        wifiError.innerHTML += `<li>${solution}</li>`;
+                    });
+                    wifiError.innerHTML += '</ul>';
+                }
+            }
         } finally {
             wifiLoading.style.display = 'none';
         }
@@ -260,6 +275,21 @@ wifiForm.addEventListener('submit', async (e) => {
         wifiError.textContent = err.message;
         wifiError.style.display = 'block';
         wifiSuccess.style.display = 'none';
+        
+        // Display additional error details if available
+        if (err.response && err.response.data) {
+            const errorData = err.response.data;
+            if (errorData.details) {
+                wifiError.innerHTML += `<br><small>${errorData.details}</small>`;
+            }
+            if (errorData.solutions && errorData.solutions.length > 0) {
+                wifiError.innerHTML += '<br><strong>Solutions:</strong><ul>';
+                errorData.solutions.forEach(solution => {
+                    wifiError.innerHTML += `<li>${solution}</li>`;
+                });
+                wifiError.innerHTML += '</ul>';
+            }
+        }
     } finally {
         wifiLoading.style.display = 'none';
     }
