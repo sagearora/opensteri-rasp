@@ -294,6 +294,10 @@ select:focus, input[type="password"]:focus, input[type="text"]:focus, input[type
     margin-bottom: 1rem;
 }
 
+.printer-status {
+    margin-bottom: 1rem;
+}
+
 .status-card {
     background: #F8FAFC;
     border: 2px solid #E2E8F0;

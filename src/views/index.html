@@ -172,48 +172,117 @@
                 </div>
             </div>
             
-            <div class="form-group">
-                <label>Printer Status:</label>
-                <div class="status-indicator status-unknown">
-                    <span>⏳</span>
-                    Checking printer connection...
+            <!-- Printer Connection Status (shown when connected) -->
+            <div id="printerStatus" class="printer-status" style="display: none;">
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon connected">
+                            🖨️
+                        </div>
+                        <div class="status-info">
+                            <h3 id="connectedPrinter">Printer Name</h3>
+                            <p id="printerDetails">Connected • Model: Thermal • Paper: 4x6 inch</p>
+                        </div>
+                    </div>
+                    <div class="status-actions">
+                        <button type="button" id="editPrinterBtn" class="btn btn-ghost">
+                            ✏️ Edit Configuration
+                        </button>
+                        <button type="button" id="disconnectPrinterBtn" class="btn btn-danger">
+                            🔌 Disconnect Printer
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <form id="printerForm">
+            <!-- Printer Setup Form (shown when not connected) -->
+            <div id="printerSetupForm">
                 <div class="form-group">
-                    <label for="printerName">Printer Name:</label>
-                    <input type="text" id="printerName" name="printerName" placeholder="Enter printer name" required>
+                    <label>Printer Status:</label>
+                    <div class="status-indicator status-unknown">
+                        <span>⏳</span>
+                        Checking printer connection...
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="printerModel">Printer Model:</label>
-                    <select id="printerModel" name="printerModel" required>
-                        <option value="">Select printer model...</option>
-                        <option value="thermal">Thermal Printer</option>
-                        <option value="inkjet">Inkjet Printer</option>
-                        <option value="laser">Laser Printer</option>
-                        <option value="label">Label Printer</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="paperSize">Paper Size:</label>
-                    <select id="paperSize" name="paperSize" required>
-                        <option value="">Select paper size...</option>
-                        <option value="A4">A4</option>
-                        <option value="Letter">Letter</option>
-                        <option value="Legal">Legal</option>
-                        <option value="4x6">4x6 inch</option>
-                        <option value="3x5">3x5 inch</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-success">
-                    <span>⚙️</span>
-                    Configure Printer
-                </button>
-            </form>
+                <form id="printerForm">
+                    <div class="form-group">
+                        <label for="printerName">Printer Name:</label>
+                        <input type="text" id="printerName" name="printerName" placeholder="Enter printer name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="printerModel">Printer Model:</label>
+                        <select id="printerModel" name="printerModel" required>
+                            <option value="">Select printer model...</option>
+                            <option value="thermal">Thermal Printer</option>
+                            <option value="inkjet">Inkjet Printer</option>
+                            <option value="laser">Laser Printer</option>
+                            <option value="label">Label Printer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="paperSize">Paper Size:</label>
+                        <select id="paperSize" name="paperSize" required>
+                            <option value="">Select paper size...</option>
+                            <option value="A4">A4</option>
+                            <option value="Letter">Letter</option>
+                            <option value="Legal">Legal</option>
+                            <option value="4x6">4x6 inch</option>
+                            <option value="3x5">3x5 inch</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <span>⚙️</span>
+                        Configure Printer
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Printer Edit Form (shown when editing configuration) -->
+            <div id="printerEditForm" style="display: none;">
+                <form id="editPrinterForm">
+                    <div class="form-group">
+                        <label for="editPrinterName">Printer Name:</label>
+                        <input type="text" id="editPrinterName" name="printerName" placeholder="Enter printer name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPrinterModel">Printer Model:</label>
+                        <select id="editPrinterModel" name="printerModel" required>
+                            <option value="">Select printer model...</option>
+                            <option value="thermal">Thermal Printer</option>
+                            <option value="inkjet">Inkjet Printer</option>
+                            <option value="laser">Laser Printer</option>
+                            <option value="label">Label Printer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPaperSize">Paper Size:</label>
+                        <select id="editPaperSize" name="paperSize" required>
+                            <option value="">Select paper size...</option>
+                            <option value="A4">A4</option>
+                            <option value="Letter">Letter</option>
+                            <option value="Legal">Legal</option>
+                            <option value="4x6">4x6 inch</option>
+                            <option value="3x5">3x5 inch</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">
+                            <span>💾</span>
+                            Update Configuration
+                        </button>
+                        <button type="button" id="cancelEditPrinterBtn" class="btn btn-ghost">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
             
             <div id="printerLoading" class="loading">
                 <p>Configuring printer settings...</p>

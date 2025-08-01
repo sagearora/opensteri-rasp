@@ -352,47 +352,143 @@ const printerLoading = document.getElementById('printerLoading');
 const printerError = document.getElementById('printerError');
 const printerSuccess = document.getElementById('printerSuccess');
 
-printerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(printerForm);
-    const printerName = formData.get('printerName');
-    const printerModel = formData.get('printerModel');
-    const paperSize = formData.get('paperSize');
-    
-    if (!printerName || !printerModel || !paperSize) {
-        printerError.textContent = 'Please fill in all printer configuration fields';
-        printerError.style.display = 'block';
-        return;
-    }
-    
+// Printer status elements
+const printerStatus = document.getElementById('printerStatus');
+const printerSetupForm = document.getElementById('printerSetupForm');
+const printerEditForm = document.getElementById('printerEditForm');
+const connectedPrinter = document.getElementById('connectedPrinter');
+const printerDetails = document.getElementById('printerDetails');
+const editPrinterBtn = document.getElementById('editPrinterBtn');
+const disconnectPrinterBtn = document.getElementById('disconnectPrinterBtn');
+const cancelEditPrinterBtn = document.getElementById('cancelEditPrinterBtn');
+
+// Edit form elements
+const editPrinterForm = document.getElementById('editPrinterForm');
+const editPrinterName = document.getElementById('editPrinterName');
+const editPrinterModel = document.getElementById('editPrinterModel');
+const editPaperSize = document.getElementById('editPaperSize');
+
+// Current printer status
+let currentPrinterStatus = null;
+
+// Function to check printer status
+async function checkPrinterStatus() {
     try {
         printerLoading.style.display = 'block';
         printerError.style.display = 'none';
         printerSuccess.style.display = 'none';
         
-        const response = await fetch('/configure-printer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ printerName, printerModel, paperSize })
+        const response = await fetch('/token-status', {
+            method: 'GET'
         });
         
         const data = await response.json();
         
         if (response.ok) {
-            printerSuccess.textContent = 'Printer configured successfully!';
-            printerSuccess.style.display = 'block';
+            currentPrinterStatus = data;
+            updatePrinterUI(data);
         } else {
-            throw new Error(data.error || 'Failed to configure printer');
+            throw new Error(data.error || 'Failed to check printer status');
         }
     } catch (err) {
         printerError.textContent = err.message;
         printerError.style.display = 'block';
-        printerSuccess.style.display = 'none';
+        // Show setup form as fallback
+        showPrinterSetupForm();
     } finally {
         printerLoading.style.display = 'none';
+    }
+}
+
+// Function to update printer UI based on status
+function updatePrinterUI(status) {
+    if (status.hasToken && status.hasPrinterId) {
+        showPrinterStatus(status);
+    } else {
+        showPrinterSetupForm();
+    }
+}
+
+// Function to show printer connection status
+function showPrinterStatus(status) {
+    printerStatus.style.display = 'block';
+    printerSetupForm.style.display = 'none';
+    printerEditForm.style.display = 'none';
+    
+    // Update status display
+    connectedPrinter.textContent = 'Connected Printer';
+    
+    const details = [];
+    if (status.printerId) {
+        details.push(`Printer ID: ${status.printerId}`);
+    }
+    if (status.token) {
+        details.push('Token: Active');
+    }
+    
+    printerDetails.textContent = details.length > 0 ? details.join(' • ') : 'Connected';
+}
+
+// Function to show printer setup form
+function showPrinterSetupForm() {
+    printerStatus.style.display = 'none';
+    printerSetupForm.style.display = 'block';
+    printerEditForm.style.display = 'none';
+    printerError.style.display = 'none';
+    printerSuccess.style.display = 'none';
+}
+
+// Function to show printer edit form
+function showPrinterEditForm() {
+    printerStatus.style.display = 'none';
+    printerSetupForm.style.display = 'none';
+    printerEditForm.style.display = 'block';
+    
+    // Pre-populate with current printer info if available
+    if (currentPrinterStatus && currentPrinterStatus.printerId) {
+        editPrinterName.value = 'Connected Printer'; // Default name
+        editPrinterModel.value = 'thermal'; // Default model
+        editPaperSize.value = '4x6'; // Default paper size
+    }
+}
+
+// Event Listeners for printer management
+editPrinterBtn.addEventListener('click', showPrinterEditForm);
+cancelEditPrinterBtn.addEventListener('click', () => {
+    if (currentPrinterStatus && currentPrinterStatus.hasToken) {
+        showPrinterStatus(currentPrinterStatus);
+    } else {
+        showPrinterSetupForm();
+    }
+});
+
+disconnectPrinterBtn.addEventListener('click', async () => {
+    if (confirm('Are you sure you want to disconnect the printer? This will remove the printer configuration.')) {
+        try {
+            printerLoading.style.display = 'block';
+            printerError.style.display = 'none';
+            
+            // Clear the printer configuration by removing from .env
+            const response = await fetch('/disconnect-printer', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                showPrinterSetupForm();
+                printerSuccess.textContent = 'Successfully disconnected printer';
+                printerSuccess.style.display = 'block';
+                // Refresh status after successful disconnection
+                setTimeout(checkPrinterStatus, 2000);
+            } else {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to disconnect printer');
+            }
+        } catch (err) {
+            printerError.textContent = err.message;
+            printerError.style.display = 'block';
+        } finally {
+            printerLoading.style.display = 'none';
+        }
     }
 });
 
@@ -430,7 +526,7 @@ credentialsForm.addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            credentialsSuccess.textContent = 'Successfully joined OpenSteri! Access token saved.';
+            credentialsSuccess.textContent = 'Successfully joined OpenSteri! Access token saved and heartbeat started.';
             credentialsSuccess.style.display = 'block';
             
             // Show additional success details if available
@@ -494,4 +590,104 @@ checkTokenBtn.addEventListener('click', async () => {
     } finally {
         checkTokenBtn.disabled = false;
     }
+}); 
+
+// Printer Form Submit (for initial setup)
+printerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(printerForm);
+    const printerName = formData.get('printerName');
+    const printerModel = formData.get('printerModel');
+    const paperSize = formData.get('paperSize');
+    
+    if (!printerName || !printerModel || !paperSize) {
+        printerError.textContent = 'Please fill in all printer configuration fields';
+        printerError.style.display = 'block';
+        return;
+    }
+    
+    try {
+        printerLoading.style.display = 'block';
+        printerError.style.display = 'none';
+        printerSuccess.style.display = 'none';
+        
+        const response = await fetch('/configure-printer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ printerName, printerModel, paperSize })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            printerSuccess.textContent = 'Printer configured successfully!';
+            printerSuccess.style.display = 'block';
+            // Refresh status after successful configuration
+            setTimeout(checkPrinterStatus, 2000);
+        } else {
+            throw new Error(data.error || 'Failed to configure printer');
+        }
+    } catch (err) {
+        printerError.textContent = err.message;
+        printerError.style.display = 'block';
+        printerSuccess.style.display = 'none';
+    } finally {
+        printerLoading.style.display = 'none';
+    }
+});
+
+// Printer Edit Form Submit
+editPrinterForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(editPrinterForm);
+    const printerName = formData.get('printerName');
+    const printerModel = formData.get('printerModel');
+    const paperSize = formData.get('paperSize');
+    
+    if (!printerName || !printerModel || !paperSize) {
+        printerError.textContent = 'Please fill in all printer configuration fields';
+        printerError.style.display = 'block';
+        return;
+    }
+    
+    try {
+        printerLoading.style.display = 'block';
+        printerError.style.display = 'none';
+        printerSuccess.style.display = 'none';
+        
+        const response = await fetch('/configure-printer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ printerName, printerModel, paperSize })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            printerSuccess.textContent = 'Printer configuration updated successfully!';
+            printerSuccess.style.display = 'block';
+            // Refresh status after successful update
+            setTimeout(checkPrinterStatus, 2000);
+        } else {
+            throw new Error(data.error || 'Failed to update printer configuration');
+        }
+    } catch (err) {
+        printerError.textContent = err.message;
+        printerError.style.display = 'block';
+        printerSuccess.style.display = 'none';
+    } finally {
+        printerLoading.style.display = 'none';
+    }
+});
+
+// Initialize WiFi status on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkWiFiStatus();
+    checkPrinterStatus();
 }); 

@@ -473,6 +473,16 @@ export function createServer(): express.Application {
       // Reload environment variables to make the token available
       dotenv.config();
       
+      // Immediately start heartbeat and subscription
+      try {
+        console.log('Starting immediate heartbeat and subscription after successful join...');
+        await initializePrinterConnectionWithCredentials(responseData.token, responseData.printer_id);
+        console.log('Heartbeat and subscription started successfully');
+      } catch (error) {
+        console.error('Failed to start heartbeat after join:', error);
+        // Don't fail the join request if heartbeat fails, just log the error
+      }
+      
       res.json({ 
         message: 'Successfully joined and access token saved',
         token: responseData.token, // Return token in response for immediate use
@@ -511,6 +521,33 @@ export function createServer(): express.Application {
         hasToken: false,
         hasPrinterId: false,
         message: 'No access token found. Use /join endpoint to authenticate.'
+      });
+    }
+  });
+
+  // Endpoint to disconnect printer (clear printer configuration)
+  app.post('/disconnect-printer', async (req, res) => {
+    try {
+      const envPath = getEnvFilePath();
+      
+      if (fs.existsSync(envPath)) {
+        let envContent = fs.readFileSync(envPath, 'utf8');
+        
+        // Remove PRINTER_ID from .env file
+        envContent = envContent.replace(/PRINTER_ID=.*\n?/g, '');
+        envContent = envContent.replace(/PRINTER_ID=.*$/g, '');
+        
+        // Write back to .env file
+        fs.writeFileSync(envPath, envContent.trim() + '\n');
+        console.log('Printer configuration cleared from .env file');
+      }
+      
+      res.json({ message: 'Successfully disconnected printer' });
+    } catch (error) {
+      console.error('Error in disconnect printer endpoint:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during printer disconnection',
+        details: error instanceof Error ? error.message : String(error)
       });
     }
   });
