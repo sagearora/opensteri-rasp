@@ -152,6 +152,7 @@ async function scanWiFiNetworks() {
 async function loadNetworksForEdit() {
     try {
         editRescanBtn.disabled = true;
+        wifiLoading.style.display = 'block';
         
         const response = await fetch('/scan', {
             method: 'GET'
@@ -175,6 +176,7 @@ async function loadNetworksForEdit() {
         console.error('Error loading networks for edit:', err);
     } finally {
         editRescanBtn.disabled = false;
+        wifiLoading.style.display = 'none';
     }
 }
 
@@ -295,88 +297,42 @@ wifiForm.addEventListener('submit', async (e) => {
     }
 });
 
-// WiFi Edit Form Submit
-editWifiForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(editWifiForm);
-    const network = formData.get('network');
-    const password = formData.get('password');
-    
-    if (!network || !password) {
-        wifiError.textContent = 'Please select a network and enter a password';
-        wifiError.style.display = 'block';
-        return;
-    }
-    
-    try {
-        wifiLoading.style.display = 'block';
-        wifiError.style.display = 'none';
-        wifiSuccess.style.display = 'none';
-        
-        const response = await fetch('/connect', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ network, password })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            wifiSuccess.textContent = 'Successfully updated WiFi connection!';
-            wifiSuccess.style.display = 'block';
-            // Refresh status after successful connection
-            setTimeout(checkWiFiStatus, 2000);
-        } else {
-            throw new Error(data.error || 'Failed to update network connection');
-        }
-    } catch (err) {
-        wifiError.textContent = err.message;
-        wifiError.style.display = 'block';
-        wifiSuccess.style.display = 'none';
-    } finally {
-        wifiLoading.style.display = 'none';
-    }
-});
-
 // Initialize WiFi status on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Show initial loading states
+    wifiLoading.style.display = 'block';
+    credentialsLoading.style.display = 'block';
+    
+    // Check statuses
     checkWiFiStatus();
+    checkOpensteriStatus();
 });
 
-// Printer Setup Section
-const printerForm = document.getElementById('printerForm');
-const printerLoading = document.getElementById('printerLoading');
-const printerError = document.getElementById('printerError');
-const printerSuccess = document.getElementById('printerSuccess');
+// OpenSteri Connection Section
+const credentialsLoading = document.getElementById('credentialsLoading');
+const credentialsError = document.getElementById('credentialsError');
+const credentialsSuccess = document.getElementById('credentialsSuccess');
 
-// Printer status elements
-const printerStatus = document.getElementById('printerStatus');
-const printerSetupForm = document.getElementById('printerSetupForm');
-const printerEditForm = document.getElementById('printerEditForm');
-const connectedPrinter = document.getElementById('connectedPrinter');
-const printerDetails = document.getElementById('printerDetails');
-const editPrinterBtn = document.getElementById('editPrinterBtn');
-const disconnectPrinterBtn = document.getElementById('disconnectPrinterBtn');
-const cancelEditPrinterBtn = document.getElementById('cancelEditPrinterBtn');
+// OpenSteri status elements
+const opensteriStatus = document.getElementById('opensteriStatus');
+const opensteriConnectForm = document.getElementById('opensteriConnectForm');
+const joinCodeSection = document.getElementById('joinCodeSection');
+const connectedAccount = document.getElementById('connectedAccount');
+const opensteriConnectionDetails = document.getElementById('connectionDetails');
+const disconnectOpensteriBtn = document.getElementById('disconnectOpensteriBtn');
 
-// Edit form elements
-const editPrinterForm = document.getElementById('editPrinterForm');
-const editPrinterName = document.getElementById('editPrinterName');
-const editPrinterModel = document.getElementById('editPrinterModel');
-const editPaperSize = document.getElementById('editPaperSize');
+// Form elements
+const joinCodeForm = document.getElementById('joinCodeForm');
 
-// Current printer status
-let currentPrinterStatus = null;
+// Current OpenSteri status
+let currentOpensteriStatus = null;
 
-// Function to check printer status
-async function checkPrinterStatus() {
+// Function to check OpenSteri connection status
+async function checkOpensteriStatus() {
     try {
-        printerLoading.style.display = 'block';
-        printerError.style.display = 'none';
-        printerSuccess.style.display = 'none';
+        credentialsLoading.style.display = 'block';
+        credentialsError.style.display = 'none';
+        credentialsSuccess.style.display = 'none';
         
         const response = await fetch('/token-status', {
             method: 'GET'
@@ -385,38 +341,38 @@ async function checkPrinterStatus() {
         const data = await response.json();
         
         if (response.ok) {
-            currentPrinterStatus = data;
-            updatePrinterUI(data);
+            currentOpensteriStatus = data;
+            updateOpensteriUI(data);
         } else {
-            throw new Error(data.error || 'Failed to check printer status');
+            throw new Error(data.error || 'Failed to check OpenSteri status');
         }
     } catch (err) {
-        printerError.textContent = err.message;
-        printerError.style.display = 'block';
-        // Show setup form as fallback
-        showPrinterSetupForm();
+        credentialsError.textContent = err.message;
+        credentialsError.style.display = 'block';
+        // Show connect form as fallback
+        showOpensteriConnectForm();
     } finally {
-        printerLoading.style.display = 'none';
+        credentialsLoading.style.display = 'none';
     }
 }
 
-// Function to update printer UI based on status
-function updatePrinterUI(status) {
+// Function to update OpenSteri UI based on status
+function updateOpensteriUI(status) {
     if (status.hasToken && status.hasPrinterId) {
-        showPrinterStatus(status);
+        showOpensteriStatus(status);
     } else {
-        showPrinterSetupForm();
+        showOpensteriConnectForm();
     }
 }
 
-// Function to show printer connection status
-function showPrinterStatus(status) {
-    printerStatus.style.display = 'block';
-    printerSetupForm.style.display = 'none';
-    printerEditForm.style.display = 'none';
+// Function to show OpenSteri connection status
+function showOpensteriStatus(status) {
+    opensteriStatus.style.display = 'block';
+    opensteriConnectForm.style.display = 'none';
+    joinCodeSection.style.display = 'none';
     
     // Update status display
-    connectedPrinter.textContent = 'Connected Printer';
+    connectedAccount.textContent = 'OpenSteri Account';
     
     const details = [];
     if (status.printerId) {
@@ -426,83 +382,56 @@ function showPrinterStatus(status) {
         details.push('Token: Active');
     }
     
-    printerDetails.textContent = details.length > 0 ? details.join(' • ') : 'Connected';
+    opensteriConnectionDetails.textContent = details.length > 0 ? details.join(' • ') : 'Connected';
 }
 
-// Function to show printer setup form
-function showPrinterSetupForm() {
-    printerStatus.style.display = 'none';
-    printerSetupForm.style.display = 'block';
-    printerEditForm.style.display = 'none';
-    printerError.style.display = 'none';
-    printerSuccess.style.display = 'none';
+// Function to show OpenSteri connect form
+function showOpensteriConnectForm() {
+    opensteriStatus.style.display = 'none';
+    opensteriConnectForm.style.display = 'block';
+    joinCodeSection.style.display = 'block';
+    credentialsError.style.display = 'none';
+    credentialsSuccess.style.display = 'none';
 }
 
-// Function to show printer edit form
-function showPrinterEditForm() {
-    printerStatus.style.display = 'none';
-    printerSetupForm.style.display = 'none';
-    printerEditForm.style.display = 'block';
-    
-    // Pre-populate with current printer info if available
-    if (currentPrinterStatus && currentPrinterStatus.printerId) {
-        editPrinterName.value = 'Connected Printer'; // Default name
-        editPrinterModel.value = 'thermal'; // Default model
-        editPaperSize.value = '4x6'; // Default paper size
-    }
-}
-
-// Event Listeners for printer management
-editPrinterBtn.addEventListener('click', showPrinterEditForm);
-cancelEditPrinterBtn.addEventListener('click', () => {
-    if (currentPrinterStatus && currentPrinterStatus.hasToken) {
-        showPrinterStatus(currentPrinterStatus);
-    } else {
-        showPrinterSetupForm();
-    }
-});
-
-disconnectPrinterBtn.addEventListener('click', async () => {
-    if (confirm('Are you sure you want to disconnect the printer? This will remove the printer configuration.')) {
+// Event Listeners for OpenSteri management
+disconnectOpensteriBtn.addEventListener('click', async () => {
+    if (confirm('Are you sure you want to disconnect the printer? This will unpair the printer from your account.')) {
         try {
-            printerLoading.style.display = 'block';
-            printerError.style.display = 'none';
+            credentialsLoading.style.display = 'block';
+            credentialsError.style.display = 'none';
+            credentialsSuccess.style.display = 'none';
             
-            // Clear the printer configuration by removing from .env
-            const response = await fetch('/disconnect-printer', {
+            // Disconnect the printer by updating paired_at to null
+            const response = await fetch('/disconnect-printer-paired', {
                 method: 'POST'
             });
             
             if (response.ok) {
-                showPrinterSetupForm();
-                printerSuccess.textContent = 'Successfully disconnected printer';
-                printerSuccess.style.display = 'block';
+                showOpensteriConnectForm();
+                credentialsSuccess.textContent = 'Successfully disconnected printer';
+                credentialsSuccess.style.display = 'block';
                 // Refresh status after successful disconnection
-                setTimeout(checkPrinterStatus, 2000);
+                setTimeout(checkOpensteriStatus, 2000);
             } else {
                 const data = await response.json();
                 throw new Error(data.error || 'Failed to disconnect printer');
             }
         } catch (err) {
-            printerError.textContent = err.message;
-            printerError.style.display = 'block';
+            credentialsError.textContent = err.message;
+            credentialsError.style.display = 'block';
         } finally {
-            printerLoading.style.display = 'none';
+            credentialsLoading.style.display = 'none';
         }
     }
 });
 
-// OpenSteri Credentials Section
-const credentialsForm = document.getElementById('credentialsForm');
-const credentialsLoading = document.getElementById('credentialsLoading');
-const credentialsError = document.getElementById('credentialsError');
-const credentialsSuccess = document.getElementById('credentialsSuccess');
-
-credentialsForm.addEventListener('submit', async (e) => {
+// Join Code Form Submit
+joinCodeForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const formData = new FormData(credentialsForm);
-    const joinCode = formData.get('joinToken'); // Keep the form field name as joinToken for backward compatibility
+    const formData = new FormData(joinCodeForm);
+    const joinCode = formData.get('joinToken');
     
     if (!joinCode) {
         credentialsError.textContent = 'Please enter your join code';
@@ -528,11 +457,8 @@ credentialsForm.addEventListener('submit', async (e) => {
         if (response.ok) {
             credentialsSuccess.textContent = 'Successfully joined OpenSteri! Access token saved and heartbeat started.';
             credentialsSuccess.style.display = 'block';
-            
-            // Show additional success details if available
-            if (data.printer_id) {
-                credentialsSuccess.innerHTML += `<br><small>Printer ID: ${data.printer_id}</small>`;
-            }
+            // Refresh status after successful join
+            setTimeout(checkOpensteriStatus, 2000);
         } else {
             throw new Error(data.error || 'Failed to join OpenSteri');
         }
@@ -540,154 +466,7 @@ credentialsForm.addEventListener('submit', async (e) => {
         credentialsError.textContent = err.message;
         credentialsError.style.display = 'block';
         credentialsSuccess.style.display = 'none';
-        
-        // Display additional error details if available
-        if (err.response && err.response.data) {
-            const errorData = err.response.data;
-            if (errorData.details) {
-                credentialsError.innerHTML += `<br><small>${errorData.details}</small>`;
-            }
-        }
     } finally {
         credentialsLoading.style.display = 'none';
     }
-});
-
-// Token Status Check
-const checkTokenBtn = document.getElementById('checkTokenBtn');
-const tokenStatus = document.getElementById('tokenStatus');
-const tokenStatusText = document.getElementById('tokenStatusText');
-
-checkTokenBtn.addEventListener('click', async () => {
-    try {
-        tokenStatus.style.display = 'block';
-        tokenStatusText.textContent = 'Checking token status...';
-        checkTokenBtn.disabled = true;
-        
-        const response = await fetch('/token-status', {
-            method: 'GET'
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            if (data.hasToken && data.hasPrinterId) {
-                tokenStatus.className = 'status-indicator status-success';
-                tokenStatusText.innerHTML = '<span>✅</span> Token and Printer ID available';
-            } else if (data.hasToken) {
-                tokenStatus.className = 'status-indicator status-warning';
-                tokenStatusText.innerHTML = '<span>⚠️</span> Token available but no Printer ID';
-            } else {
-                tokenStatus.className = 'status-indicator status-error';
-                tokenStatusText.innerHTML = '<span>❌</span> No token found';
-            }
-        } else {
-            throw new Error(data.error || 'Failed to check token status');
-        }
-    } catch (err) {
-        tokenStatus.className = 'status-indicator status-error';
-        tokenStatusText.innerHTML = `<span>❌</span> Error: ${err.message}`;
-    } finally {
-        checkTokenBtn.disabled = false;
-    }
-}); 
-
-// Printer Form Submit (for initial setup)
-printerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(printerForm);
-    const printerName = formData.get('printerName');
-    const printerModel = formData.get('printerModel');
-    const paperSize = formData.get('paperSize');
-    
-    if (!printerName || !printerModel || !paperSize) {
-        printerError.textContent = 'Please fill in all printer configuration fields';
-        printerError.style.display = 'block';
-        return;
-    }
-    
-    try {
-        printerLoading.style.display = 'block';
-        printerError.style.display = 'none';
-        printerSuccess.style.display = 'none';
-        
-        const response = await fetch('/configure-printer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ printerName, printerModel, paperSize })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            printerSuccess.textContent = 'Printer configured successfully!';
-            printerSuccess.style.display = 'block';
-            // Refresh status after successful configuration
-            setTimeout(checkPrinterStatus, 2000);
-        } else {
-            throw new Error(data.error || 'Failed to configure printer');
-        }
-    } catch (err) {
-        printerError.textContent = err.message;
-        printerError.style.display = 'block';
-        printerSuccess.style.display = 'none';
-    } finally {
-        printerLoading.style.display = 'none';
-    }
-});
-
-// Printer Edit Form Submit
-editPrinterForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(editPrinterForm);
-    const printerName = formData.get('printerName');
-    const printerModel = formData.get('printerModel');
-    const paperSize = formData.get('paperSize');
-    
-    if (!printerName || !printerModel || !paperSize) {
-        printerError.textContent = 'Please fill in all printer configuration fields';
-        printerError.style.display = 'block';
-        return;
-    }
-    
-    try {
-        printerLoading.style.display = 'block';
-        printerError.style.display = 'none';
-        printerSuccess.style.display = 'none';
-        
-        const response = await fetch('/configure-printer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ printerName, printerModel, paperSize })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            printerSuccess.textContent = 'Printer configuration updated successfully!';
-            printerSuccess.style.display = 'block';
-            // Refresh status after successful update
-            setTimeout(checkPrinterStatus, 2000);
-        } else {
-            throw new Error(data.error || 'Failed to update printer configuration');
-        }
-    } catch (err) {
-        printerError.textContent = err.message;
-        printerError.style.display = 'block';
-        printerSuccess.style.display = 'none';
-    } finally {
-        printerLoading.style.display = 'none';
-    }
-});
-
-// Initialize WiFi status on page load
-document.addEventListener('DOMContentLoaded', () => {
-    checkWiFiStatus();
-    checkPrinterStatus();
 }); 

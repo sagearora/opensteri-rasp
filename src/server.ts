@@ -32,6 +32,7 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import { JOIN_URL } from './constant';
 import { initializePrinterConnectionWithCredentials } from './services/printerConnectionService';
+import { getClient } from './services/graphqlClient';
 
 const execAsync = promisify(exec);
 
@@ -545,6 +546,57 @@ export function createServer(): express.Application {
       res.json({ message: 'Successfully disconnected printer' });
     } catch (error) {
       console.error('Error in disconnect printer endpoint:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during printer disconnection',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Endpoint to disconnect printer by updating paired_at to null
+  app.post('/disconnect-printer-paired', async (req, res) => {
+    try {
+      // Get current token and printer ID
+      const { token, printerId } = loadTokenFromEnv();
+      
+      if (!token || !printerId) {
+        return res.status(400).json({ 
+          error: 'No active printer connection found' 
+        });
+      }
+      
+      // Establish GraphQL connection to update the printer
+      const { httpClient } = await getClient(token);
+      
+      // Update printer's paired_at field to null
+      const result = await httpClient.updatePrinter({
+        printerId,
+        set: { paired_at: null }
+      });
+      
+      if (result.update_printer_by_pk) {
+        console.log('Successfully updated printer paired_at to null');
+        
+        // Also clear the local .env file
+        const envPath = getEnvFilePath();
+        if (fs.existsSync(envPath)) {
+          let envContent = fs.readFileSync(envPath, 'utf8');
+          
+          // Remove PRINTER_ID from .env file
+          envContent = envContent.replace(/PRINTER_ID=.*\n?/g, '');
+          envContent = envContent.replace(/PRINTER_ID=.*$/g, '');
+          
+          // Write back to .env file
+          fs.writeFileSync(envPath, envContent.trim() + '\n');
+          console.log('Printer configuration cleared from .env file');
+        }
+        
+        res.json({ message: 'Successfully disconnected printer and updated paired_at' });
+      } else {
+        throw new Error('Failed to update printer paired_at field');
+      }
+    } catch (error) {
+      console.error('Error in disconnect printer paired endpoint:', error);
       res.status(500).json({ 
         error: 'Internal server error during printer disconnection',
         details: error instanceof Error ? error.message : String(error)
