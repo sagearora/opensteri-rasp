@@ -3,10 +3,11 @@
 set -e
 
 FIRMWARE_DIR="/boot/firmware"
+SYSTEMD_SERVICE="/etc/systemd/system/usb-mode-switch.service"
 
-echo "🔧 Setting up USB auto-switch: default HOST mode → fallback GADGET mode if PC is detected"
+echo "🔧 Setting up USB auto-switch (default: HOST → fallback: GADGET if PC detected)"
 
-# 1. Create gadget mode config
+# 1. Create gadget config
 echo "Creating $FIRMWARE_DIR/config-gadget.txt"
 cat <<EOF > $FIRMWARE_DIR/config-gadget.txt
 dtoverlay=dwc2
@@ -16,15 +17,15 @@ echo "Creating $FIRMWARE_DIR/cmdline-gadget.txt"
 CMDLINE=$(cat $FIRMWARE_DIR/cmdline.txt | sed 's/ modules-load=dwc2,g_ether//g')
 echo "$CMDLINE modules-load=dwc2,g_ether" > $FIRMWARE_DIR/cmdline-gadget.txt
 
-# 2. Backup current host mode configs
+# 2. Backup current host configs
 echo "Creating $FIRMWARE_DIR/config-host.txt"
 cp $FIRMWARE_DIR/config.txt $FIRMWARE_DIR/config-host.txt
 
 echo "Creating $FIRMWARE_DIR/cmdline-host.txt"
 cp $FIRMWARE_DIR/cmdline.txt $FIRMWARE_DIR/cmdline-host.txt
 
-# 3. Clean current config.txt and cmdline.txt
-echo "Setting default boot to HOST mode"
+# 3. Clean current config to enforce HOST mode by default
+echo "Stripping gadget settings to boot into HOST mode"
 sed -i '/dtoverlay=dwc2/d' $FIRMWARE_DIR/config.txt
 sed -i 's/ modules-load=dwc2,g_ether//g' $FIRMWARE_DIR/cmdline.txt
 
@@ -53,12 +54,26 @@ EOF
 
 chmod +x /boot/usb_mode_switch.sh
 
-# 5. Enable script in rc.local
-echo "Patching /etc/rc.local to run switch script"
-RC_LOCAL=/etc/rc.local
-if ! grep -q "/boot/usb_mode_switch.sh" $RC_LOCAL; then
-    sed -i '/^exit 0/i /boot/usb_mode_switch.sh &' $RC_LOCAL
-fi
+# 5. Create systemd service
+echo "Creating systemd service: $SYSTEMD_SERVICE"
+cat <<EOF > $SYSTEMD_SERVICE
+[Unit]
+Description=USB Mode Auto-Switch on Boot
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/boot/usb_mode_switch.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 6. Enable the service
+echo "Enabling systemd service..."
+systemctl daemon-reexec
+systemctl enable usb-mode-switch.service
 
 echo "✅ Setup complete. Rebooting into HOST mode..."
 sleep 2
