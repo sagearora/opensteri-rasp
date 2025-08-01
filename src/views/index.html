@@ -28,6 +28,29 @@
                 </div>
             </div>
             
+            <!-- Compact WiFi Status (shown when connected) -->
+            <div id="wifiCompactStatus" class="compact-status" style="display: none;">
+                <div class="compact-status-card">
+                    <div class="compact-status-content">
+                        <div class="compact-status-icon connected">
+                            ✅
+                        </div>
+                        <div class="compact-status-info">
+                            <span class="compact-status-value" id="compactNetworkName">Network Name</span>
+                            <span class="compact-status-details" id="compactNetworkDetails">Signal: 85% (Connected)</span>
+                        </div>
+                    </div>
+                    <div class="compact-status-actions">
+                        <button type="button" id="compactEditWifiBtn" class="btn-compact">
+                            ✏️ Edit
+                        </button>
+                        <button type="button" id="compactDisconnectWifiBtn" class="btn-compact btn-compact-danger">
+                            🔌 Disconnect
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- WiFi Connection Status (shown when connected) -->
             <div id="wifiStatus" class="wifi-status" style="display: none;">
                 <div class="status-card">
@@ -130,6 +153,26 @@
                 </div>
             </div>
             
+            <!-- Compact OpenSteri Status (shown when connected) -->
+            <div id="opensteriCompactStatus" class="compact-status" style="display: none;">
+                <div class="compact-status-card">
+                    <div class="compact-status-content">
+                        <div class="compact-status-icon connected">
+                            ✅
+                        </div>
+                        <div class="compact-status-info">
+                            <span class="compact-status-value">Connected</span>
+                            <span class="compact-status-details" id="compactOpensteriDetails">Printer ID: ... • Token: Active</span>
+                        </div>
+                    </div>
+                    <div class="compact-status-actions">
+                        <button type="button" id="compactDisconnectOpensteriBtn" class="btn-compact btn-compact-danger">
+                            🔌 Disconnect
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- OpenSteri Connection Status (shown when connected) -->
             <div id="opensteriStatus" class="opensteri-status" style="display: none;">
                 <div class="status-card">
@@ -176,6 +219,121 @@
             
             <div id="credentialsError" class="error"></div>
             <div id="credentialsSuccess" class="success"></div>
+        </div>
+        
+        <!-- Section 3: Godex Printer Detection -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon printer-icon-bg">
+                    🖨️
+                </div>
+                <div>
+                    <h2 class="section-title">Godex Printer Detection</h2>
+                    <p class="section-subtitle">Check for connected Godex printer and verify functionality</p>
+                </div>
+            </div>
+            
+            <!-- Compact Printer Status (shown when connected) -->
+            <div id="printerCompactStatus" class="compact-status" style="display: none;">
+                <div class="compact-status-card">
+                    <div class="compact-status-content">
+                        <div class="compact-status-icon connected">
+                            ✅
+                        </div>
+                        <div class="compact-status-info">
+                            <span class="compact-status-value" id="compactPrinterName">Godex EZ-1105</span>
+                            <span class="compact-status-details" id="compactPrinterDetails">Connected • Ready to print</span>
+                        </div>
+                    </div>
+                    <div class="compact-status-actions">
+                        <button type="button" id="compactTestPrintBtn" class="btn-compact">
+                            🖨️ Test Print
+                        </button>
+                        <button type="button" id="compactRefreshPrinterBtn" class="btn-compact">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Printer Connection Status (shown when connected) -->
+            <div id="printerStatus" class="printer-status" style="display: none;">
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon connected">
+                            🖨️
+                        </div>
+                        <div class="status-info">
+                            <h3 id="connectedPrinter">Godex EZ-1105</h3>
+                            <p id="printerDetails">Connected • Ready to print • USB Port: /dev/usb/lp0</p>
+                        </div>
+                    </div>
+                    <div class="status-actions">
+                        <button type="button" id="testPrintBtn" class="btn btn-success">
+                            🖨️ Test Print
+                        </button>
+                        <button type="button" id="refreshPrinterBtn" class="btn btn-outline">
+                            🔄 Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Printer Detection Form (shown when not connected) -->
+            <div id="printerConnectForm">
+                <div class="printer-detection-info">
+                    <p>No Godex printer detected. Please ensure your printer is:</p>
+                    <ul>
+                        <li>Connected via USB cable</li>
+                        <li>Powered on and ready</li>
+                        <li>Properly installed with drivers</li>
+                    </ul>
+                </div>
+                
+                <!-- Printer Setup Video -->
+                <div class="printer-setup-video">
+                    <h3>Printer Setup Guide</h3>
+                    <div class="video-placeholder">
+                        <div class="video-icon">📹</div>
+                        <p>Video: How to connect and set up your Godex printer</p>
+                        <button type="button" id="playSetupVideoBtn" class="btn btn-outline">
+                            <span>▶️</span>
+                            Play Setup Video
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="printer-actions">
+                    <button type="button" id="detectPrinterBtn" class="btn btn-primary">
+                        <span>🔍</span>
+                        Detect Printer
+                    </button>
+                </div>
+            </div>
+            
+            <div id="printerLoading" class="loading">
+                <p>Checking printer status...</p>
+            </div>
+            
+            <div id="printerError" class="error"></div>
+            <div id="printerSuccess" class="success"></div>
+        </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div id="videoModal" class="video-modal" style="display: none;">
+        <div class="video-modal-content">
+            <div class="video-modal-header">
+                <h3>Printer Setup Guide</h3>
+                <button type="button" id="closeVideoBtn" class="close-video-btn">×</button>
+            </div>
+            <div class="video-player-container">
+                <video id="setupVideo" controls>
+                    <source src="/static/videos/printer-setup.mp4" type="video/mp4">
+                    <source src="/static/videos/printer-setup.webm" type="video/webm">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
         </div>
     </div>
 

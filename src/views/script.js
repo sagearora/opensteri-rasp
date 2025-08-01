@@ -8,6 +8,13 @@ const editWifiBtn = document.getElementById('editWifiBtn');
 const disconnectWifiBtn = document.getElementById('disconnectWifiBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
+// Compact WiFi elements
+const wifiCompactStatus = document.getElementById('wifiCompactStatus');
+const compactNetworkName = document.getElementById('compactNetworkName');
+const compactNetworkDetails = document.getElementById('compactNetworkDetails');
+const compactEditWifiBtn = document.getElementById('compactEditWifiBtn');
+const compactDisconnectWifiBtn = document.getElementById('compactDisconnectWifiBtn');
+
 // Form elements
 const rescanBtn = document.getElementById('rescanBtn');
 const networkSelect = document.getElementById('networkSelect');
@@ -57,14 +64,37 @@ async function checkWiFiStatus() {
 // Function to update WiFi UI based on status
 function updateWiFiUI(status) {
     if (status.connected && status.device) {
-        showWiFiStatus(status);
+        showWiFiCompactStatus(status);
     } else {
         showConnectForm();
     }
 }
 
+// Function to show WiFi compact status
+function showWiFiCompactStatus(status) {
+    wifiCompactStatus.style.display = 'block';
+    wifiStatus.style.display = 'none';
+    wifiConnectForm.style.display = 'none';
+    wifiEditForm.style.display = 'none';
+    
+    // Update compact status display
+    compactNetworkName.textContent = status.device.connection || 'Unknown Network';
+    
+    const details = [];
+    if (status.network) {
+        details.push(`Signal: ${status.network.signal}%`);
+    }
+    if (status.ipAddress && status.ipAddress !== 'Unknown') {
+        details.push(`IP: ${status.ipAddress}`);
+    }
+    details.push('Connected');
+    
+    compactNetworkDetails.textContent = details.join(' • ');
+}
+
 // Function to show WiFi connection status
 function showWiFiStatus(status) {
+    wifiCompactStatus.style.display = 'none';
     wifiStatus.style.display = 'block';
     wifiConnectForm.style.display = 'none';
     wifiEditForm.style.display = 'none';
@@ -88,6 +118,7 @@ function showWiFiStatus(status) {
 
 // Function to show WiFi connect form
 function showConnectForm() {
+    wifiCompactStatus.style.display = 'none';
     wifiStatus.style.display = 'none';
     wifiConnectForm.style.display = 'block';
     wifiEditForm.style.display = 'none';
@@ -97,6 +128,7 @@ function showConnectForm() {
 
 // Function to show WiFi edit form
 function showEditForm() {
+    wifiCompactStatus.style.display = 'none';
     wifiStatus.style.display = 'none';
     wifiConnectForm.style.display = 'none';
     wifiEditForm.style.display = 'block';
@@ -185,15 +217,24 @@ rescanBtn.addEventListener('click', scanWiFiNetworks);
 editRescanBtn.addEventListener('click', loadNetworksForEdit);
 
 editWifiBtn.addEventListener('click', showEditForm);
+compactEditWifiBtn.addEventListener('click', showEditForm);
 cancelEditBtn.addEventListener('click', () => {
     if (currentWifiStatus && currentWifiStatus.connected) {
-        showWiFiStatus(currentWifiStatus);
+        showWiFiCompactStatus(currentWifiStatus);
     } else {
         showConnectForm();
     }
 });
 
 disconnectWifiBtn.addEventListener('click', async () => {
+    await disconnectWiFi();
+});
+
+compactDisconnectWifiBtn.addEventListener('click', async () => {
+    await disconnectWiFi();
+});
+
+async function disconnectWiFi() {
     if (confirm('Are you sure you want to disconnect from the current WiFi network?')) {
         try {
             wifiLoading.style.display = 'block';
@@ -234,7 +275,7 @@ disconnectWifiBtn.addEventListener('click', async () => {
             wifiLoading.style.display = 'none';
         }
     }
-});
+}
 
 // WiFi Connect Form Submit
 wifiForm.addEventListener('submit', async (e) => {
@@ -302,10 +343,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show initial loading states
     wifiLoading.style.display = 'block';
     credentialsLoading.style.display = 'block';
+    printerLoading.style.display = 'block';
     
     // Check statuses
     checkWiFiStatus();
     checkOpensteriStatus();
+    checkPrinterStatus();
 });
 
 // OpenSteri Connection Section
@@ -320,6 +363,11 @@ const joinCodeSection = document.getElementById('joinCodeSection');
 const connectedAccount = document.getElementById('connectedAccount');
 const opensteriConnectionDetails = document.getElementById('connectionDetails');
 const disconnectOpensteriBtn = document.getElementById('disconnectOpensteriBtn');
+
+// Compact OpenSteri elements
+const opensteriCompactStatus = document.getElementById('opensteriCompactStatus');
+const compactOpensteriDetails = document.getElementById('compactOpensteriDetails');
+const compactDisconnectOpensteriBtn = document.getElementById('compactDisconnectOpensteriBtn');
 
 // Form elements
 const joinCodeForm = document.getElementById('joinCodeForm');
@@ -359,14 +407,34 @@ async function checkOpensteriStatus() {
 // Function to update OpenSteri UI based on status
 function updateOpensteriUI(status) {
     if (status.hasToken && status.hasPrinterId) {
-        showOpensteriStatus(status);
+        showOpensteriCompactStatus(status);
     } else {
         showOpensteriConnectForm();
     }
 }
 
+// Function to show OpenSteri compact status
+function showOpensteriCompactStatus(status) {
+    opensteriCompactStatus.style.display = 'block';
+    opensteriStatus.style.display = 'none';
+    opensteriConnectForm.style.display = 'none';
+    joinCodeSection.style.display = 'none';
+    
+    // Update compact status display
+    const details = [];
+    if (status.printerId) {
+        details.push(`Printer ID: ${status.printerId}`);
+    }
+    if (status.token) {
+        details.push('Token: Active');
+    }
+    
+    compactOpensteriDetails.textContent = details.length > 0 ? details.join(' • ') : 'Connected';
+}
+
 // Function to show OpenSteri connection status
 function showOpensteriStatus(status) {
+    opensteriCompactStatus.style.display = 'none';
     opensteriStatus.style.display = 'block';
     opensteriConnectForm.style.display = 'none';
     joinCodeSection.style.display = 'none';
@@ -387,6 +455,7 @@ function showOpensteriStatus(status) {
 
 // Function to show OpenSteri connect form
 function showOpensteriConnectForm() {
+    opensteriCompactStatus.style.display = 'none';
     opensteriStatus.style.display = 'none';
     opensteriConnectForm.style.display = 'block';
     joinCodeSection.style.display = 'block';
@@ -396,6 +465,14 @@ function showOpensteriConnectForm() {
 
 // Event Listeners for OpenSteri management
 disconnectOpensteriBtn.addEventListener('click', async () => {
+    await disconnectOpensteri();
+});
+
+compactDisconnectOpensteriBtn.addEventListener('click', async () => {
+    await disconnectOpensteri();
+});
+
+async function disconnectOpensteri() {
     if (confirm('Are you sure you want to disconnect the printer? This will unpair the printer from your account.')) {
         try {
             credentialsLoading.style.display = 'block';
@@ -424,7 +501,7 @@ disconnectOpensteriBtn.addEventListener('click', async () => {
             credentialsLoading.style.display = 'none';
         }
     }
-});
+}
 
 // Join Code Form Submit
 joinCodeForm.addEventListener('submit', async (e) => {
@@ -469,4 +546,208 @@ joinCodeForm.addEventListener('submit', async (e) => {
     } finally {
         credentialsLoading.style.display = 'none';
     }
-}); 
+});
+
+// Printer Detection Section
+const printerLoading = document.getElementById('printerLoading');
+const printerError = document.getElementById('printerError');
+const printerSuccess = document.getElementById('printerSuccess');
+
+// Printer status elements
+const printerStatus = document.getElementById('printerStatus');
+const printerConnectForm = document.getElementById('printerConnectForm');
+const connectedPrinter = document.getElementById('connectedPrinter');
+const printerDetails = document.getElementById('printerDetails');
+const testPrintBtn = document.getElementById('testPrintBtn');
+const refreshPrinterBtn = document.getElementById('refreshPrinterBtn');
+
+// Compact printer elements
+const printerCompactStatus = document.getElementById('printerCompactStatus');
+const compactPrinterName = document.getElementById('compactPrinterName');
+const compactPrinterDetails = document.getElementById('compactPrinterDetails');
+const compactTestPrintBtn = document.getElementById('compactTestPrintBtn');
+const compactRefreshPrinterBtn = document.getElementById('compactRefreshPrinterBtn');
+
+// Printer detection elements
+const detectPrinterBtn = document.getElementById('detectPrinterBtn');
+const playSetupVideoBtn = document.getElementById('playSetupVideoBtn');
+
+// Video modal elements
+const videoModal = document.getElementById('videoModal');
+const closeVideoBtn = document.getElementById('closeVideoBtn');
+const setupVideo = document.getElementById('setupVideo');
+
+// Current printer status
+let currentPrinterStatus = null;
+
+// Function to check printer status
+async function checkPrinterStatus() {
+    try {
+        printerLoading.style.display = 'block';
+        printerError.style.display = 'none';
+        printerSuccess.style.display = 'none';
+        
+        const response = await fetch('/printer-status', {
+            method: 'GET'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentPrinterStatus = data;
+            updatePrinterUI(data);
+        } else {
+            throw new Error(data.error || 'Failed to check printer status');
+        }
+    } catch (err) {
+        printerError.textContent = err.message;
+        printerError.style.display = 'block';
+        // Show connect form as fallback
+        showPrinterConnectForm();
+    } finally {
+        printerLoading.style.display = 'none';
+    }
+}
+
+// Function to update printer UI based on status
+function updatePrinterUI(status) {
+    if (status.connected && status.printer) {
+        showPrinterCompactStatus(status);
+    } else {
+        showPrinterConnectForm();
+    }
+}
+
+// Function to show printer compact status
+function showPrinterCompactStatus(status) {
+    printerCompactStatus.style.display = 'block';
+    printerStatus.style.display = 'none';
+    printerConnectForm.style.display = 'none';
+    
+    // Update compact status display
+    compactPrinterName.textContent = status.printer.name || 'Godex Printer';
+    
+    const details = [];
+    if (status.printer.port) {
+        details.push(`Port: ${status.printer.port}`);
+    }
+    if (status.printer.status) {
+        details.push(status.printer.status);
+    }
+    details.push('Connected');
+    
+    compactPrinterDetails.textContent = details.join(' • ');
+}
+
+// Function to show printer connection status
+function showPrinterStatus(status) {
+    printerCompactStatus.style.display = 'none';
+    printerStatus.style.display = 'block';
+    printerConnectForm.style.display = 'none';
+    
+    // Update status display
+    connectedPrinter.textContent = status.printer.name || 'Godex Printer';
+    
+    const details = [];
+    if (status.printer.port) {
+        details.push(`Port: ${status.printer.port}`);
+    }
+    if (status.printer.status) {
+        details.push(status.printer.status);
+    }
+    details.push('Connected');
+    
+    printerDetails.textContent = details.join(' • ');
+}
+
+// Function to show printer connect form
+function showPrinterConnectForm() {
+    printerCompactStatus.style.display = 'none';
+    printerStatus.style.display = 'none';
+    printerConnectForm.style.display = 'block';
+    printerError.style.display = 'none';
+    printerSuccess.style.display = 'none';
+}
+
+// Event Listeners for printer management
+testPrintBtn.addEventListener('click', async () => {
+    await testPrint();
+});
+
+compactTestPrintBtn.addEventListener('click', async () => {
+    await testPrint();
+});
+
+refreshPrinterBtn.addEventListener('click', async () => {
+    await checkPrinterStatus();
+});
+
+compactRefreshPrinterBtn.addEventListener('click', async () => {
+    await checkPrinterStatus();
+});
+
+detectPrinterBtn.addEventListener('click', async () => {
+    await checkPrinterStatus();
+});
+
+playSetupVideoBtn.addEventListener('click', () => {
+    videoModal.style.display = 'flex';
+    // Reset video to beginning
+    if (setupVideo) {
+        setupVideo.currentTime = 0;
+    }
+});
+
+closeVideoBtn.addEventListener('click', () => {
+    videoModal.style.display = 'none';
+    // Pause video when closing
+    if (setupVideo) {
+        setupVideo.pause();
+    }
+});
+
+// Close modal when clicking outside
+videoModal.addEventListener('click', (e) => {
+    if (e.target === videoModal) {
+        videoModal.style.display = 'none';
+        if (setupVideo) {
+            setupVideo.pause();
+        }
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && videoModal.style.display === 'flex') {
+        videoModal.style.display = 'none';
+        if (setupVideo) {
+            setupVideo.pause();
+        }
+    }
+});
+
+async function testPrint() {
+    try {
+        printerLoading.style.display = 'block';
+        printerError.style.display = 'none';
+        printerSuccess.style.display = 'none';
+        
+        const response = await fetch('/test-print', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            printerSuccess.textContent = 'Test print sent successfully! Check your printer for the test label.';
+            printerSuccess.style.display = 'block';
+        } else {
+            throw new Error(data.error || 'Failed to send test print');
+        }
+    } catch (err) {
+        printerError.textContent = err.message;
+        printerError.style.display = 'block';
+    } finally {
+        printerLoading.style.display = 'none';
+    }
+} 
