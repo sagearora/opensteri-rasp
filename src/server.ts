@@ -1,8 +1,37 @@
+/**
+ * OpenSteri Printer Portal Server
+ * 
+ * This server provides WiFi management capabilities and printer authentication
+ * for the OpenSteri printer management system.
+ * 
+ * Features:
+ * - WiFi network scanning and connection management
+ * - Join endpoint for printer authentication using join codes
+ * - Automatic subscription setup using access tokens
+ * - Token management with .env file persistence
+ * 
+ * Endpoints:
+ * - GET / - Static HTML form for WiFi management
+ * - GET /scan - Scan for available WiFi networks
+ * - POST /connect - Connect to a WiFi network
+ * - GET /status - Get current WiFi connection status
+ * - POST /disconnect - Disconnect from WiFi network
+ * - POST /join - Join with a join code to get access token
+ * - GET /token-status - Check access token and printer ID status
+ * 
+ * @author OpenSteri Printer Management System
+ * @version 1.0.0
+ */
+
 import express from 'express';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+import { JOIN_URL } from './constant';
+import { initializePrinterConnectionWithCredentials } from './services/printerConnectionService';
 
 const execAsync = promisify(exec);
 
@@ -12,6 +41,72 @@ const WIFI_CONFIG = {
   sudoCommand: 'sudo', // Can be changed to 'pkexec' or other privilege escalation methods
   fallbackToNonSudo: true // Try without sudo if sudo fails
 };
+
+// Helper functions for token management
+function getEnvFilePath(): string {
+  return path.join(process.cwd(), '.env');
+}
+
+function saveTokenToEnv(token: string, printerId?: string): void {
+  const envPath = getEnvFilePath();
+  let envContent = '';
+  
+  // Read existing .env file if it exists
+  if (fs.existsSync(envPath)) {
+    envContent = fs.readFileSync(envPath, 'utf8');
+  }
+  
+  // Check if ACCESS_TOKEN already exists in the file
+  if (envContent.includes('ACCESS_TOKEN=')) {
+    // Replace existing ACCESS_TOKEN
+    envContent = envContent.replace(/ACCESS_TOKEN=.*/g, `ACCESS_TOKEN=${token}`);
+  } else {
+    // Add ACCESS_TOKEN to the end of the file
+    envContent += `\nACCESS_TOKEN=${token}`;
+  }
+  
+  // Save printer_id if provided
+  if (printerId) {
+    if (envContent.includes('PRINTER_ID=')) {
+      // Replace existing PRINTER_ID
+      envContent = envContent.replace(/PRINTER_ID=.*/g, `PRINTER_ID=${printerId}`);
+    } else {
+      // Add PRINTER_ID to the end of the file
+      envContent += `\nPRINTER_ID=${printerId}`;
+    }
+  }
+  
+  // Write back to .env file
+  fs.writeFileSync(envPath, envContent.trim() + '\n');
+  console.log('Access token saved to .env file');
+}
+
+function loadTokenFromEnv(): { token: string | null; printerId: string | null } {
+  const envPath = getEnvFilePath();
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    const tokenMatch = envContent.match(/ACCESS_TOKEN=(.+)/);
+    const printerIdMatch = envContent.match(/PRINTER_ID=(.+)/);
+    
+    return {
+      token: tokenMatch ? tokenMatch[1].trim() : null,
+      printerId: printerIdMatch ? printerIdMatch[1].trim() : null
+    };
+  }
+  return { token: null, printerId: null };
+}
+
+function getCurrentAccessToken(): string | null {
+  // First try to get from environment variables (in case .env was reloaded)
+  const envToken = process.env.ACCESS_TOKEN;
+  if (envToken) {
+    return envToken;
+  }
+  
+  // Fallback to reading from .env file
+  const { token } = loadTokenFromEnv();
+  return token;
+}
 
 export function createServer(): express.Application {
   const app = express();
@@ -336,13 +431,119 @@ export function createServer(): express.Application {
     }
   });
 
+  // Endpoint to join with a join code and get access token
+  app.post('/join', async (req, res) => {
+    try {
+      const { join_code } = req.body;
+      
+      if (!join_code) {
+        return res.status(400).json({ error: 'Join code is required' });
+      }
+      
+      // Send join code to JOIN_URL
+      const response = await fetch(JOIN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ join_code })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Join request failed:', response.status, errorText);
+        return res.status(response.status).json({ 
+          error: 'Failed to join with the provided code',
+          details: errorText
+        });
+      }
+      
+      const responseData = await response.json();
+      
+      // Check if response contains access token
+      if (!responseData.access_token) {
+        return res.status(400).json({ 
+          error: 'Invalid response from join server - no access token received' 
+        });
+      }
+      
+      // Save the access token and printer_id to .env file
+      saveTokenToEnv(responseData.access_token, responseData.printer_id);
+      
+      // Reload environment variables to make the token available
+      dotenv.config();
+      
+      res.json({ 
+        message: 'Successfully joined and access token saved',
+        token: responseData.access_token, // Return token in response for immediate use
+        printer_id: responseData.printer_id
+      });
+      
+    } catch (error) {
+      console.error('Error in join endpoint:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during join process',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Endpoint to check token status
+  app.get('/token-status', (req, res) => {
+    const { token, printerId } = loadTokenFromEnv();
+    
+    if (token && printerId) {
+      res.json({ 
+        hasToken: true,
+        hasPrinterId: true,
+        token: token.substring(0, 10) + '...', // Only show first 10 characters for security
+        printerId: printerId.substring(0, 10) + '...' // Only show first 10 characters for security
+      });
+    } else if (token) {
+      res.json({ 
+        hasToken: true,
+        hasPrinterId: false,
+        token: token.substring(0, 10) + '...',
+        message: 'Access token found but no printer ID. Re-join to get printer ID.'
+      });
+    } else {
+      res.json({ 
+        hasToken: false,
+        hasPrinterId: false,
+        message: 'No access token found. Use /join endpoint to authenticate.'
+      });
+    }
+  });
+
   return app;
 }
 
 export function startServer(app: express.Application, port: number = 3001): void {
+  // Load environment variables
+  dotenv.config();
+  
+  // Load access token and printer_id on startup
+  const { token: accessToken, printerId } = loadTokenFromEnv();
+  
   app.listen(port, () => {
     console.log(`🚀 OpenSteri Printer Portal server running on http://localhost:${port}`);
     console.log(`📡 WiFi scanning and connection management available`);
     console.log(`📁 Static files served from /static/`);
+    
+    if (accessToken && printerId) {
+      console.log(`🔑 Access token and printer ID loaded from .env file`);
+      console.log(`🖨️  Initializing automatic subscription for printer: ${printerId}`);
+      
+      // Initialize automatic subscription using the access token and printer ID
+      initializePrinterConnectionWithCredentials(accessToken, printerId)
+        .then(() => {
+          console.log(`✅ Automatic subscription established for printer: ${printerId}`);
+        })
+        .catch((error) => {
+          console.error(`❌ Failed to establish automatic subscription for printer: ${printerId}`, error);
+        });
+    } else {
+      console.log(`⚠️  No access token or printer ID found. Use /join endpoint to authenticate.`);
+    }
   });
 } 
