@@ -28,32 +28,90 @@
                 </div>
             </div>
             
-            <form id="wifiForm">
-                <div class="form-group">
-                    <label for="networkSelect">Select WiFi Network:</label>
-                    <select id="networkSelect" name="network" required>
-                        <option value="">Select a network...</option>
-                    </select>
-                    <div class="rescan-container">
-                        <button type="button" id="rescanBtn" class="btn btn-ghost">
-                            Can't find your WiFi? Rescan.
+            <!-- WiFi Connection Status (shown when connected) -->
+            <div id="wifiStatus" class="wifi-status" style="display: none;">
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon connected">
+                            📶
+                        </div>
+                        <div class="status-info">
+                            <h3 id="connectedNetwork">Network Name</h3>
+                            <p id="connectionDetails">Connected • Signal: 85% • IP: 192.168.1.100</p>
+                        </div>
+                    </div>
+                    <div class="status-actions">
+                        <button type="button" id="editWifiBtn" class="btn btn-ghost">
+                            ✏️ Edit Connection
+                        </button>
+                        <button type="button" id="disconnectWifiBtn" class="btn btn-danger">
+                            🔌 Disconnect
                         </button>
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">WiFi Password:</label>
-                    <input type="password" id="password" name="password" placeholder="Enter WiFi password" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">
-                    <span>🔗</span>
-                    Connect to WiFi
-                </button>
-            </form>
+            </div>
+            
+            <!-- WiFi Connect Form (shown when not connected) -->
+            <div id="wifiConnectForm">
+                <form id="wifiForm">
+                    <div class="form-group">
+                        <label for="networkSelect">Select WiFi Network:</label>
+                        <select id="networkSelect" name="network" required>
+                            <option value="">Select a network...</option>
+                        </select>
+                        <div class="rescan-container">
+                            <button type="button" id="rescanBtn" class="btn btn-ghost">
+                                Can't find your WiFi? Rescan.
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">WiFi Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter WiFi password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span>🔗</span>
+                        Connect to WiFi
+                    </button>
+                </form>
+            </div>
+            
+            <!-- WiFi Edit Form (shown when editing connection) -->
+            <div id="wifiEditForm" style="display: none;">
+                <form id="editWifiForm">
+                    <div class="form-group">
+                        <label for="editNetworkSelect">Select WiFi Network:</label>
+                        <select id="editNetworkSelect" name="network" required>
+                            <option value="">Select a network...</option>
+                        </select>
+                        <div class="rescan-container">
+                            <button type="button" id="editRescanBtn" class="btn btn-ghost">
+                                Can't find your WiFi? Rescan.
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPassword">WiFi Password:</label>
+                        <input type="password" id="editPassword" name="password" placeholder="Enter WiFi password" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span>💾</span>
+                            Update Connection
+                        </button>
+                        <button type="button" id="cancelEditBtn" class="btn btn-ghost">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
             
             <div id="wifiLoading" class="loading">
-                <p>Scanning for WiFi networks...</p>
+                <p>Checking WiFi status...</p>
             </div>
             
             <div id="wifiError" class="error"></div>
