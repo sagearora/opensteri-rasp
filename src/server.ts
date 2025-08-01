@@ -14,6 +14,25 @@ export function createServer(): express.Application {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Serve static files from views directory
+  const viewsPath = path.join(__dirname, 'views');
+  const distViewsPath = path.join(__dirname, '..', 'dist', 'views');
+  const srcViewsPath = path.join(process.cwd(), 'src', 'views');
+  
+  // Try to serve static files from multiple possible locations
+  if (fs.existsSync(viewsPath)) {
+    app.use('/static', express.static(viewsPath));
+    console.log(`Serving static files from: ${viewsPath}`);
+  } else if (fs.existsSync(distViewsPath)) {
+    app.use('/static', express.static(distViewsPath));
+    console.log(`Serving static files from: ${distViewsPath}`);
+  } else if (fs.existsSync(srcViewsPath)) {
+    app.use('/static', express.static(srcViewsPath));
+    console.log(`Serving static files from: ${srcViewsPath}`);
+  } else {
+    console.warn('Could not find views directory for static file serving');
+  }
+
   // Serve static HTML form
   app.get('/', (req, res) => {
     // Try multiple possible paths for the view file
@@ -112,5 +131,6 @@ export function startServer(app: express.Application, port: number = 3001): void
   app.listen(port, () => {
     console.log(`🚀 OpenSteri Printer Portal server running on http://localhost:${port}`);
     console.log(`📡 WiFi scanning and connection management available`);
+    console.log(`📁 Static files served from /static/`);
   });
 } 

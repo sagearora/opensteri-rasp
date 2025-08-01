@@ -7,315 +7,155 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #FFF7F0 0%, #EAE6FD 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            color: #1C1C3D;
-            line-height: 1.6;
-        }
-        
-        .container {
-            background: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.06);
-            padding: 2rem;
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid #E4E4F7;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .header h1 {
-            color: #0A014F;
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            margin-bottom: 0.5rem;
-            line-height: 1.2;
-        }
-        
-        .header p {
-            color: #5C5C8A;
-            font-size: 1.25rem;
-            font-weight: 500;
-            line-height: 1.5;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #1C1C3D;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        
-        select, input[type="password"] {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #E4E4F7;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s ease;
-            background: #FFFFFF;
-            color: #1C1C3D;
-        }
-        
-        select:focus, input[type="password"]:focus {
-            outline: none;
-            border-color: #5A3FFF;
-            box-shadow: 0 0 0 3px rgba(90, 63, 255, 0.1);
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .btn-primary {
-            background: #5A3FFF;
-            color: #FFFFFF;
-        }
-        
-        .btn-primary:hover {
-            background: #4A32D4;
-            transform: scale(1.03);
-        }
-        
-        .btn-outline {
-            background: transparent;
-            color: #5A3FFF;
-            border: 1px solid #5A3FFF;
-        }
-        
-        .btn-outline:hover {
-            background: #F4F1FD;
-            transform: scale(1.03);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 1rem;
-            color: #6F6F8F;
-            font-size: 0.875rem;
-        }
-        
-        .error {
-            color: #DC2626;
-            background: #FEF2F2;
-            border: 1px solid #FECACA;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            display: none;
-            font-size: 0.875rem;
-        }
-        
-        .success {
-            color: #059669;
-            background: #F0FDF4;
-            border: 1px solid #BBF7D0;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            display: none;
-            font-size: 0.875rem;
-        }
-        
-        .scan-btn {
-            background: #5A3FFF;
-            color: #FFFFFF;
-            margin-bottom: 1rem;
-        }
-        
-        .scan-btn:hover {
-            background: #4A32D4;
-        }
-        
-        .wifi-icon {
-            font-size: 1.2rem;
-        }
-        
-        .connect-icon {
-            font-size: 1.2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-                margin: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .header p {
-                font-size: 1.125rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>OpenSteri Printer Portal</h1>
-            <p>Welcome to your printer management system</p>
+            <p>Complete your printer setup and configuration</p>
         </div>
         
-        <form id="wifiForm">
-            <div class="form-group">
-                <button type="button" id="scanBtn" class="btn scan-btn">
-                    <span class="wifi-icon">📶</span>
-                    Scan for WiFi Networks
+        <!-- Section 1: WiFi Setup -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon wifi-icon-bg">
+                    📶
+                </div>
+                <div>
+                    <h2 class="section-title">WiFi Setup</h2>
+                    <p class="section-subtitle">Connect your printer to your local network</p>
+                </div>
+            </div>
+            
+            <form id="wifiForm">
+                <div class="form-group">
+                    <label for="networkSelect">Select WiFi Network:</label>
+                    <select id="networkSelect" name="network" required>
+                        <option value="">Select a network...</option>
+                    </select>
+                    <div class="rescan-container">
+                        <button type="button" id="rescanBtn" class="btn btn-ghost">
+                            Can't find your WiFi? Rescan.
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">WiFi Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter WiFi password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <span>🔗</span>
+                    Connect to WiFi
                 </button>
+            </form>
+            
+            <div id="wifiLoading" class="loading">
+                <p>Scanning for WiFi networks...</p>
             </div>
             
-            <div class="form-group">
-                <label for="networkSelect">Select WiFi Network:</label>
-                <select id="networkSelect" name="network" required>
-                    <option value="">Select a network...</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">WiFi Password:</label>
-                <input type="password" id="password" name="password" placeholder="Enter WiFi password" required>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">
-                <span class="connect-icon">🔗</span>
-                Connect to WiFi
-            </button>
-        </form>
-        
-        <div id="loading" class="loading">
-            <p>Scanning for WiFi networks...</p>
+            <div id="wifiError" class="error"></div>
+            <div id="wifiSuccess" class="success"></div>
         </div>
         
-        <div id="error" class="error"></div>
-        <div id="success" class="success"></div>
+        <!-- Section 2: OpenSteri.com Credentials -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon credentials-icon-bg">
+                    🔐
+                </div>
+                <div>
+                    <h2 class="section-title">OpenSteri.com Credentials</h2>
+                    <p class="section-subtitle">Connect to your OpenSteri account</p>
+                </div>
+            </div>
+            
+            <form id="credentialsForm">
+                <div class="form-group">
+                    <label for="joinToken">Join Token:</label>
+                    <input type="text" id="joinToken" name="joinToken" placeholder="Enter your join token" required>
+                </div>
+                
+                <button type="submit" class="btn btn-warning">
+                    <span>🔗</span>
+                    Connect to OpenSteri
+                </button>
+            </form>
+            
+            <div id="credentialsLoading" class="loading">
+                <p>Connecting to OpenSteri.com...</p>
+            </div>
+            
+            <div id="credentialsError" class="error"></div>
+            <div id="credentialsSuccess" class="success"></div>
+        </div>
+        
+        <!-- Section 3: Printer Setup -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon printer-icon-bg">
+                    🖨️
+                </div>
+                <div>
+                    <h2 class="section-title">Printer Setup</h2>
+                    <p class="section-subtitle">Configure your printer hardware settings</p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Printer Status:</label>
+                <div class="status-indicator status-unknown">
+                    <span>⏳</span>
+                    Checking printer connection...
+                </div>
+            </div>
+            
+            <form id="printerForm">
+                <div class="form-group">
+                    <label for="printerName">Printer Name:</label>
+                    <input type="text" id="printerName" name="printerName" placeholder="Enter printer name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="printerModel">Printer Model:</label>
+                    <select id="printerModel" name="printerModel" required>
+                        <option value="">Select printer model...</option>
+                        <option value="thermal">Thermal Printer</option>
+                        <option value="inkjet">Inkjet Printer</option>
+                        <option value="laser">Laser Printer</option>
+                        <option value="label">Label Printer</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="paperSize">Paper Size:</label>
+                    <select id="paperSize" name="paperSize" required>
+                        <option value="">Select paper size...</option>
+                        <option value="A4">A4</option>
+                        <option value="Letter">Letter</option>
+                        <option value="Legal">Legal</option>
+                        <option value="4x6">4x6 inch</option>
+                        <option value="3x5">3x5 inch</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-success">
+                    <span>⚙️</span>
+                    Configure Printer
+                </button>
+            </form>
+            
+            <div id="printerLoading" class="loading">
+                <p>Configuring printer settings...</p>
+            </div>
+            
+            <div id="printerError" class="error"></div>
+            <div id="printerSuccess" class="success"></div>
+        </div>
     </div>
 
-    <script>
-        const scanBtn = document.getElementById('scanBtn');
-        const networkSelect = document.getElementById('networkSelect');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const success = document.getElementById('success');
-        const form = document.getElementById('wifiForm');
-
-        scanBtn.addEventListener('click', async () => {
-            try {
-                scanBtn.disabled = true;
-                loading.style.display = 'block';
-                error.style.display = 'none';
-                success.style.display = 'none';
-                
-                const response = await fetch('/scan', {
-                    method: 'GET'
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    networkSelect.innerHTML = '<option value="">Select a network...</option>';
-                    data.networks.forEach(network => {
-                        const option = document.createElement('option');
-                        option.value = network.ssid;
-                        option.textContent = `${network.ssid} (${network.signal}%)`;
-                        networkSelect.appendChild(option);
-                    });
-                    
-                    success.textContent = `Found ${data.networks.length} WiFi networks`;
-                    success.style.display = 'block';
-                } else {
-                    throw new Error(data.error || 'Failed to scan networks');
-                }
-            } catch (err) {
-                error.textContent = err.message;
-                error.style.display = 'block';
-            } finally {
-                scanBtn.disabled = false;
-                loading.style.display = 'none';
-            }
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(form);
-            const network = formData.get('network');
-            const password = formData.get('password');
-            
-            if (!network || !password) {
-                error.textContent = 'Please select a network and enter a password';
-                error.style.display = 'block';
-                return;
-            }
-            
-            try {
-                const response = await fetch('/connect', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ network, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    success.textContent = 'Successfully connected to WiFi network!';
-                    success.style.display = 'block';
-                    error.style.display = 'none';
-                } else {
-                    throw new Error(data.error || 'Failed to connect to network');
-                }
-            } catch (err) {
-                error.textContent = err.message;
-                error.style.display = 'block';
-                success.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="/static/script.js"></script>
 </body>
 </html> 
