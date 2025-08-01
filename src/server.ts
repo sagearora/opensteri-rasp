@@ -106,17 +106,26 @@ export function createServer(): express.Application {
         return res.status(400).json({ error: 'Network name and password are required' });
       }
       
-      // Use nmcli to connect to the WiFi network
-      const command = `nmcli device wifi connect "${network}" password "${password}"`;
+      // Use nmcli with sudo to connect to the WiFi network
+      const command = `sudo nmcli device wifi connect "${network}" password "${password}"`;
       
       try {
         await execAsync(command);
         res.json({ message: 'Successfully connected to WiFi network' });
       } catch (connectError) {
         console.error('Error connecting to WiFi:', connectError);
-        res.status(500).json({ 
-          error: 'Failed to connect to WiFi network. Please check your credentials and try again.' 
-        });
+        
+        // Check if it's a sudo permission error
+        const errorMessage = connectError instanceof Error ? connectError.message : String(connectError);
+        if (errorMessage.includes('sudo') || errorMessage.includes('Insufficient privileges')) {
+          res.status(500).json({ 
+            error: 'Sudo privileges required. Please ensure the application has sudo access or run with appropriate permissions.' 
+          });
+        } else {
+          res.status(500).json({ 
+            error: 'Failed to connect to WiFi network. Please check your credentials and try again.' 
+          });
+        }
       }
     } catch (error) {
       console.error('Error in connect endpoint:', error);
