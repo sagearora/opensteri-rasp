@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenSteri Printer Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,85 +15,113 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FFF7F0 0%, #EAE6FD 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 1rem;
+            color: #1C1C3D;
+            line-height: 1.6;
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
             max-width: 500px;
             width: 100%;
+            border: 1px solid #E4E4F7;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
         }
         
         .header h1 {
-            color: #333;
+            color: #0A014F;
             font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
         }
         
         .header p {
-            color: #666;
-            font-size: 1.1rem;
+            color: #5C5C8A;
+            font-size: 1.25rem;
+            font-weight: 500;
+            line-height: 1.5;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 1.5rem;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
+            margin-bottom: 0.5rem;
+            color: #1C1C3D;
             font-weight: 600;
             font-size: 1rem;
         }
         
         select, input[type="password"] {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
+            padding: 1rem;
+            border: 2px solid #E4E4F7;
+            border-radius: 8px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            background: #FFFFFF;
+            color: #1C1C3D;
         }
         
         select:focus, input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #5A3FFF;
+            box-shadow: 0 0 0 3px rgba(90, 63, 255, 0.1);
         }
         
         .btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        .btn-primary {
+            background: #5A3FFF;
+            color: #FFFFFF;
+        }
+        
+        .btn-primary:hover {
+            background: #4A32D4;
+            transform: scale(1.03);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #5A3FFF;
+            border: 1px solid #5A3FFF;
+        }
+        
+        .btn-outline:hover {
+            background: #F4F1FD;
+            transform: scale(1.03);
         }
         
         .btn:disabled {
@@ -102,37 +133,64 @@
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
-            color: #666;
+            margin-top: 1rem;
+            color: #6F6F8F;
+            font-size: 0.875rem;
         }
         
         .error {
-            color: #e74c3c;
-            background: #fdf2f2;
-            border: 1px solid #fecaca;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
+            color: #DC2626;
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
             display: none;
+            font-size: 0.875rem;
         }
         
         .success {
             color: #059669;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
             display: none;
+            font-size: 0.875rem;
         }
         
         .scan-btn {
-            background: #10b981;
-            margin-bottom: 20px;
+            background: #5A3FFF;
+            color: #FFFFFF;
+            margin-bottom: 1rem;
         }
         
         .scan-btn:hover {
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            background: #4A32D4;
+        }
+        
+        .wifi-icon {
+            font-size: 1.2rem;
+        }
+        
+        .connect-icon {
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1.125rem;
+            }
         }
     </style>
 </head>
@@ -146,7 +204,8 @@
         <form id="wifiForm">
             <div class="form-group">
                 <button type="button" id="scanBtn" class="btn scan-btn">
-                    🔍 Scan for WiFi Networks
+                    <span class="wifi-icon">📶</span>
+                    Scan for WiFi Networks
                 </button>
             </div>
             
@@ -162,7 +221,10 @@
                 <input type="password" id="password" name="password" placeholder="Enter WiFi password" required>
             </div>
             
-            <button type="submit" class="btn">Connect to WiFi</button>
+            <button type="submit" class="btn btn-primary">
+                <span class="connect-icon">🔗</span>
+                Connect to WiFi
+            </button>
         </form>
         
         <div id="loading" class="loading">
