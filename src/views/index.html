@@ -132,18 +132,28 @@
             
             <form id="credentialsForm">
                 <div class="form-group">
-                    <label for="joinToken">Join Token:</label>
-                    <input type="text" id="joinToken" name="joinToken" placeholder="Enter your join token" required>
+                    <label for="joinToken">Join Code:</label>
+                    <input type="text" id="joinToken" name="joinToken" placeholder="Enter your join code" required>
                 </div>
                 
                 <button type="submit" class="btn btn-warning">
                     <span>🔗</span>
-                    Connect to OpenSteri
+                    Join OpenSteri
                 </button>
             </form>
             
+            <div class="form-group">
+                <button type="button" id="checkTokenBtn" class="btn btn-ghost">
+                    🔍 Check Token Status
+                </button>
+                <div id="tokenStatus" class="status-indicator" style="display: none;">
+                    <span>⏳</span>
+                    <span id="tokenStatusText">Checking token status...</span>
+                </div>
+            </div>
+            
             <div id="credentialsLoading" class="loading">
-                <p>Connecting to OpenSteri.com...</p>
+                <p>Joining OpenSteri...</p>
             </div>
             
             <div id="credentialsError" class="error"></div>

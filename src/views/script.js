@@ -406,10 +406,10 @@ credentialsForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(credentialsForm);
-    const joinToken = formData.get('joinToken');
+    const joinCode = formData.get('joinToken'); // Keep the form field name as joinToken for backward compatibility
     
-    if (!joinToken) {
-        credentialsError.textContent = 'Please enter your join token';
+    if (!joinCode) {
+        credentialsError.textContent = 'Please enter your join code';
         credentialsError.style.display = 'block';
         return;
     }
@@ -419,27 +419,79 @@ credentialsForm.addEventListener('submit', async (e) => {
         credentialsError.style.display = 'none';
         credentialsSuccess.style.display = 'none';
         
-        const response = await fetch('/connect-openteri', {
+        const response = await fetch('/join', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ joinToken })
+            body: JSON.stringify({ join_code: joinCode })
         });
         
         const data = await response.json();
         
         if (response.ok) {
-            credentialsSuccess.textContent = 'Successfully connected to OpenSteri.com!';
+            credentialsSuccess.textContent = 'Successfully joined OpenSteri! Access token saved.';
             credentialsSuccess.style.display = 'block';
+            
+            // Show additional success details if available
+            if (data.printer_id) {
+                credentialsSuccess.innerHTML += `<br><small>Printer ID: ${data.printer_id}</small>`;
+            }
         } else {
-            throw new Error(data.error || 'Failed to connect to OpenSteri');
+            throw new Error(data.error || 'Failed to join OpenSteri');
         }
     } catch (err) {
         credentialsError.textContent = err.message;
         credentialsError.style.display = 'block';
         credentialsSuccess.style.display = 'none';
+        
+        // Display additional error details if available
+        if (err.response && err.response.data) {
+            const errorData = err.response.data;
+            if (errorData.details) {
+                credentialsError.innerHTML += `<br><small>${errorData.details}</small>`;
+            }
+        }
     } finally {
         credentialsLoading.style.display = 'none';
+    }
+});
+
+// Token Status Check
+const checkTokenBtn = document.getElementById('checkTokenBtn');
+const tokenStatus = document.getElementById('tokenStatus');
+const tokenStatusText = document.getElementById('tokenStatusText');
+
+checkTokenBtn.addEventListener('click', async () => {
+    try {
+        tokenStatus.style.display = 'block';
+        tokenStatusText.textContent = 'Checking token status...';
+        checkTokenBtn.disabled = true;
+        
+        const response = await fetch('/token-status', {
+            method: 'GET'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            if (data.hasToken && data.hasPrinterId) {
+                tokenStatus.className = 'status-indicator status-success';
+                tokenStatusText.innerHTML = '<span>✅</span> Token and Printer ID available';
+            } else if (data.hasToken) {
+                tokenStatus.className = 'status-indicator status-warning';
+                tokenStatusText.innerHTML = '<span>⚠️</span> Token available but no Printer ID';
+            } else {
+                tokenStatus.className = 'status-indicator status-error';
+                tokenStatusText.innerHTML = '<span>❌</span> No token found';
+            }
+        } else {
+            throw new Error(data.error || 'Failed to check token status');
+        }
+    } catch (err) {
+        tokenStatus.className = 'status-indicator status-error';
+        tokenStatusText.innerHTML = `<span>❌</span> Error: ${err.message}`;
+    } finally {
+        checkTokenBtn.disabled = false;
     }
 }); 

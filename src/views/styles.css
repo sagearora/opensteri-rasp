@@ -266,9 +266,27 @@ select:focus, input[type="password"]:focus, input[type="text"]:focus, input[type
 }
 
 .status-unknown {
+    background: #F3F4F6;
+    color: #6B7280;
+    border: 1px solid #D1D5DB;
+}
+
+.status-success {
+    background: #D1FAE5;
+    color: #065F46;
+    border: 1px solid #10B981;
+}
+
+.status-warning {
     background: #FEF3C7;
-    color: #D97706;
-    border: 1px solid #FDE68A;
+    color: #92400E;
+    border: 1px solid #F59E0B;
+}
+
+.status-error {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #EF4444;
 }
 
 /* WiFi Status Styles */
