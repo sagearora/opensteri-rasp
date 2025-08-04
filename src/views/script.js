@@ -490,14 +490,15 @@ async function disconnectOpensteri() {
             credentialsError.style.display = 'none';
             credentialsSuccess.style.display = 'none';
             
-            // Disconnect the printer by updating paired_at to null
-            const response = await fetch('/disconnect-printer-paired', {
+            // Disconnect the printer (handles both local cleanup and server update)
+            const response = await fetch('/disconnect-printer', {
                 method: 'POST'
             });
             
             if (response.ok) {
+                const data = await response.json();
                 showOpensteriConnectForm();
-                credentialsSuccess.textContent = 'Successfully disconnected printer';
+                credentialsSuccess.textContent = data.message;
                 credentialsSuccess.style.display = 'block';
                 // Refresh status after successful disconnection
                 setTimeout(checkOpensteriStatus, 2000);
