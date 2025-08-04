@@ -161,26 +161,4 @@ export async function initializePrinterConnectionWithCredentials(token: string, 
     console.error('Failed to initialize printer connection with credentials:', error);
     throw error;
   }
-}
-
-/**
- * Save credentials and initialize printer connection
- * 
- * This function saves the provided credentials and then initializes
- * the printer connection using the printerConnectionService.
- * 
- * @param token - The authentication token for the printer
- * @param printerId - The unique identifier for the printer
- * @returns Promise<any> - The printer information
- */
-export async function saveCredentialsAndInitializeConnection(token: string, printerId: string): Promise<any> {
-  try {
-    // Initialize the connection using the service
-    const printerInfo = await initializePrinterConnectionWithCredentials(token, printerId);
-    
-    return printerInfo;
-  } catch (error) {
-    console.error('Failed to save credentials and initialize connection:', error);
-    throw error;
-  }
 } 

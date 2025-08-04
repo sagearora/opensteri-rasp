@@ -157,10 +157,4 @@ export class PrinterService {
       };
     }
   }
-}
-
-// Export individual functions for backward compatibility
-export const getPrinterState = PrinterService.getPrinterState;
-export const joinPrinter = PrinterService.joinPrinter;
-export const printLabels = PrinterService.printLabels;
-export const printTestLabel = PrinterService.printTestLabel; 
+} 

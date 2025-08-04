@@ -36,10 +36,6 @@ import { getClient } from './services/graphqlClient';
 import { isPrinterConnected, getPrinterState, triggerPrinterDetection } from './services/checkPrinter';
 import { PrinterService } from './services/printerService';
 
-// Import printer constants
-const PRINTER_VENDOR_ID = 6495;
-const PRINTER_PRODUCT_ID = 1;
-
 const execAsync = promisify(exec);
 
 // Configuration for WiFi operations
@@ -48,6 +44,15 @@ const WIFI_CONFIG = {
   sudoCommand: 'sudo', // Can be changed to 'pkexec' or other privilege escalation methods
   fallbackToNonSudo: true // Try without sudo if sudo fails
 };
+
+// Helper function for consistent error responses
+function sendErrorResponse(res: express.Response, status: number, error: string, details?: string): void {
+  const response: any = { error };
+  if (details) {
+    response.details = details;
+  }
+  res.status(status).json(response);
+}
 
 // Helper functions for token management
 function getEnvFilePath(): string {
@@ -103,21 +108,8 @@ function loadTokenFromEnv(): { token: string | null; printerId: string | null } 
   return { token: null, printerId: null };
 }
 
-function getCurrentAccessToken(): string | null {
-  // First try to get from environment variables (in case .env was reloaded)
-  const envToken = process.env.ACCESS_TOKEN;
-  if (envToken) {
-    return envToken;
-  }
-  
-  // Fallback to reading from .env file
-  const { token } = loadTokenFromEnv();
-  return token;
-}
-
 export function createServer(): express.Application {
   const app = express();
-  const PORT = 3001;
 
   // Middleware
   app.use(express.json());
@@ -202,9 +194,7 @@ export function createServer(): express.Application {
       res.json({ networks });
     } catch (error) {
       console.error('Error scanning WiFi networks:', error);
-      res.status(500).json({ 
-        error: 'Failed to scan WiFi networks. Make sure nmcli is available and you have the necessary permissions.' 
-      });
+      sendErrorResponse(res, 500, 'Failed to scan WiFi networks. Make sure nmcli is available and you have the necessary permissions.');
     }
   });
 
@@ -264,36 +254,16 @@ export function createServer(): express.Application {
         const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
         
         if (errorMessage.includes('sudo') || errorMessage.includes('Insufficient privileges')) {
-          res.status(500).json({ 
-            error: 'WiFi connection requires elevated privileges. Please run the application with sudo or configure proper permissions.',
-            details: 'Try running: sudo npm start or configure sudoers to allow nmcli commands without password.',
-            solutions: [
-              'Run the application with sudo: sudo npm start',
-              'Configure sudoers to allow nmcli commands',
-              'Run the application as root user',
-              'Use pkexec instead of sudo'
-            ]
-          });
+          sendErrorResponse(res, 500, 'WiFi connection requires elevated privileges. Please run the application with sudo or configure proper permissions.', 'Try running: sudo npm start or configure sudoers to allow nmcli commands without password.');
         } else if (errorMessage.includes('NetworkManager')) {
-          res.status(500).json({ 
-            error: 'NetworkManager service is not running or not available.',
-            details: 'Please ensure NetworkManager is installed and running.',
-            solutions: [
-              'Install NetworkManager: sudo apt-get install network-manager',
-              'Start NetworkManager service: sudo systemctl start NetworkManager',
-              'Enable NetworkManager: sudo systemctl enable NetworkManager'
-            ]
-          });
+          sendErrorResponse(res, 500, 'NetworkManager service is not running or not available.', 'Please ensure NetworkManager is installed and running.');
         } else {
-          res.status(500).json({ 
-            error: 'Failed to connect to WiFi network. Please check your credentials and try again.',
-            details: errorMessage
-          });
+          sendErrorResponse(res, 500, 'Failed to connect to WiFi network. Please check your credentials and try again.', errorMessage);
         }
       }
     } catch (error) {
       console.error('Error in connect endpoint:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      sendErrorResponse(res, 500, 'Internal server error');
     }
   });
 
@@ -359,82 +329,37 @@ export function createServer(): express.Application {
       
     } catch (error) {
       console.error('Error getting WiFi status:', error);
-      res.status(500).json({ 
-        error: 'Failed to get WiFi status. Make sure nmcli is available.' 
-      });
+      sendErrorResponse(res, 500, 'Failed to get WiFi status. Make sure nmcli is available.');
     }
   });
 
   // Endpoint to disconnect from WiFi
   app.post('/disconnect', async (req, res) => {
     try {
-      // Try different approaches for disconnecting from WiFi
-      let disconnected = false;
-      let lastError = null;
+      const { ssid } = req.body;
       
-      // Approach 1: Try with sudo
-      if (WIFI_CONFIG.useSudo) {
-        try {
-          const command = `${WIFI_CONFIG.sudoCommand} nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)`;
-          await execAsync(command);
-          disconnected = true;
-        } catch (error) {
-          lastError = error;
-          console.log('Sudo disconnect approach failed, trying alternative methods...');
-        }
+      if (!ssid) {
+        return res.status(400).json({ error: 'SSID is required' });
       }
       
-      // Approach 2: Try without sudo
-      if (!disconnected && WIFI_CONFIG.fallbackToNonSudo) {
-        try {
-          const command = `nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)`;
-          await execAsync(command);
-          disconnected = true;
-        } catch (error) {
-          lastError = error;
-          console.log('Non-sudo disconnect approach also failed...');
-        }
-      }
-      
-      // Approach 3: Try with pkexec
-      if (!disconnected && WIFI_CONFIG.fallbackToNonSudo) {
-        try {
-          const command = `pkexec nmcli device disconnect $(nmcli -t -f DEVICE,TYPE device | grep wifi | cut -d: -f1)`;
-          await execAsync(command);
-          disconnected = true;
-        } catch (error) {
-          lastError = error;
-          console.log('pkexec disconnect approach also failed...');
-        }
-      }
-      
-      if (disconnected) {
-        res.json({ message: 'Successfully disconnected from WiFi network' });
-      } else {
-        // Provide helpful error message
-        const errorMessage = lastError instanceof Error ? lastError.message : String(lastError);
+      // Delete the WiFi connection by SSID
+      try {
+        const command = `sudo nmcli connection delete "${ssid}"`;
+        await execAsync(command);
+        res.json({ message: `Successfully disconnected from WiFi network: ${ssid}` });
+      } catch (error) {
+        console.error('Error disconnecting from WiFi:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
         
         if (errorMessage.includes('sudo') || errorMessage.includes('Insufficient privileges')) {
-          res.status(500).json({ 
-            error: 'WiFi disconnection requires elevated privileges. Please run the application with sudo or configure proper permissions.',
-            details: 'Try running: sudo npm start or configure sudoers to allow nmcli commands without password.',
-            solutions: [
-              'Run the application with sudo: sudo npm start',
-              'Configure sudoers to allow nmcli commands',
-              'Run the application as root user',
-              'Use pkexec instead of sudo'
-            ]
-          });
+          sendErrorResponse(res, 500, 'WiFi disconnection requires elevated privileges. Please run the application with sudo or configure proper permissions.', 'Try running: sudo npm start or configure sudoers to allow nmcli commands without password.');
         } else {
-          res.status(500).json({ 
-            error: 'Failed to disconnect from WiFi network. Please try again.',
-            details: errorMessage
-          });
+          sendErrorResponse(res, 500, 'Failed to disconnect from WiFi network. Please try again.', errorMessage);
         }
       }
     } catch (error) {
       console.error('Error in disconnect endpoint:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      sendErrorResponse(res, 500, 'Internal server error');
     }
   });
 
@@ -498,10 +423,7 @@ export function createServer(): express.Application {
       
     } catch (error) {
       console.error('Error in join endpoint:', error);
-      res.status(500).json({ 
-        error: 'Internal server error during join process',
-        details: error instanceof Error ? error.message : String(error)
-      });
+      sendErrorResponse(res, 500, 'Internal server error during join process', error instanceof Error ? error.message : String(error));
     }
   });
 
@@ -552,10 +474,7 @@ export function createServer(): express.Application {
       res.json({ message: 'Successfully disconnected printer' });
     } catch (error) {
       console.error('Error in disconnect printer endpoint:', error);
-      res.status(500).json({ 
-        error: 'Internal server error during printer disconnection',
-        details: error instanceof Error ? error.message : String(error)
-      });
+      sendErrorResponse(res, 500, 'Internal server error during printer disconnection', error instanceof Error ? error.message : String(error));
     }
   });
 
@@ -626,8 +545,6 @@ export function createServer(): express.Application {
         printerState: printerState,
         message: isConnected ? 'GoDEX printer is connected and ready.' : 'GoDEX printer is not connected or not detected.',
         debug: {
-          vendorId: PRINTER_VENDOR_ID,
-          productId: PRINTER_PRODUCT_ID,
           hasError: !!printerState.error,
           error: printerState.error
         }

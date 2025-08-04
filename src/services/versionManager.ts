@@ -42,50 +42,6 @@ export function getCurrentVersion(): string {
 }
 
 /**
- * Parse version string to get major, minor, and patch numbers
- * 
- * @param version - Version string (e.g., "1.2.3")
- * @returns object with major, minor, patch numbers
- * @throws Error if version string is invalid
- */
-export function parseVersion(version: string): { major: number; minor: number; patch: number } {
-  const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
-  const match = version.match(versionRegex);
-  
-  if (!match) {
-    throw new Error(`Invalid version format: ${version}. Expected format: x.y.z`);
-  }
-  
-  return {
-    major: parseInt(match[1], 10),
-    minor: parseInt(match[2], 10),
-    patch: parseInt(match[3], 10)
-  };
-}
-
-/**
- * Increment version number
- * 
- * @param version - Current version string
- * @param type - Type of increment ('major', 'minor', 'patch')
- * @returns string - New version string
- */
-export function incrementVersion(version: string, type: 'major' | 'minor' | 'patch'): string {
-  const parsed = parseVersion(version);
-  
-  switch (type) {
-    case 'major':
-      return `${parsed.major + 1}.0.0`;
-    case 'minor':
-      return `${parsed.major}.${parsed.minor + 1}.0`;
-    case 'patch':
-      return `${parsed.major}.${parsed.minor}.${parsed.patch + 1}`;
-    default:
-      throw new Error(`Invalid increment type: ${type}`);
-  }
-}
-
-/**
  * Get version as a simple number for database storage
  * 
  * This converts a semantic version like "1.2.3" to a simple number like 123
@@ -94,9 +50,19 @@ export function incrementVersion(version: string, type: 'major' | 'minor' | 'pat
  * @param version - Version string (e.g., "1.2.3")
  * @returns number - Version as a simple number
  */
-export function getVersionNumber(version: string): number {
-  const parsed = parseVersion(version);
-  return parsed.major * 10000 + parsed.minor * 100 + parsed.patch;
+function getVersionNumber(version: string): number {
+  const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
+  const match = version.match(versionRegex);
+  
+  if (!match) {
+    throw new Error(`Invalid version format: ${version}. Expected format: x.y.z`);
+  }
+  
+  const major = parseInt(match[1], 10);
+  const minor = parseInt(match[2], 10);
+  const patch = parseInt(match[3], 10);
+  
+  return major * 10000 + minor * 100 + patch;
 }
 
 /**
@@ -107,18 +73,4 @@ export function getVersionNumber(version: string): number {
 export function getCurrentVersionNumber(): number {
   const version = getCurrentVersion();
   return getVersionNumber(version);
-}
-
-/**
- * Convert version number back to semantic version string
- * 
- * @param versionNumber - Version number (e.g., 123 for "1.2.3")
- * @returns string - Semantic version string
- */
-export function getVersionFromNumber(versionNumber: number): string {
-  const major = Math.floor(versionNumber / 10000);
-  const minor = Math.floor((versionNumber % 10000) / 100);
-  const patch = versionNumber % 100;
-  
-  return `${major}.${minor}.${patch}`;
 } 

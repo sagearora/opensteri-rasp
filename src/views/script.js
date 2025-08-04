@@ -240,9 +240,20 @@ async function disconnectWiFi() {
             wifiLoading.style.display = 'block';
             wifiError.style.display = 'none';
             
-            // Use nmcli to disconnect
+            // Get the current WiFi SSID from the status
+            if (!currentWifiStatus || !currentWifiStatus.connected || !currentWifiStatus.device || !currentWifiStatus.device.connection) {
+                throw new Error('No WiFi connection found to disconnect');
+            }
+            
+            const ssid = currentWifiStatus.device.connection;
+            
+            // Use nmcli to disconnect with the SSID
             const response = await fetch('/disconnect', {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ssid })
             });
             
             if (response.ok) {
