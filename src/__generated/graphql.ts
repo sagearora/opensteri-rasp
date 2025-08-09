@@ -95,13 +95,12 @@ export type Appointment = {
   creator: User;
   creator_id: Scalars['uuid']['output'];
   emr_id?: Maybe<Scalars['String']['output']>;
-  endtime_at: Scalars['timestamptz']['output'];
+  ended_at?: Maybe<Scalars['timestamptz']['output']>;
   id: Scalars['bigint']['output'];
   /** An object relationship */
   patient: Patient;
   patient_id: Scalars['uuid']['output'];
-  starttime_at: Scalars['timestamptz']['output'];
-  state?: Maybe<Appointment_State_Enum>;
+  started_at: Scalars['timestamptz']['output'];
   /** An array relationship */
   steri_labels: Array<Steri_Label>;
   /** An aggregate relationship */
@@ -177,12 +176,11 @@ export type Appointment_Bool_Exp = {
   creator?: InputMaybe<User_Bool_Exp>;
   creator_id?: InputMaybe<Uuid_Comparison_Exp>;
   emr_id?: InputMaybe<String_Comparison_Exp>;
-  endtime_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  ended_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   patient?: InputMaybe<Patient_Bool_Exp>;
   patient_id?: InputMaybe<Uuid_Comparison_Exp>;
-  starttime_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  state?: InputMaybe<Appointment_State_Enum_Comparison_Exp>;
+  started_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   steri_labels?: InputMaybe<Steri_Label_Bool_Exp>;
   steri_labels_aggregate?: InputMaybe<Steri_Label_Aggregate_Bool_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -210,12 +208,11 @@ export type Appointment_Insert_Input = {
   creator?: InputMaybe<User_Obj_Rel_Insert_Input>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
   emr_id?: InputMaybe<Scalars['String']['input']>;
-  endtime_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  ended_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   patient?: InputMaybe<Patient_Obj_Rel_Insert_Input>;
   patient_id?: InputMaybe<Scalars['uuid']['input']>;
-  starttime_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  state?: InputMaybe<Appointment_State_Enum>;
+  started_at?: InputMaybe<Scalars['timestamptz']['input']>;
   steri_labels?: InputMaybe<Steri_Label_Arr_Rel_Insert_Input>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -228,10 +225,10 @@ export type Appointment_Max_Fields = {
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   creator_id?: Maybe<Scalars['uuid']['output']>;
   emr_id?: Maybe<Scalars['String']['output']>;
-  endtime_at?: Maybe<Scalars['timestamptz']['output']>;
+  ended_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   patient_id?: Maybe<Scalars['uuid']['output']>;
-  starttime_at?: Maybe<Scalars['timestamptz']['output']>;
+  started_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
 };
 
@@ -243,10 +240,10 @@ export type Appointment_Min_Fields = {
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   creator_id?: Maybe<Scalars['uuid']['output']>;
   emr_id?: Maybe<Scalars['String']['output']>;
-  endtime_at?: Maybe<Scalars['timestamptz']['output']>;
+  ended_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   patient_id?: Maybe<Scalars['uuid']['output']>;
-  starttime_at?: Maybe<Scalars['timestamptz']['output']>;
+  started_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
 };
 
@@ -282,12 +279,11 @@ export type Appointment_Order_By = {
   creator?: InputMaybe<User_Order_By>;
   creator_id?: InputMaybe<Order_By>;
   emr_id?: InputMaybe<Order_By>;
-  endtime_at?: InputMaybe<Order_By>;
+  ended_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   patient?: InputMaybe<Patient_Order_By>;
   patient_id?: InputMaybe<Order_By>;
-  starttime_at?: InputMaybe<Order_By>;
-  state?: InputMaybe<Order_By>;
+  started_at?: InputMaybe<Order_By>;
   steri_labels_aggregate?: InputMaybe<Steri_Label_Aggregate_Order_By>;
   updated_at?: InputMaybe<Order_By>;
 };
@@ -310,15 +306,13 @@ export enum Appointment_Select_Column {
   /** column name */
   EmrId = 'emr_id',
   /** column name */
-  EndtimeAt = 'endtime_at',
+  EndedAt = 'ended_at',
   /** column name */
   Id = 'id',
   /** column name */
   PatientId = 'patient_id',
   /** column name */
-  StarttimeAt = 'starttime_at',
-  /** column name */
-  State = 'state',
+  StartedAt = 'started_at',
   /** column name */
   UpdatedAt = 'updated_at'
 }
@@ -330,11 +324,10 @@ export type Appointment_Set_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
   emr_id?: InputMaybe<Scalars['String']['input']>;
-  endtime_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  ended_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   patient_id?: InputMaybe<Scalars['uuid']['input']>;
-  starttime_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  state?: InputMaybe<Appointment_State_Enum>;
+  started_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -379,21 +372,6 @@ export enum Appointment_State_Constraint {
   /** unique or primary key constraint on columns "id" */
   AppointmentStatePkey = 'appointment_state_pkey'
 }
-
-export enum Appointment_State_Enum {
-  Finished = 'finished',
-  InProgress = 'in_progress',
-  NotStarted = 'not_started'
-}
-
-/** Boolean expression to compare columns of type "appointment_state_enum". All fields are combined with logical 'AND'. */
-export type Appointment_State_Enum_Comparison_Exp = {
-  _eq?: InputMaybe<Appointment_State_Enum>;
-  _in?: InputMaybe<Array<Appointment_State_Enum>>;
-  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
-  _neq?: InputMaybe<Appointment_State_Enum>;
-  _nin?: InputMaybe<Array<Appointment_State_Enum>>;
-};
 
 /** input type for inserting data into table "appointment_state" */
 export type Appointment_State_Insert_Input = {
@@ -508,11 +486,10 @@ export type Appointment_Stream_Cursor_Value_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
   emr_id?: InputMaybe<Scalars['String']['input']>;
-  endtime_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  ended_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   patient_id?: InputMaybe<Scalars['uuid']['input']>;
-  starttime_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  state?: InputMaybe<Appointment_State_Enum>;
+  started_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -535,15 +512,13 @@ export enum Appointment_Update_Column {
   /** column name */
   EmrId = 'emr_id',
   /** column name */
-  EndtimeAt = 'endtime_at',
+  EndedAt = 'ended_at',
   /** column name */
   Id = 'id',
   /** column name */
   PatientId = 'patient_id',
   /** column name */
-  StarttimeAt = 'starttime_at',
-  /** column name */
-  State = 'state',
+  StartedAt = 'started_at',
   /** column name */
   UpdatedAt = 'updated_at'
 }
@@ -1388,6 +1363,720 @@ export type Fuzzy_Search_Patient_Args = {
   query?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** columns and relationships of "incubator" */
+export type Incubator = {
+  __typename?: 'incubator';
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  brand: Scalars['String']['output'];
+  /** An object relationship */
+  clinic: Clinic;
+  clinic_id: Scalars['uuid']['output'];
+  created_at: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  creator: User;
+  creator_id: Scalars['uuid']['output'];
+  id: Scalars['bigint']['output'];
+  incubation_duration_minutes: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  number_of_columns: Scalars['Int']['output'];
+  number_of_rows: Scalars['Int']['output'];
+  state: Scalars['jsonb']['output'];
+  /** An array relationship */
+  steri_cycles: Array<Steri_Cycle>;
+  /** An aggregate relationship */
+  steri_cycles_aggregate: Steri_Cycle_Aggregate;
+  updated_at: Scalars['timestamptz']['output'];
+};
+
+
+/** columns and relationships of "incubator" */
+export type IncubatorStateArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "incubator" */
+export type IncubatorSteri_CyclesArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Cycle_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Cycle_Order_By>>;
+  where?: InputMaybe<Steri_Cycle_Bool_Exp>;
+};
+
+
+/** columns and relationships of "incubator" */
+export type IncubatorSteri_Cycles_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Cycle_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Cycle_Order_By>>;
+  where?: InputMaybe<Steri_Cycle_Bool_Exp>;
+};
+
+/** aggregated selection of "incubator" */
+export type Incubator_Aggregate = {
+  __typename?: 'incubator_aggregate';
+  aggregate?: Maybe<Incubator_Aggregate_Fields>;
+  nodes: Array<Incubator>;
+};
+
+/** aggregate fields of "incubator" */
+export type Incubator_Aggregate_Fields = {
+  __typename?: 'incubator_aggregate_fields';
+  avg?: Maybe<Incubator_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Incubator_Max_Fields>;
+  min?: Maybe<Incubator_Min_Fields>;
+  stddev?: Maybe<Incubator_Stddev_Fields>;
+  stddev_pop?: Maybe<Incubator_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Incubator_Stddev_Samp_Fields>;
+  sum?: Maybe<Incubator_Sum_Fields>;
+  var_pop?: Maybe<Incubator_Var_Pop_Fields>;
+  var_samp?: Maybe<Incubator_Var_Samp_Fields>;
+  variance?: Maybe<Incubator_Variance_Fields>;
+};
+
+
+/** aggregate fields of "incubator" */
+export type Incubator_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Incubator_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Incubator_Append_Input = {
+  state?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Incubator_Avg_Fields = {
+  __typename?: 'incubator_avg_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "incubator". All fields are combined with a logical 'AND'. */
+export type Incubator_Bool_Exp = {
+  _and?: InputMaybe<Array<Incubator_Bool_Exp>>;
+  _not?: InputMaybe<Incubator_Bool_Exp>;
+  _or?: InputMaybe<Array<Incubator_Bool_Exp>>;
+  archived_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  brand?: InputMaybe<String_Comparison_Exp>;
+  clinic?: InputMaybe<Clinic_Bool_Exp>;
+  clinic_id?: InputMaybe<Uuid_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  creator?: InputMaybe<User_Bool_Exp>;
+  creator_id?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Bigint_Comparison_Exp>;
+  incubation_duration_minutes?: InputMaybe<Int_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+  number_of_columns?: InputMaybe<Int_Comparison_Exp>;
+  number_of_rows?: InputMaybe<Int_Comparison_Exp>;
+  state?: InputMaybe<Jsonb_Comparison_Exp>;
+  steri_cycles?: InputMaybe<Steri_Cycle_Bool_Exp>;
+  steri_cycles_aggregate?: InputMaybe<Steri_Cycle_Aggregate_Bool_Exp>;
+  updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "incubator" */
+export enum Incubator_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  IncubatorPkey = 'incubator_pkey'
+}
+
+/** columns and relationships of "incubator_control" */
+export type Incubator_Control = {
+  __typename?: 'incubator_control';
+  created_at: Scalars['timestamptz']['output'];
+  id: Scalars['bigint']['output'];
+  /** An object relationship */
+  incubator: Incubator;
+  incubator_id: Scalars['bigint']['output'];
+  is_test_passed?: Maybe<Scalars['Boolean']['output']>;
+  /** An object relationship */
+  recorded_by?: Maybe<User>;
+  result_recorded_at?: Maybe<Scalars['timestamptz']['output']>;
+  result_recorded_by_id?: Maybe<Scalars['uuid']['output']>;
+  started_at: Scalars['timestamptz']['output'];
+  updated_at: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "incubator_control" */
+export type Incubator_Control_Aggregate = {
+  __typename?: 'incubator_control_aggregate';
+  aggregate?: Maybe<Incubator_Control_Aggregate_Fields>;
+  nodes: Array<Incubator_Control>;
+};
+
+/** aggregate fields of "incubator_control" */
+export type Incubator_Control_Aggregate_Fields = {
+  __typename?: 'incubator_control_aggregate_fields';
+  avg?: Maybe<Incubator_Control_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Incubator_Control_Max_Fields>;
+  min?: Maybe<Incubator_Control_Min_Fields>;
+  stddev?: Maybe<Incubator_Control_Stddev_Fields>;
+  stddev_pop?: Maybe<Incubator_Control_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Incubator_Control_Stddev_Samp_Fields>;
+  sum?: Maybe<Incubator_Control_Sum_Fields>;
+  var_pop?: Maybe<Incubator_Control_Var_Pop_Fields>;
+  var_samp?: Maybe<Incubator_Control_Var_Samp_Fields>;
+  variance?: Maybe<Incubator_Control_Variance_Fields>;
+};
+
+
+/** aggregate fields of "incubator_control" */
+export type Incubator_Control_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Incubator_Control_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Incubator_Control_Avg_Fields = {
+  __typename?: 'incubator_control_avg_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "incubator_control". All fields are combined with a logical 'AND'. */
+export type Incubator_Control_Bool_Exp = {
+  _and?: InputMaybe<Array<Incubator_Control_Bool_Exp>>;
+  _not?: InputMaybe<Incubator_Control_Bool_Exp>;
+  _or?: InputMaybe<Array<Incubator_Control_Bool_Exp>>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Bigint_Comparison_Exp>;
+  incubator?: InputMaybe<Incubator_Bool_Exp>;
+  incubator_id?: InputMaybe<Bigint_Comparison_Exp>;
+  is_test_passed?: InputMaybe<Boolean_Comparison_Exp>;
+  recorded_by?: InputMaybe<User_Bool_Exp>;
+  result_recorded_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  result_recorded_by_id?: InputMaybe<Uuid_Comparison_Exp>;
+  started_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "incubator_control" */
+export enum Incubator_Control_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  IncubatorControlPkey = 'incubator_control_pkey'
+}
+
+/** input type for incrementing numeric columns in table "incubator_control" */
+export type Incubator_Control_Inc_Input = {
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** input type for inserting data into table "incubator_control" */
+export type Incubator_Control_Insert_Input = {
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubator?: InputMaybe<Incubator_Obj_Rel_Insert_Input>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
+  is_test_passed?: InputMaybe<Scalars['Boolean']['input']>;
+  recorded_by?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  result_recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  result_recorded_by_id?: InputMaybe<Scalars['uuid']['input']>;
+  started_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Incubator_Control_Max_Fields = {
+  __typename?: 'incubator_control_max_fields';
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
+  result_recorded_at?: Maybe<Scalars['timestamptz']['output']>;
+  result_recorded_by_id?: Maybe<Scalars['uuid']['output']>;
+  started_at?: Maybe<Scalars['timestamptz']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Incubator_Control_Min_Fields = {
+  __typename?: 'incubator_control_min_fields';
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
+  result_recorded_at?: Maybe<Scalars['timestamptz']['output']>;
+  result_recorded_by_id?: Maybe<Scalars['uuid']['output']>;
+  started_at?: Maybe<Scalars['timestamptz']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "incubator_control" */
+export type Incubator_Control_Mutation_Response = {
+  __typename?: 'incubator_control_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Incubator_Control>;
+};
+
+/** on_conflict condition type for table "incubator_control" */
+export type Incubator_Control_On_Conflict = {
+  constraint: Incubator_Control_Constraint;
+  update_columns?: Array<Incubator_Control_Update_Column>;
+  where?: InputMaybe<Incubator_Control_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "incubator_control". */
+export type Incubator_Control_Order_By = {
+  created_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  incubator?: InputMaybe<Incubator_Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
+  is_test_passed?: InputMaybe<Order_By>;
+  recorded_by?: InputMaybe<User_Order_By>;
+  result_recorded_at?: InputMaybe<Order_By>;
+  result_recorded_by_id?: InputMaybe<Order_By>;
+  started_at?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: incubator_control */
+export type Incubator_Control_Pk_Columns_Input = {
+  id: Scalars['bigint']['input'];
+};
+
+/** select columns of table "incubator_control" */
+export enum Incubator_Control_Select_Column {
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IncubatorId = 'incubator_id',
+  /** column name */
+  IsTestPassed = 'is_test_passed',
+  /** column name */
+  ResultRecordedAt = 'result_recorded_at',
+  /** column name */
+  ResultRecordedById = 'result_recorded_by_id',
+  /** column name */
+  StartedAt = 'started_at',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+/** input type for updating data in table "incubator_control" */
+export type Incubator_Control_Set_Input = {
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
+  is_test_passed?: InputMaybe<Scalars['Boolean']['input']>;
+  result_recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  result_recorded_by_id?: InputMaybe<Scalars['uuid']['input']>;
+  started_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Incubator_Control_Stddev_Fields = {
+  __typename?: 'incubator_control_stddev_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Incubator_Control_Stddev_Pop_Fields = {
+  __typename?: 'incubator_control_stddev_pop_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Incubator_Control_Stddev_Samp_Fields = {
+  __typename?: 'incubator_control_stddev_samp_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "incubator_control" */
+export type Incubator_Control_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Incubator_Control_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Incubator_Control_Stream_Cursor_Value_Input = {
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
+  is_test_passed?: InputMaybe<Scalars['Boolean']['input']>;
+  result_recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  result_recorded_by_id?: InputMaybe<Scalars['uuid']['input']>;
+  started_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Incubator_Control_Sum_Fields = {
+  __typename?: 'incubator_control_sum_fields';
+  id?: Maybe<Scalars['bigint']['output']>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** update columns of table "incubator_control" */
+export enum Incubator_Control_Update_Column {
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IncubatorId = 'incubator_id',
+  /** column name */
+  IsTestPassed = 'is_test_passed',
+  /** column name */
+  ResultRecordedAt = 'result_recorded_at',
+  /** column name */
+  ResultRecordedById = 'result_recorded_by_id',
+  /** column name */
+  StartedAt = 'started_at',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+export type Incubator_Control_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Incubator_Control_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Incubator_Control_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Incubator_Control_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Incubator_Control_Var_Pop_Fields = {
+  __typename?: 'incubator_control_var_pop_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Incubator_Control_Var_Samp_Fields = {
+  __typename?: 'incubator_control_var_samp_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Incubator_Control_Variance_Fields = {
+  __typename?: 'incubator_control_variance_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Incubator_Delete_At_Path_Input = {
+  state?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Incubator_Delete_Elem_Input = {
+  state?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Incubator_Delete_Key_Input = {
+  state?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** input type for incrementing numeric columns in table "incubator" */
+export type Incubator_Inc_Input = {
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_duration_minutes?: InputMaybe<Scalars['Int']['input']>;
+  number_of_columns?: InputMaybe<Scalars['Int']['input']>;
+  number_of_rows?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "incubator" */
+export type Incubator_Insert_Input = {
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  brand?: InputMaybe<Scalars['String']['input']>;
+  clinic?: InputMaybe<Clinic_Obj_Rel_Insert_Input>;
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_duration_minutes?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  number_of_columns?: InputMaybe<Scalars['Int']['input']>;
+  number_of_rows?: InputMaybe<Scalars['Int']['input']>;
+  state?: InputMaybe<Scalars['jsonb']['input']>;
+  steri_cycles?: InputMaybe<Steri_Cycle_Arr_Rel_Insert_Input>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Incubator_Max_Fields = {
+  __typename?: 'incubator_max_fields';
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  brand?: Maybe<Scalars['String']['output']>;
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  creator_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  number_of_columns?: Maybe<Scalars['Int']['output']>;
+  number_of_rows?: Maybe<Scalars['Int']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Incubator_Min_Fields = {
+  __typename?: 'incubator_min_fields';
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  brand?: Maybe<Scalars['String']['output']>;
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  creator_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  number_of_columns?: Maybe<Scalars['Int']['output']>;
+  number_of_rows?: Maybe<Scalars['Int']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "incubator" */
+export type Incubator_Mutation_Response = {
+  __typename?: 'incubator_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Incubator>;
+};
+
+/** input type for inserting object relation for remote table "incubator" */
+export type Incubator_Obj_Rel_Insert_Input = {
+  data: Incubator_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Incubator_On_Conflict>;
+};
+
+/** on_conflict condition type for table "incubator" */
+export type Incubator_On_Conflict = {
+  constraint: Incubator_Constraint;
+  update_columns?: Array<Incubator_Update_Column>;
+  where?: InputMaybe<Incubator_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "incubator". */
+export type Incubator_Order_By = {
+  archived_at?: InputMaybe<Order_By>;
+  brand?: InputMaybe<Order_By>;
+  clinic?: InputMaybe<Clinic_Order_By>;
+  clinic_id?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  creator?: InputMaybe<User_Order_By>;
+  creator_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  incubation_duration_minutes?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  number_of_columns?: InputMaybe<Order_By>;
+  number_of_rows?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+  steri_cycles_aggregate?: InputMaybe<Steri_Cycle_Aggregate_Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: incubator */
+export type Incubator_Pk_Columns_Input = {
+  id: Scalars['bigint']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Incubator_Prepend_Input = {
+  state?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** select columns of table "incubator" */
+export enum Incubator_Select_Column {
+  /** column name */
+  ArchivedAt = 'archived_at',
+  /** column name */
+  Brand = 'brand',
+  /** column name */
+  ClinicId = 'clinic_id',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  CreatorId = 'creator_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IncubationDurationMinutes = 'incubation_duration_minutes',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  NumberOfColumns = 'number_of_columns',
+  /** column name */
+  NumberOfRows = 'number_of_rows',
+  /** column name */
+  State = 'state',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+/** input type for updating data in table "incubator" */
+export type Incubator_Set_Input = {
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  brand?: InputMaybe<Scalars['String']['input']>;
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_duration_minutes?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  number_of_columns?: InputMaybe<Scalars['Int']['input']>;
+  number_of_rows?: InputMaybe<Scalars['Int']['input']>;
+  state?: InputMaybe<Scalars['jsonb']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Incubator_Stddev_Fields = {
+  __typename?: 'incubator_stddev_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Incubator_Stddev_Pop_Fields = {
+  __typename?: 'incubator_stddev_pop_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Incubator_Stddev_Samp_Fields = {
+  __typename?: 'incubator_stddev_samp_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "incubator" */
+export type Incubator_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Incubator_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Incubator_Stream_Cursor_Value_Input = {
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  brand?: InputMaybe<Scalars['String']['input']>;
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_duration_minutes?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  number_of_columns?: InputMaybe<Scalars['Int']['input']>;
+  number_of_rows?: InputMaybe<Scalars['Int']['input']>;
+  state?: InputMaybe<Scalars['jsonb']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Incubator_Sum_Fields = {
+  __typename?: 'incubator_sum_fields';
+  id?: Maybe<Scalars['bigint']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Int']['output']>;
+  number_of_columns?: Maybe<Scalars['Int']['output']>;
+  number_of_rows?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "incubator" */
+export enum Incubator_Update_Column {
+  /** column name */
+  ArchivedAt = 'archived_at',
+  /** column name */
+  Brand = 'brand',
+  /** column name */
+  ClinicId = 'clinic_id',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  CreatorId = 'creator_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IncubationDurationMinutes = 'incubation_duration_minutes',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  NumberOfColumns = 'number_of_columns',
+  /** column name */
+  NumberOfRows = 'number_of_rows',
+  /** column name */
+  State = 'state',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+export type Incubator_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Incubator_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Incubator_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Incubator_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Incubator_Delete_Key_Input>;
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Incubator_Inc_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Incubator_Prepend_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Incubator_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Incubator_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Incubator_Var_Pop_Fields = {
+  __typename?: 'incubator_var_pop_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Incubator_Var_Samp_Fields = {
+  __typename?: 'incubator_var_samp_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Incubator_Variance_Fields = {
+  __typename?: 'incubator_variance_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  incubation_duration_minutes?: Maybe<Scalars['Float']['output']>;
+  number_of_columns?: Maybe<Scalars['Float']['output']>;
+  number_of_rows?: Maybe<Scalars['Float']['output']>;
+};
+
 export type Jsonb_Cast_Exp = {
   String?: InputMaybe<String_Comparison_Exp>;
 };
@@ -1445,6 +2134,14 @@ export type Mutation_Root = {
   delete_count?: Maybe<Count_Mutation_Response>;
   /** delete single row from the table: "count" */
   delete_count_by_pk?: Maybe<Count>;
+  /** delete data from the table: "incubator" */
+  delete_incubator?: Maybe<Incubator_Mutation_Response>;
+  /** delete single row from the table: "incubator" */
+  delete_incubator_by_pk?: Maybe<Incubator>;
+  /** delete data from the table: "incubator_control" */
+  delete_incubator_control?: Maybe<Incubator_Control_Mutation_Response>;
+  /** delete single row from the table: "incubator_control" */
+  delete_incubator_control_by_pk?: Maybe<Incubator_Control>;
   /** delete data from the table: "patient" */
   delete_patient?: Maybe<Patient_Mutation_Response>;
   /** delete single row from the table: "patient" */
@@ -1505,6 +2202,14 @@ export type Mutation_Root = {
   insert_count?: Maybe<Count_Mutation_Response>;
   /** insert a single row into the table: "count" */
   insert_count_one?: Maybe<Count>;
+  /** insert data into the table: "incubator" */
+  insert_incubator?: Maybe<Incubator_Mutation_Response>;
+  /** insert data into the table: "incubator_control" */
+  insert_incubator_control?: Maybe<Incubator_Control_Mutation_Response>;
+  /** insert a single row into the table: "incubator_control" */
+  insert_incubator_control_one?: Maybe<Incubator_Control>;
+  /** insert a single row into the table: "incubator" */
+  insert_incubator_one?: Maybe<Incubator>;
   /** insert data into the table: "patient" */
   insert_patient?: Maybe<Patient_Mutation_Response>;
   /** insert a single row into the table: "patient" */
@@ -1575,6 +2280,18 @@ export type Mutation_Root = {
   update_count_by_pk?: Maybe<Count>;
   /** update multiples rows of table: "count" */
   update_count_many?: Maybe<Array<Maybe<Count_Mutation_Response>>>;
+  /** update data of the table: "incubator" */
+  update_incubator?: Maybe<Incubator_Mutation_Response>;
+  /** update single row of the table: "incubator" */
+  update_incubator_by_pk?: Maybe<Incubator>;
+  /** update data of the table: "incubator_control" */
+  update_incubator_control?: Maybe<Incubator_Control_Mutation_Response>;
+  /** update single row of the table: "incubator_control" */
+  update_incubator_control_by_pk?: Maybe<Incubator_Control>;
+  /** update multiples rows of table: "incubator_control" */
+  update_incubator_control_many?: Maybe<Array<Maybe<Incubator_Control_Mutation_Response>>>;
+  /** update multiples rows of table: "incubator" */
+  update_incubator_many?: Maybe<Array<Maybe<Incubator_Mutation_Response>>>;
   /** update data of the table: "patient" */
   update_patient?: Maybe<Patient_Mutation_Response>;
   /** update single row of the table: "patient" */
@@ -1688,6 +2405,30 @@ export type Mutation_RootDelete_CountArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Count_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_IncubatorArgs = {
+  where: Incubator_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Incubator_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Incubator_ControlArgs = {
+  where: Incubator_Control_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Incubator_Control_By_PkArgs = {
   id: Scalars['bigint']['input'];
 };
 
@@ -1877,6 +2618,34 @@ export type Mutation_RootInsert_CountArgs = {
 export type Mutation_RootInsert_Count_OneArgs = {
   object: Count_Insert_Input;
   on_conflict?: InputMaybe<Count_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_IncubatorArgs = {
+  objects: Array<Incubator_Insert_Input>;
+  on_conflict?: InputMaybe<Incubator_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Incubator_ControlArgs = {
+  objects: Array<Incubator_Control_Insert_Input>;
+  on_conflict?: InputMaybe<Incubator_Control_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Incubator_Control_OneArgs = {
+  object: Incubator_Control_Insert_Input;
+  on_conflict?: InputMaybe<Incubator_Control_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Incubator_OneArgs = {
+  object: Incubator_Insert_Input;
+  on_conflict?: InputMaybe<Incubator_On_Conflict>;
 };
 
 
@@ -2139,6 +2908,60 @@ export type Mutation_RootUpdate_Count_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Count_ManyArgs = {
   updates: Array<Count_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_IncubatorArgs = {
+  _append?: InputMaybe<Incubator_Append_Input>;
+  _delete_at_path?: InputMaybe<Incubator_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Incubator_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Incubator_Delete_Key_Input>;
+  _inc?: InputMaybe<Incubator_Inc_Input>;
+  _prepend?: InputMaybe<Incubator_Prepend_Input>;
+  _set?: InputMaybe<Incubator_Set_Input>;
+  where: Incubator_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Incubator_By_PkArgs = {
+  _append?: InputMaybe<Incubator_Append_Input>;
+  _delete_at_path?: InputMaybe<Incubator_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Incubator_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Incubator_Delete_Key_Input>;
+  _inc?: InputMaybe<Incubator_Inc_Input>;
+  _prepend?: InputMaybe<Incubator_Prepend_Input>;
+  _set?: InputMaybe<Incubator_Set_Input>;
+  pk_columns: Incubator_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Incubator_ControlArgs = {
+  _inc?: InputMaybe<Incubator_Control_Inc_Input>;
+  _set?: InputMaybe<Incubator_Control_Set_Input>;
+  where: Incubator_Control_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Incubator_Control_By_PkArgs = {
+  _inc?: InputMaybe<Incubator_Control_Inc_Input>;
+  _set?: InputMaybe<Incubator_Control_Set_Input>;
+  pk_columns: Incubator_Control_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Incubator_Control_ManyArgs = {
+  updates: Array<Incubator_Control_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Incubator_ManyArgs = {
+  updates: Array<Incubator_Updates>;
 };
 
 
@@ -3710,6 +4533,18 @@ export type Query_Root = {
   fuzzy_search_patient: Array<Patient>;
   /** execute function "fuzzy_search_patient" and query aggregates on result of table type "patient" */
   fuzzy_search_patient_aggregate: Patient_Aggregate;
+  /** fetch data from the table: "incubator" */
+  incubator: Array<Incubator>;
+  /** fetch aggregated fields from the table: "incubator" */
+  incubator_aggregate: Incubator_Aggregate;
+  /** fetch data from the table: "incubator" using primary key columns */
+  incubator_by_pk?: Maybe<Incubator>;
+  /** fetch data from the table: "incubator_control" */
+  incubator_control: Array<Incubator_Control>;
+  /** fetch aggregated fields from the table: "incubator_control" */
+  incubator_control_aggregate: Incubator_Control_Aggregate;
+  /** fetch data from the table: "incubator_control" using primary key columns */
+  incubator_control_by_pk?: Maybe<Incubator_Control>;
   /** fetch data from the table: "patient" */
   patient: Array<Patient>;
   /** fetch aggregated fields from the table: "patient" */
@@ -3734,6 +4569,10 @@ export type Query_Root = {
   printer_command_type_aggregate: Printer_Command_Type_Aggregate;
   /** fetch data from the table: "printer_command_type" using primary key columns */
   printer_command_type_by_pk?: Maybe<Printer_Command_Type>;
+  /** fetch data from the table: "recent_steri_item" */
+  recent_steri_item: Array<Recent_Steri_Item>;
+  /** fetch aggregated fields from the table: "recent_steri_item" */
+  recent_steri_item_aggregate: Recent_Steri_Item_Aggregate;
   /** fetch data from the table: "steri_cycle" */
   steri_cycle: Array<Steri_Cycle>;
   /** fetch aggregated fields from the table: "steri_cycle" */
@@ -3895,6 +4734,52 @@ export type Query_RootFuzzy_Search_Patient_AggregateArgs = {
 };
 
 
+export type Query_RootIncubatorArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Order_By>>;
+  where?: InputMaybe<Incubator_Bool_Exp>;
+};
+
+
+export type Query_RootIncubator_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Order_By>>;
+  where?: InputMaybe<Incubator_Bool_Exp>;
+};
+
+
+export type Query_RootIncubator_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Query_RootIncubator_ControlArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Control_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Control_Order_By>>;
+  where?: InputMaybe<Incubator_Control_Bool_Exp>;
+};
+
+
+export type Query_RootIncubator_Control_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Control_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Control_Order_By>>;
+  where?: InputMaybe<Incubator_Control_Bool_Exp>;
+};
+
+
+export type Query_RootIncubator_Control_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
 export type Query_RootPatientArgs = {
   distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -3984,6 +4869,24 @@ export type Query_RootPrinter_Command_Type_AggregateArgs = {
 
 export type Query_RootPrinter_Command_Type_By_PkArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type Query_RootRecent_Steri_ItemArgs = {
+  distinct_on?: InputMaybe<Array<Recent_Steri_Item_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Recent_Steri_Item_Order_By>>;
+  where?: InputMaybe<Recent_Steri_Item_Bool_Exp>;
+};
+
+
+export type Query_RootRecent_Steri_Item_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Recent_Steri_Item_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Recent_Steri_Item_Order_By>>;
+  where?: InputMaybe<Recent_Steri_Item_Bool_Exp>;
 };
 
 
@@ -4165,6 +5068,162 @@ export type Query_RootUser_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
+/** columns and relationships of "recent_steri_item" */
+export type Recent_Steri_Item = {
+  __typename?: 'recent_steri_item';
+  id?: Maybe<Scalars['bigint']['output']>;
+  latest_created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  steri_item?: Maybe<Steri_Item>;
+  total_items?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "recent_steri_item" */
+export type Recent_Steri_Item_Aggregate = {
+  __typename?: 'recent_steri_item_aggregate';
+  aggregate?: Maybe<Recent_Steri_Item_Aggregate_Fields>;
+  nodes: Array<Recent_Steri_Item>;
+};
+
+/** aggregate fields of "recent_steri_item" */
+export type Recent_Steri_Item_Aggregate_Fields = {
+  __typename?: 'recent_steri_item_aggregate_fields';
+  avg?: Maybe<Recent_Steri_Item_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Recent_Steri_Item_Max_Fields>;
+  min?: Maybe<Recent_Steri_Item_Min_Fields>;
+  stddev?: Maybe<Recent_Steri_Item_Stddev_Fields>;
+  stddev_pop?: Maybe<Recent_Steri_Item_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Recent_Steri_Item_Stddev_Samp_Fields>;
+  sum?: Maybe<Recent_Steri_Item_Sum_Fields>;
+  var_pop?: Maybe<Recent_Steri_Item_Var_Pop_Fields>;
+  var_samp?: Maybe<Recent_Steri_Item_Var_Samp_Fields>;
+  variance?: Maybe<Recent_Steri_Item_Variance_Fields>;
+};
+
+
+/** aggregate fields of "recent_steri_item" */
+export type Recent_Steri_Item_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Recent_Steri_Item_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Recent_Steri_Item_Avg_Fields = {
+  __typename?: 'recent_steri_item_avg_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "recent_steri_item". All fields are combined with a logical 'AND'. */
+export type Recent_Steri_Item_Bool_Exp = {
+  _and?: InputMaybe<Array<Recent_Steri_Item_Bool_Exp>>;
+  _not?: InputMaybe<Recent_Steri_Item_Bool_Exp>;
+  _or?: InputMaybe<Array<Recent_Steri_Item_Bool_Exp>>;
+  id?: InputMaybe<Bigint_Comparison_Exp>;
+  latest_created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  steri_item?: InputMaybe<Steri_Item_Bool_Exp>;
+  total_items?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Recent_Steri_Item_Max_Fields = {
+  __typename?: 'recent_steri_item_max_fields';
+  id?: Maybe<Scalars['bigint']['output']>;
+  latest_created_at?: Maybe<Scalars['timestamptz']['output']>;
+  total_items?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type Recent_Steri_Item_Min_Fields = {
+  __typename?: 'recent_steri_item_min_fields';
+  id?: Maybe<Scalars['bigint']['output']>;
+  latest_created_at?: Maybe<Scalars['timestamptz']['output']>;
+  total_items?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "recent_steri_item". */
+export type Recent_Steri_Item_Order_By = {
+  id?: InputMaybe<Order_By>;
+  latest_created_at?: InputMaybe<Order_By>;
+  steri_item?: InputMaybe<Steri_Item_Order_By>;
+  total_items?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "recent_steri_item" */
+export enum Recent_Steri_Item_Select_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LatestCreatedAt = 'latest_created_at',
+  /** column name */
+  TotalItems = 'total_items'
+}
+
+/** aggregate stddev on columns */
+export type Recent_Steri_Item_Stddev_Fields = {
+  __typename?: 'recent_steri_item_stddev_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Recent_Steri_Item_Stddev_Pop_Fields = {
+  __typename?: 'recent_steri_item_stddev_pop_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Recent_Steri_Item_Stddev_Samp_Fields = {
+  __typename?: 'recent_steri_item_stddev_samp_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "recent_steri_item" */
+export type Recent_Steri_Item_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Recent_Steri_Item_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Recent_Steri_Item_Stream_Cursor_Value_Input = {
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  latest_created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  total_items?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Recent_Steri_Item_Sum_Fields = {
+  __typename?: 'recent_steri_item_sum_fields';
+  id?: Maybe<Scalars['bigint']['output']>;
+  total_items?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Recent_Steri_Item_Var_Pop_Fields = {
+  __typename?: 'recent_steri_item_var_pop_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Recent_Steri_Item_Var_Samp_Fields = {
+  __typename?: 'recent_steri_item_var_samp_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Recent_Steri_Item_Variance_Fields = {
+  __typename?: 'recent_steri_item_variance_fields';
+  id?: Maybe<Scalars['Float']['output']>;
+  total_items?: Maybe<Scalars['Float']['output']>;
+};
+
 export type Signup = {
   __typename?: 'signup';
   access_token: Scalars['String']['output'];
@@ -4205,6 +5264,10 @@ export type Steri_Cycle = {
   finish_user?: Maybe<User>;
   finish_user_id?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['bigint']['output'];
+  incubation_started_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  incubator?: Maybe<Incubator>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
   is_spore_test_enabled: Scalars['Boolean']['output'];
   log_data?: Maybe<Scalars['jsonb']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
@@ -4213,7 +5276,7 @@ export type Steri_Cycle = {
   /** An object relationship */
   spore_test_user?: Maybe<User>;
   spore_test_user_id?: Maybe<Scalars['uuid']['output']>;
-  start_at?: Maybe<Scalars['timestamp']['output']>;
+  start_at?: Maybe<Scalars['timestamptz']['output']>;
   /** An object relationship */
   start_user?: Maybe<User>;
   start_user_id?: Maybe<Scalars['uuid']['output']>;
@@ -4342,12 +5405,14 @@ export type Steri_Cycle_Arr_Rel_Insert_Input = {
 export type Steri_Cycle_Avg_Fields = {
   __typename?: 'steri_cycle_avg_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by avg() on columns of table "steri_cycle" */
 export type Steri_Cycle_Avg_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4364,6 +5429,9 @@ export type Steri_Cycle_Bool_Exp = {
   finish_user?: InputMaybe<User_Bool_Exp>;
   finish_user_id?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
+  incubation_started_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  incubator?: InputMaybe<Incubator_Bool_Exp>;
+  incubator_id?: InputMaybe<Bigint_Comparison_Exp>;
   is_spore_test_enabled?: InputMaybe<Boolean_Comparison_Exp>;
   log_data?: InputMaybe<Jsonb_Comparison_Exp>;
   notes?: InputMaybe<String_Comparison_Exp>;
@@ -4371,7 +5439,7 @@ export type Steri_Cycle_Bool_Exp = {
   spore_test_recorded_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   spore_test_user?: InputMaybe<User_Bool_Exp>;
   spore_test_user_id?: InputMaybe<Uuid_Comparison_Exp>;
-  start_at?: InputMaybe<Timestamp_Comparison_Exp>;
+  start_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   start_user?: InputMaybe<User_Bool_Exp>;
   start_user_id?: InputMaybe<Uuid_Comparison_Exp>;
   status?: InputMaybe<Steri_Cycle_Status_Enum_Comparison_Exp>;
@@ -4408,6 +5476,7 @@ export type Steri_Cycle_Delete_Key_Input = {
 /** input type for incrementing numeric columns in table "steri_cycle" */
 export type Steri_Cycle_Inc_Input = {
   id?: InputMaybe<Scalars['bigint']['input']>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
   sterilizer_id?: InputMaybe<Scalars['bigint']['input']>;
 };
 
@@ -4421,6 +5490,9 @@ export type Steri_Cycle_Insert_Input = {
   finish_user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   finish_user_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_started_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  incubator?: InputMaybe<Incubator_Obj_Rel_Insert_Input>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
   is_spore_test_enabled?: InputMaybe<Scalars['Boolean']['input']>;
   log_data?: InputMaybe<Scalars['jsonb']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
@@ -4428,7 +5500,7 @@ export type Steri_Cycle_Insert_Input = {
   spore_test_recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
   spore_test_user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   spore_test_user_id?: InputMaybe<Scalars['uuid']['input']>;
-  start_at?: InputMaybe<Scalars['timestamp']['input']>;
+  start_at?: InputMaybe<Scalars['timestamptz']['input']>;
   start_user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   start_user_id?: InputMaybe<Scalars['uuid']['input']>;
   status?: InputMaybe<Steri_Cycle_Status_Enum>;
@@ -4447,10 +5519,12 @@ export type Steri_Cycle_Max_Fields = {
   finish_at?: Maybe<Scalars['timestamptz']['output']>;
   finish_user_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
+  incubation_started_at?: Maybe<Scalars['timestamptz']['output']>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   spore_test_recorded_at?: Maybe<Scalars['timestamptz']['output']>;
   spore_test_user_id?: Maybe<Scalars['uuid']['output']>;
-  start_at?: Maybe<Scalars['timestamp']['output']>;
+  start_at?: Maybe<Scalars['timestamptz']['output']>;
   start_user_id?: Maybe<Scalars['uuid']['output']>;
   sterilizer_id?: Maybe<Scalars['bigint']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
@@ -4464,6 +5538,8 @@ export type Steri_Cycle_Max_Order_By = {
   finish_at?: InputMaybe<Order_By>;
   finish_user_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  incubation_started_at?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   notes?: InputMaybe<Order_By>;
   spore_test_recorded_at?: InputMaybe<Order_By>;
   spore_test_user_id?: InputMaybe<Order_By>;
@@ -4482,10 +5558,12 @@ export type Steri_Cycle_Min_Fields = {
   finish_at?: Maybe<Scalars['timestamptz']['output']>;
   finish_user_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
+  incubation_started_at?: Maybe<Scalars['timestamptz']['output']>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   spore_test_recorded_at?: Maybe<Scalars['timestamptz']['output']>;
   spore_test_user_id?: Maybe<Scalars['uuid']['output']>;
-  start_at?: Maybe<Scalars['timestamp']['output']>;
+  start_at?: Maybe<Scalars['timestamptz']['output']>;
   start_user_id?: Maybe<Scalars['uuid']['output']>;
   sterilizer_id?: Maybe<Scalars['bigint']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
@@ -4499,6 +5577,8 @@ export type Steri_Cycle_Min_Order_By = {
   finish_at?: InputMaybe<Order_By>;
   finish_user_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  incubation_started_at?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   notes?: InputMaybe<Order_By>;
   spore_test_recorded_at?: InputMaybe<Order_By>;
   spore_test_user_id?: InputMaybe<Order_By>;
@@ -4541,6 +5621,9 @@ export type Steri_Cycle_Order_By = {
   finish_user?: InputMaybe<User_Order_By>;
   finish_user_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  incubation_started_at?: InputMaybe<Order_By>;
+  incubator?: InputMaybe<Incubator_Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   is_spore_test_enabled?: InputMaybe<Order_By>;
   log_data?: InputMaybe<Order_By>;
   notes?: InputMaybe<Order_By>;
@@ -4582,6 +5665,10 @@ export enum Steri_Cycle_Select_Column {
   FinishUserId = 'finish_user_id',
   /** column name */
   Id = 'id',
+  /** column name */
+  IncubationStartedAt = 'incubation_started_at',
+  /** column name */
+  IncubatorId = 'incubator_id',
   /** column name */
   IsSporeTestEnabled = 'is_spore_test_enabled',
   /** column name */
@@ -4630,13 +5717,15 @@ export type Steri_Cycle_Set_Input = {
   finish_at?: InputMaybe<Scalars['timestamptz']['input']>;
   finish_user_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_started_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
   is_spore_test_enabled?: InputMaybe<Scalars['Boolean']['input']>;
   log_data?: InputMaybe<Scalars['jsonb']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
   spore_test_passed?: InputMaybe<Scalars['Boolean']['input']>;
   spore_test_recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
   spore_test_user_id?: InputMaybe<Scalars['uuid']['input']>;
-  start_at?: InputMaybe<Scalars['timestamp']['input']>;
+  start_at?: InputMaybe<Scalars['timestamptz']['input']>;
   start_user_id?: InputMaybe<Scalars['uuid']['input']>;
   status?: InputMaybe<Steri_Cycle_Status_Enum>;
   sterilizer_id?: InputMaybe<Scalars['bigint']['input']>;
@@ -4785,12 +5874,14 @@ export type Steri_Cycle_Status_Updates = {
 export type Steri_Cycle_Stddev_Fields = {
   __typename?: 'steri_cycle_stddev_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev() on columns of table "steri_cycle" */
 export type Steri_Cycle_Stddev_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4798,12 +5889,14 @@ export type Steri_Cycle_Stddev_Order_By = {
 export type Steri_Cycle_Stddev_Pop_Fields = {
   __typename?: 'steri_cycle_stddev_pop_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_pop() on columns of table "steri_cycle" */
 export type Steri_Cycle_Stddev_Pop_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4811,12 +5904,14 @@ export type Steri_Cycle_Stddev_Pop_Order_By = {
 export type Steri_Cycle_Stddev_Samp_Fields = {
   __typename?: 'steri_cycle_stddev_samp_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_samp() on columns of table "steri_cycle" */
 export type Steri_Cycle_Stddev_Samp_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4836,13 +5931,15 @@ export type Steri_Cycle_Stream_Cursor_Value_Input = {
   finish_at?: InputMaybe<Scalars['timestamptz']['input']>;
   finish_user_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
+  incubation_started_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  incubator_id?: InputMaybe<Scalars['bigint']['input']>;
   is_spore_test_enabled?: InputMaybe<Scalars['Boolean']['input']>;
   log_data?: InputMaybe<Scalars['jsonb']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
   spore_test_passed?: InputMaybe<Scalars['Boolean']['input']>;
   spore_test_recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
   spore_test_user_id?: InputMaybe<Scalars['uuid']['input']>;
-  start_at?: InputMaybe<Scalars['timestamp']['input']>;
+  start_at?: InputMaybe<Scalars['timestamptz']['input']>;
   start_user_id?: InputMaybe<Scalars['uuid']['input']>;
   status?: InputMaybe<Steri_Cycle_Status_Enum>;
   sterilizer_id?: InputMaybe<Scalars['bigint']['input']>;
@@ -4853,12 +5950,14 @@ export type Steri_Cycle_Stream_Cursor_Value_Input = {
 export type Steri_Cycle_Sum_Fields = {
   __typename?: 'steri_cycle_sum_fields';
   id?: Maybe<Scalars['bigint']['output']>;
+  incubator_id?: Maybe<Scalars['bigint']['output']>;
   sterilizer_id?: Maybe<Scalars['bigint']['output']>;
 };
 
 /** order by sum() on columns of table "steri_cycle" */
 export type Steri_Cycle_Sum_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4876,6 +5975,10 @@ export enum Steri_Cycle_Update_Column {
   FinishUserId = 'finish_user_id',
   /** column name */
   Id = 'id',
+  /** column name */
+  IncubationStartedAt = 'incubation_started_at',
+  /** column name */
+  IncubatorId = 'incubator_id',
   /** column name */
   IsSporeTestEnabled = 'is_spore_test_enabled',
   /** column name */
@@ -4923,12 +6026,14 @@ export type Steri_Cycle_Updates = {
 export type Steri_Cycle_Var_Pop_Fields = {
   __typename?: 'steri_cycle_var_pop_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_pop() on columns of table "steri_cycle" */
 export type Steri_Cycle_Var_Pop_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4936,12 +6041,14 @@ export type Steri_Cycle_Var_Pop_Order_By = {
 export type Steri_Cycle_Var_Samp_Fields = {
   __typename?: 'steri_cycle_var_samp_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_samp() on columns of table "steri_cycle" */
 export type Steri_Cycle_Var_Samp_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -4949,12 +6056,14 @@ export type Steri_Cycle_Var_Samp_Order_By = {
 export type Steri_Cycle_Variance_Fields = {
   __typename?: 'steri_cycle_variance_fields';
   id?: Maybe<Scalars['Float']['output']>;
+  incubator_id?: Maybe<Scalars['Float']['output']>;
   sterilizer_id?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by variance() on columns of table "steri_cycle" */
 export type Steri_Cycle_Variance_Order_By = {
   id?: InputMaybe<Order_By>;
+  incubator_id?: InputMaybe<Order_By>;
   sterilizer_id?: InputMaybe<Order_By>;
 };
 
@@ -5461,8 +6570,6 @@ export type Steri_Label = {
   expiry_at: Scalars['timestamptz']['output'];
   id: Scalars['bigint']['output'];
   next_label_id?: Maybe<Scalars['bigint']['output']>;
-  printed_at?: Maybe<Scalars['timestamptz']['output']>;
-  printer_id?: Maybe<Scalars['uuid']['output']>;
   /** An object relationship */
   steri_cycle?: Maybe<Steri_Cycle>;
   steri_cycle_id?: Maybe<Scalars['bigint']['output']>;
@@ -5580,8 +6687,6 @@ export type Steri_Label_Bool_Exp = {
   expiry_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   next_label_id?: InputMaybe<Bigint_Comparison_Exp>;
-  printed_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  printer_id?: InputMaybe<Uuid_Comparison_Exp>;
   steri_cycle?: InputMaybe<Steri_Cycle_Bool_Exp>;
   steri_cycle_id?: InputMaybe<Bigint_Comparison_Exp>;
   steri_cycle_user?: InputMaybe<User_Bool_Exp>;
@@ -5625,8 +6730,6 @@ export type Steri_Label_Insert_Input = {
   expiry_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   next_label_id?: InputMaybe<Scalars['bigint']['input']>;
-  printed_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  printer_id?: InputMaybe<Scalars['uuid']['input']>;
   steri_cycle?: InputMaybe<Steri_Cycle_Obj_Rel_Insert_Input>;
   steri_cycle_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_user?: InputMaybe<User_Obj_Rel_Insert_Input>;
@@ -5650,8 +6753,6 @@ export type Steri_Label_Max_Fields = {
   expiry_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   next_label_id?: Maybe<Scalars['bigint']['output']>;
-  printed_at?: Maybe<Scalars['timestamptz']['output']>;
-  printer_id?: Maybe<Scalars['uuid']['output']>;
   steri_cycle_id?: Maybe<Scalars['bigint']['output']>;
   steri_cycle_user_id?: Maybe<Scalars['uuid']['output']>;
   steri_item_id?: Maybe<Scalars['bigint']['output']>;
@@ -5671,8 +6772,6 @@ export type Steri_Label_Max_Order_By = {
   expiry_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   next_label_id?: InputMaybe<Order_By>;
-  printed_at?: InputMaybe<Order_By>;
-  printer_id?: InputMaybe<Order_By>;
   steri_cycle_id?: InputMaybe<Order_By>;
   steri_cycle_user_id?: InputMaybe<Order_By>;
   steri_item_id?: InputMaybe<Order_By>;
@@ -5693,8 +6792,6 @@ export type Steri_Label_Min_Fields = {
   expiry_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   next_label_id?: Maybe<Scalars['bigint']['output']>;
-  printed_at?: Maybe<Scalars['timestamptz']['output']>;
-  printer_id?: Maybe<Scalars['uuid']['output']>;
   steri_cycle_id?: Maybe<Scalars['bigint']['output']>;
   steri_cycle_user_id?: Maybe<Scalars['uuid']['output']>;
   steri_item_id?: Maybe<Scalars['bigint']['output']>;
@@ -5714,8 +6811,6 @@ export type Steri_Label_Min_Order_By = {
   expiry_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   next_label_id?: InputMaybe<Order_By>;
-  printed_at?: InputMaybe<Order_By>;
-  printer_id?: InputMaybe<Order_By>;
   steri_cycle_id?: InputMaybe<Order_By>;
   steri_cycle_user_id?: InputMaybe<Order_By>;
   steri_item_id?: InputMaybe<Order_By>;
@@ -5756,8 +6851,6 @@ export type Steri_Label_Order_By = {
   expiry_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   next_label_id?: InputMaybe<Order_By>;
-  printed_at?: InputMaybe<Order_By>;
-  printer_id?: InputMaybe<Order_By>;
   steri_cycle?: InputMaybe<Steri_Cycle_Order_By>;
   steri_cycle_id?: InputMaybe<Order_By>;
   steri_cycle_user?: InputMaybe<User_Order_By>;
@@ -5796,10 +6889,6 @@ export enum Steri_Label_Select_Column {
   /** column name */
   NextLabelId = 'next_label_id',
   /** column name */
-  PrintedAt = 'printed_at',
-  /** column name */
-  PrinterId = 'printer_id',
-  /** column name */
   SteriCycleId = 'steri_cycle_id',
   /** column name */
   SteriCycleUserId = 'steri_cycle_user_id',
@@ -5823,8 +6912,6 @@ export type Steri_Label_Set_Input = {
   expiry_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   next_label_id?: InputMaybe<Scalars['bigint']['input']>;
-  printed_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  printer_id?: InputMaybe<Scalars['uuid']['input']>;
   steri_cycle_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_user_id?: InputMaybe<Scalars['uuid']['input']>;
   steri_item_id?: InputMaybe<Scalars['bigint']['input']>;
@@ -5915,8 +7002,6 @@ export type Steri_Label_Stream_Cursor_Value_Input = {
   expiry_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   next_label_id?: InputMaybe<Scalars['bigint']['input']>;
-  printed_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  printer_id?: InputMaybe<Scalars['uuid']['input']>;
   steri_cycle_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_user_id?: InputMaybe<Scalars['uuid']['input']>;
   steri_item_id?: InputMaybe<Scalars['bigint']['input']>;
@@ -5967,10 +7052,6 @@ export enum Steri_Label_Update_Column {
   Id = 'id',
   /** column name */
   NextLabelId = 'next_label_id',
-  /** column name */
-  PrintedAt = 'printed_at',
-  /** column name */
-  PrinterId = 'printer_id',
   /** column name */
   SteriCycleId = 'steri_cycle_id',
   /** column name */
@@ -6968,6 +8049,22 @@ export type Subscription_Root = {
   fuzzy_search_patient: Array<Patient>;
   /** execute function "fuzzy_search_patient" and query aggregates on result of table type "patient" */
   fuzzy_search_patient_aggregate: Patient_Aggregate;
+  /** fetch data from the table: "incubator" */
+  incubator: Array<Incubator>;
+  /** fetch aggregated fields from the table: "incubator" */
+  incubator_aggregate: Incubator_Aggregate;
+  /** fetch data from the table: "incubator" using primary key columns */
+  incubator_by_pk?: Maybe<Incubator>;
+  /** fetch data from the table: "incubator_control" */
+  incubator_control: Array<Incubator_Control>;
+  /** fetch aggregated fields from the table: "incubator_control" */
+  incubator_control_aggregate: Incubator_Control_Aggregate;
+  /** fetch data from the table: "incubator_control" using primary key columns */
+  incubator_control_by_pk?: Maybe<Incubator_Control>;
+  /** fetch data from the table in a streaming manner: "incubator_control" */
+  incubator_control_stream: Array<Incubator_Control>;
+  /** fetch data from the table in a streaming manner: "incubator" */
+  incubator_stream: Array<Incubator>;
   /** fetch data from the table: "patient" */
   patient: Array<Patient>;
   /** fetch aggregated fields from the table: "patient" */
@@ -7000,6 +8097,12 @@ export type Subscription_Root = {
   printer_command_type_stream: Array<Printer_Command_Type>;
   /** fetch data from the table in a streaming manner: "printer" */
   printer_stream: Array<Printer>;
+  /** fetch data from the table: "recent_steri_item" */
+  recent_steri_item: Array<Recent_Steri_Item>;
+  /** fetch aggregated fields from the table: "recent_steri_item" */
+  recent_steri_item_aggregate: Recent_Steri_Item_Aggregate;
+  /** fetch data from the table in a streaming manner: "recent_steri_item" */
+  recent_steri_item_stream: Array<Recent_Steri_Item>;
   /** fetch data from the table: "steri_cycle" */
   steri_cycle: Array<Steri_Cycle>;
   /** fetch aggregated fields from the table: "steri_cycle" */
@@ -7205,6 +8308,66 @@ export type Subscription_RootFuzzy_Search_Patient_AggregateArgs = {
 };
 
 
+export type Subscription_RootIncubatorArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Order_By>>;
+  where?: InputMaybe<Incubator_Bool_Exp>;
+};
+
+
+export type Subscription_RootIncubator_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Order_By>>;
+  where?: InputMaybe<Incubator_Bool_Exp>;
+};
+
+
+export type Subscription_RootIncubator_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Subscription_RootIncubator_ControlArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Control_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Control_Order_By>>;
+  where?: InputMaybe<Incubator_Control_Bool_Exp>;
+};
+
+
+export type Subscription_RootIncubator_Control_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Incubator_Control_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Incubator_Control_Order_By>>;
+  where?: InputMaybe<Incubator_Control_Bool_Exp>;
+};
+
+
+export type Subscription_RootIncubator_Control_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Subscription_RootIncubator_Control_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Incubator_Control_Stream_Cursor_Input>>;
+  where?: InputMaybe<Incubator_Control_Bool_Exp>;
+};
+
+
+export type Subscription_RootIncubator_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Incubator_Stream_Cursor_Input>>;
+  where?: InputMaybe<Incubator_Bool_Exp>;
+};
+
+
 export type Subscription_RootPatientArgs = {
   distinct_on?: InputMaybe<Array<Patient_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7322,6 +8485,31 @@ export type Subscription_RootPrinter_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Printer_Stream_Cursor_Input>>;
   where?: InputMaybe<Printer_Bool_Exp>;
+};
+
+
+export type Subscription_RootRecent_Steri_ItemArgs = {
+  distinct_on?: InputMaybe<Array<Recent_Steri_Item_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Recent_Steri_Item_Order_By>>;
+  where?: InputMaybe<Recent_Steri_Item_Bool_Exp>;
+};
+
+
+export type Subscription_RootRecent_Steri_Item_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Recent_Steri_Item_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Recent_Steri_Item_Order_By>>;
+  where?: InputMaybe<Recent_Steri_Item_Bool_Exp>;
+};
+
+
+export type Subscription_RootRecent_Steri_Item_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Recent_Steri_Item_Stream_Cursor_Input>>;
+  where?: InputMaybe<Recent_Steri_Item_Bool_Exp>;
 };
 
 
