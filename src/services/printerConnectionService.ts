@@ -50,69 +50,6 @@ function logVersionInfo(): void {
   console.log('==========================');
 }
 
-/**
- * Initialize printer connection using environment authentication
- * 
- * This function attempts to establish a printer connection
- * using the environment file created on boot with printer_id and join token.
- * It authenticates using the join token to get an access token,
- * then establishes GraphQL connections and sets up monitoring.
- * 
- * @returns Promise<void>
- */
-export async function initializePrinterConnection(): Promise<void> {
-  try {
-    // Log version information on startup
-    logVersionInfo();
-    
-    console.log('Initializing printer connection using environment authentication...');
-    
-    // Initialize environment authentication
-    const authResult = await initializeEnvironmentAuth();
-    
-    if (!authResult.success || !authResult.access_token || !authResult.printer_id) {
-      console.log('No valid authentication data found. Printer will remain disconnected until environment is configured.');
-      return;
-    }
-
-    console.log('Authentication successful, establishing GraphQL connections...');
-    
-    // Establish GraphQL connections using access token
-    const { wsClient, httpClient } = await getClient(authResult.access_token);
-    
-    // Set up printer subscription (includes command handling and archived monitoring)
-    currentSubscription = subscribeToPrinter(
-      wsClient, 
-      authResult.printer_id, 
-      (command) => handleCommand(httpClient, command),
-      {
-        onArchived: () => {
-          console.log('Printer archived callback triggered');
-          // The subscription will be automatically cleaned up when archived
-        }
-      }
-    );
-    
-    // Fetch and store latest printer information
-    const printerInfo = await fetchPrinterInfo(httpClient, authResult.printer_id);
-    setLatestPrinterInfo(printerInfo);
-    
-    // Start heartbeat monitoring
-    startPrinterHeartbeat(httpClient, authResult.printer_id);
-
-    await httpClient.updatePrinter({
-      printerId: authResult.printer_id,
-      set: {
-        update_started_at: null
-      }
-    });
-    
-    console.log('Printer connection established successfully using environment authentication');
-  } catch (error) {
-    console.error('Failed to initialize printer connection:', error);
-    throw error;
-  }
-}
 
 /**
  * Initialize printer connection with fresh credentials
@@ -153,6 +90,13 @@ export async function initializePrinterConnectionWithCredentials(token: string, 
     
     // Start heartbeat monitoring
     startPrinterHeartbeat(httpClient, printerId);
+
+    await httpClient.updatePrinter({
+      printerId,
+      set: {
+        update_started_at: null
+      }
+    });
     
     console.log('Printer connection initialized successfully');
     

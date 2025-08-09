@@ -160,6 +160,7 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
         }
         
         console.log(`Update process completed successfully for printer: ${printer_id}`);
+        
         resolve({
           success: true,
           message: 'Update run successfully'

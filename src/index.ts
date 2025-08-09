@@ -11,7 +11,6 @@
 import 'dotenv/config';
 
 // Import services
-import { initializePrinterConnection } from './services/printerConnectionService';
 import { stopPrinterHeartbeat } from './services/startHeartbeat';
 
 // Import Express server
@@ -27,9 +26,6 @@ import { createServer, startServer } from './server';
 async function initializeApplication(): Promise<void> {
   try {
     console.log('Initializing Printer Management System...');
-    
-    // Initialize printer connection using environment authentication
-    await initializePrinterConnection();
     
     // Start Express server for WiFi management
     const app = createServer();
