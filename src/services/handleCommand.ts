@@ -93,37 +93,73 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
 };
 
 async function runUpdate(sdk: Sdk, printer_id: string) {
+  console.log(`Starting update process for printer: ${printer_id}`);
+  
   const { printer_by_pk: printer } = await sdk.getPrinter({ printerId: printer_id });
   if (!printer) {
+    console.error(`Printer not found with ID: ${printer_id}`);
     return {
       success: false,
       message: 'Printer not found or update already started'
     };
   }
+  
+  console.log(`Found printer with ID: ${printer_id}`);
+  
   if (printer.update_started_at) {
+    console.warn(`Update already started for printer ${printer_id} at ${printer.update_started_at}`);
     return {
       success: false,
       message: 'Update already started'
     };
   }
+  
+  console.log(`Marking update as started for printer: ${printer_id}`);
   await sdk.updatePrinter({
     printerId: printer_id,
     set: {
       update_started_at: 'now()'
     }
   });
+  console.log(`Successfully marked update as started for printer: ${printer_id}`);
+  
   return new Promise<CommandResult>((resolve, reject) => {
+    console.log('Making self-update.sh executable...');
     // first make the self-update.sh executable
-    exec('chmod +x /home/pi/opensteri-rasp/self-update.sh', (error, stdout, stderr) => {
+    exec('chmod +x /home/pi/opensteri/self-update.sh', (error, stdout, stderr) => {
       if (error) {
+        console.error('Failed to make self-update.sh executable:', error);
+        console.error('Error output:', stderr);
         return reject(error);
       }
+      
+      if (stdout) {
+        console.log('chmod stdout:', stdout);
+      }
+      if (stderr) {
+        console.warn('chmod stderr:', stderr);
+      }
+      
       console.log('self-update.sh is now executable');
-      exec('bash /home/pi/opensteri-rasp/self-update.sh', async (error, stdout, stderr) => {
+      console.log('Executing update script...');
+      
+      exec('bash /home/pi/opensteri/self-update.sh', async (error, stdout, stderr) => {
         if (error) {
+          console.error('Update script execution failed:', error);
+          console.error('Script error output:', stderr);
+          console.log('Script standard output:', stdout);
           return reject(error);
         }
-        console.log('Update script executed successfully');
+        
+        console.log('Update script completed successfully');
+        if (stdout) {
+          console.log('Update script output:', stdout);
+        }
+        if (stderr) {
+          console.warn('Update script warnings:', stderr);
+        }
+        
+        console.log(`Update process completed successfully for printer: ${printer_id}`);
         resolve({
           success: true,
           message: 'Update run successfully'
