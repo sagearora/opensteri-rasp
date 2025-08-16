@@ -12,6 +12,7 @@
 import { exec } from "child_process";
 import { Printer_Command_Type_Enum, PrinterCommandFragment, Sdk } from "../__generated/graphql";
 import { LabelData, PrinterService, PrintResult } from "./printerService";
+import { sendToPrinter } from "./checkPrinter";
 
 /**
  * Interface for command execution result
@@ -42,6 +43,7 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
 
     // Execute command based on type
     switch (command.command) {
+
       case Printer_Command_Type_Enum.PrintTest:
         result = await PrinterService.printTestLabel();
         break;
@@ -50,6 +52,14 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
         break;
       case Printer_Command_Type_Enum.RunUpdate:
         result = await runUpdate(sdk, command.printer_id);
+        break;
+      case Printer_Command_Type_Enum.RawCommand:
+        const bytesSent = await sendToPrinter(command.data as string);
+        result = {
+          success: true,
+          message: `Successfully sent ${bytesSent} bytes to printer`,
+          data: bytesSent
+        };
         break;
       default:
         console.warn(`Unknown command type: ${command.command}`);
@@ -94,7 +104,7 @@ export const handleCommand = async (sdk: Sdk, command: PrinterCommandFragment): 
 
 async function runUpdate(sdk: Sdk, printer_id: string) {
   console.log(`Starting update process for printer: ${printer_id}`);
-  
+
   const { printer_by_pk: printer } = await sdk.getPrinter({ printerId: printer_id });
   if (!printer) {
     console.error(`Printer not found with ID: ${printer_id}`);
@@ -103,9 +113,9 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
       message: 'Printer not found or update already started'
     };
   }
-  
+
   console.log(`Found printer with ID: ${printer_id}`);
-  
+
   if (printer.update_started_at) {
     console.warn(`Update already started for printer ${printer_id} at ${printer.update_started_at}`);
     return {
@@ -113,7 +123,7 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
       message: 'Update already started'
     };
   }
-  
+
   console.log(`Marking update as started for printer: ${printer_id}`);
   await sdk.updatePrinter({
     printerId: printer_id,
@@ -122,7 +132,7 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
     }
   });
   console.log(`Successfully marked update as started for printer: ${printer_id}`);
-  
+
   return new Promise<CommandResult>((resolve, reject) => {
     console.log('Making self-update.sh executable...');
     // first make the self-update.sh executable
@@ -132,17 +142,17 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
         console.error('Error output:', stderr);
         return reject(error);
       }
-      
+
       if (stdout) {
         console.log('chmod stdout:', stdout);
       }
       if (stderr) {
         console.warn('chmod stderr:', stderr);
       }
-      
+
       console.log('self-update.sh is now executable');
       console.log('Executing update script...');
-      
+
       exec('bash /home/pi/opensteri/self-update.sh', async (error, stdout, stderr) => {
         if (error) {
           console.error('Update script execution failed:', error);
@@ -150,7 +160,7 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
           console.log('Script standard output:', stdout);
           return reject(error);
         }
-        
+
         console.log('Update script completed successfully');
         if (stdout) {
           console.log('Update script output:', stdout);
@@ -158,9 +168,9 @@ async function runUpdate(sdk: Sdk, printer_id: string) {
         if (stderr) {
           console.warn('Update script warnings:', stderr);
         }
-        
+
         console.log(`Update process completed successfully for printer: ${printer_id}`);
-        
+
         resolve({
           success: true,
           message: 'Update run successfully'

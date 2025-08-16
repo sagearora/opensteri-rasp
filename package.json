@@ -64,6 +64,7 @@
         "@graphql-codegen/typescript-graphql-request": "^6.3.0",
         "@graphql-codegen/typescript-operations": "^4.6.1",
         "@graphql-codegen/typescript-resolvers": "^4.5.1",
+        "@parcel/watcher": "^2.5.1",
         "@types/express": "^4.17.21",
         "@types/node": "^20.19.9",
         "@types/ws": "^8.18.1",

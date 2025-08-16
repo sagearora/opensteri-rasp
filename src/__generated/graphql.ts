@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   bigint: { input: any; output: any; }
   citext: { input: any; output: any; }
+  date: { input: any; output: any; }
   jsonb: { input: any; output: any; }
   smallint: { input: any; output: any; }
   timestamp: { input: any; output: any; }
@@ -605,6 +606,7 @@ export type Clinic = {
   default_printer?: Maybe<Printer>;
   default_printer_id?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
+  is_strict_printing_enabled: Scalars['Boolean']['output'];
   name: Scalars['citext']['output'];
   /** An array relationship */
   printers: Array<Printer>;
@@ -752,6 +754,7 @@ export type Clinic_Bool_Exp = {
   default_printer?: InputMaybe<Printer_Bool_Exp>;
   default_printer_id?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  is_strict_printing_enabled?: InputMaybe<Boolean_Comparison_Exp>;
   name?: InputMaybe<Citext_Comparison_Exp>;
   printers?: InputMaybe<Printer_Bool_Exp>;
   printers_aggregate?: InputMaybe<Printer_Aggregate_Bool_Exp>;
@@ -783,6 +786,7 @@ export type Clinic_Insert_Input = {
   default_printer?: InputMaybe<Printer_Obj_Rel_Insert_Input>;
   default_printer_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  is_strict_printing_enabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['citext']['input']>;
   printers?: InputMaybe<Printer_Arr_Rel_Insert_Input>;
   steri_item_expiry_days?: InputMaybe<Scalars['Int']['input']>;
@@ -846,6 +850,7 @@ export type Clinic_Order_By = {
   default_printer?: InputMaybe<Printer_Order_By>;
   default_printer_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  is_strict_printing_enabled?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   printers_aggregate?: InputMaybe<Printer_Aggregate_Order_By>;
   steri_item_expiry_days?: InputMaybe<Order_By>;
@@ -871,6 +876,8 @@ export enum Clinic_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  IsStrictPrintingEnabled = 'is_strict_printing_enabled',
+  /** column name */
   Name = 'name',
   /** column name */
   SteriItemExpiryDays = 'steri_item_expiry_days',
@@ -884,6 +891,7 @@ export type Clinic_Set_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   default_printer_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  is_strict_printing_enabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['citext']['input']>;
   steri_item_expiry_days?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -921,6 +929,7 @@ export type Clinic_Stream_Cursor_Value_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   default_printer_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  is_strict_printing_enabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['citext']['input']>;
   steri_item_expiry_days?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -942,6 +951,8 @@ export enum Clinic_Update_Column {
   DefaultPrinterId = 'default_printer_id',
   /** column name */
   Id = 'id',
+  /** column name */
+  IsStrictPrintingEnabled = 'is_strict_printing_enabled',
   /** column name */
   Name = 'name',
   /** column name */
@@ -1358,6 +1369,19 @@ export enum Cursor_Ordering {
   /** descending ordering of the cursor */
   Desc = 'DESC'
 }
+
+/** Boolean expression to compare columns of type "date". All fields are combined with logical 'AND'. */
+export type Date_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['date']['input']>;
+  _gt?: InputMaybe<Scalars['date']['input']>;
+  _gte?: InputMaybe<Scalars['date']['input']>;
+  _in?: InputMaybe<Array<Scalars['date']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['date']['input']>;
+  _lte?: InputMaybe<Scalars['date']['input']>;
+  _neq?: InputMaybe<Scalars['date']['input']>;
+  _nin?: InputMaybe<Array<Scalars['date']['input']>>;
+};
 
 export type Fuzzy_Search_Patient_Args = {
   query?: InputMaybe<Scalars['String']['input']>;
@@ -3255,8 +3279,9 @@ export type Patient = {
   clinic_id: Scalars['uuid']['output'];
   created_at: Scalars['timestamptz']['output'];
   /** An object relationship */
-  creator: User;
-  creator_id: Scalars['uuid']['output'];
+  creator?: Maybe<User>;
+  creator_id?: Maybe<Scalars['uuid']['output']>;
+  date_of_birth?: Maybe<Scalars['date']['output']>;
   emr_id?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   name: Scalars['citext']['output'];
@@ -3295,6 +3320,7 @@ export type Patient_Bool_Exp = {
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   creator?: InputMaybe<User_Bool_Exp>;
   creator_id?: InputMaybe<Uuid_Comparison_Exp>;
+  date_of_birth?: InputMaybe<Date_Comparison_Exp>;
   emr_id?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   name?: InputMaybe<Citext_Comparison_Exp>;
@@ -3317,6 +3343,7 @@ export type Patient_Insert_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator?: InputMaybe<User_Obj_Rel_Insert_Input>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  date_of_birth?: InputMaybe<Scalars['date']['input']>;
   emr_id?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   name?: InputMaybe<Scalars['citext']['input']>;
@@ -3330,6 +3357,7 @@ export type Patient_Max_Fields = {
   clinic_id?: Maybe<Scalars['uuid']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   creator_id?: Maybe<Scalars['uuid']['output']>;
+  date_of_birth?: Maybe<Scalars['date']['output']>;
   emr_id?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['citext']['output']>;
@@ -3343,6 +3371,7 @@ export type Patient_Min_Fields = {
   clinic_id?: Maybe<Scalars['uuid']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   creator_id?: Maybe<Scalars['uuid']['output']>;
+  date_of_birth?: Maybe<Scalars['date']['output']>;
   emr_id?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['citext']['output']>;
@@ -3380,6 +3409,7 @@ export type Patient_Order_By = {
   created_at?: InputMaybe<Order_By>;
   creator?: InputMaybe<User_Order_By>;
   creator_id?: InputMaybe<Order_By>;
+  date_of_birth?: InputMaybe<Order_By>;
   emr_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
@@ -3402,6 +3432,8 @@ export enum Patient_Select_Column {
   /** column name */
   CreatorId = 'creator_id',
   /** column name */
+  DateOfBirth = 'date_of_birth',
+  /** column name */
   EmrId = 'emr_id',
   /** column name */
   Id = 'id',
@@ -3417,6 +3449,7 @@ export type Patient_Set_Input = {
   clinic_id?: InputMaybe<Scalars['uuid']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  date_of_birth?: InputMaybe<Scalars['date']['input']>;
   emr_id?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   name?: InputMaybe<Scalars['citext']['input']>;
@@ -3437,6 +3470,7 @@ export type Patient_Stream_Cursor_Value_Input = {
   clinic_id?: InputMaybe<Scalars['uuid']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
+  date_of_birth?: InputMaybe<Scalars['date']['input']>;
   emr_id?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   name?: InputMaybe<Scalars['citext']['input']>;
@@ -3453,6 +3487,8 @@ export enum Patient_Update_Column {
   CreatedAt = 'created_at',
   /** column name */
   CreatorId = 'creator_id',
+  /** column name */
+  DateOfBirth = 'date_of_birth',
   /** column name */
   EmrId = 'emr_id',
   /** column name */
@@ -4011,6 +4047,7 @@ export enum Printer_Command_Type_Enum {
   Ping = 'ping',
   PrintLabels = 'print_labels',
   PrintTest = 'print_test',
+  RawCommand = 'raw_command',
   Reboot = 'reboot',
   RunUpdate = 'run_update'
 }
@@ -4597,6 +4634,10 @@ export type Query_Root = {
   steri_label_aggregate: Steri_Label_Aggregate;
   /** fetch data from the table: "steri_label" using primary key columns */
   steri_label_by_pk?: Maybe<Steri_Label>;
+  /** fetch data from the table: "steri_label_print_stats" */
+  steri_label_print_stats: Array<Steri_Label_Print_Stats>;
+  /** fetch aggregated fields from the table: "steri_label_print_stats" */
+  steri_label_print_stats_aggregate: Steri_Label_Print_Stats_Aggregate;
   /** fetch data from the table: "steri_template" */
   steri_template: Array<Steri_Template>;
   /** fetch aggregated fields from the table: "steri_template" */
@@ -4979,6 +5020,24 @@ export type Query_RootSteri_Label_AggregateArgs = {
 
 export type Query_RootSteri_Label_By_PkArgs = {
   id: Scalars['bigint']['input'];
+};
+
+
+export type Query_RootSteri_Label_Print_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Label_Print_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Label_Print_Stats_Order_By>>;
+  where?: InputMaybe<Steri_Label_Print_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootSteri_Label_Print_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Label_Print_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Label_Print_Stats_Order_By>>;
+  where?: InputMaybe<Steri_Label_Print_Stats_Bool_Exp>;
 };
 
 
@@ -6569,6 +6628,7 @@ export type Steri_Label = {
   creator_id: Scalars['uuid']['output'];
   expiry_at: Scalars['timestamptz']['output'];
   id: Scalars['bigint']['output'];
+  is_printed_directly?: Maybe<Scalars['Boolean']['output']>;
   next_label_id?: Maybe<Scalars['bigint']['output']>;
   /** An object relationship */
   steri_cycle?: Maybe<Steri_Cycle>;
@@ -6591,7 +6651,23 @@ export type Steri_Label_Aggregate = {
 };
 
 export type Steri_Label_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Steri_Label_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Steri_Label_Aggregate_Bool_Exp_Bool_Or>;
   count?: InputMaybe<Steri_Label_Aggregate_Bool_Exp_Count>;
+};
+
+export type Steri_Label_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Steri_Label_Select_Column_Steri_Label_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Steri_Label_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Steri_Label_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Steri_Label_Select_Column_Steri_Label_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Steri_Label_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
 };
 
 export type Steri_Label_Aggregate_Bool_Exp_Count = {
@@ -6686,6 +6762,7 @@ export type Steri_Label_Bool_Exp = {
   creator_id?: InputMaybe<Uuid_Comparison_Exp>;
   expiry_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
+  is_printed_directly?: InputMaybe<Boolean_Comparison_Exp>;
   next_label_id?: InputMaybe<Bigint_Comparison_Exp>;
   steri_cycle?: InputMaybe<Steri_Cycle_Bool_Exp>;
   steri_cycle_id?: InputMaybe<Bigint_Comparison_Exp>;
@@ -6729,6 +6806,7 @@ export type Steri_Label_Insert_Input = {
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
   expiry_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
+  is_printed_directly?: InputMaybe<Scalars['Boolean']['input']>;
   next_label_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle?: InputMaybe<Steri_Cycle_Obj_Rel_Insert_Input>;
   steri_cycle_id?: InputMaybe<Scalars['bigint']['input']>;
@@ -6850,6 +6928,7 @@ export type Steri_Label_Order_By = {
   creator_id?: InputMaybe<Order_By>;
   expiry_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  is_printed_directly?: InputMaybe<Order_By>;
   next_label_id?: InputMaybe<Order_By>;
   steri_cycle?: InputMaybe<Steri_Cycle_Order_By>;
   steri_cycle_id?: InputMaybe<Order_By>;
@@ -6864,6 +6943,182 @@ export type Steri_Label_Order_By = {
 /** primary key columns input for table: steri_label */
 export type Steri_Label_Pk_Columns_Input = {
   id: Scalars['bigint']['input'];
+};
+
+/** columns and relationships of "steri_label_print_stats" */
+export type Steri_Label_Print_Stats = {
+  __typename?: 'steri_label_print_stats';
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  label_date?: Maybe<Scalars['date']['output']>;
+  printed_directly?: Maybe<Scalars['bigint']['output']>;
+  printed_from_appointment?: Maybe<Scalars['bigint']['output']>;
+  total_labels?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "steri_label_print_stats" */
+export type Steri_Label_Print_Stats_Aggregate = {
+  __typename?: 'steri_label_print_stats_aggregate';
+  aggregate?: Maybe<Steri_Label_Print_Stats_Aggregate_Fields>;
+  nodes: Array<Steri_Label_Print_Stats>;
+};
+
+/** aggregate fields of "steri_label_print_stats" */
+export type Steri_Label_Print_Stats_Aggregate_Fields = {
+  __typename?: 'steri_label_print_stats_aggregate_fields';
+  avg?: Maybe<Steri_Label_Print_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Steri_Label_Print_Stats_Max_Fields>;
+  min?: Maybe<Steri_Label_Print_Stats_Min_Fields>;
+  stddev?: Maybe<Steri_Label_Print_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<Steri_Label_Print_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Steri_Label_Print_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<Steri_Label_Print_Stats_Sum_Fields>;
+  var_pop?: Maybe<Steri_Label_Print_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<Steri_Label_Print_Stats_Var_Samp_Fields>;
+  variance?: Maybe<Steri_Label_Print_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "steri_label_print_stats" */
+export type Steri_Label_Print_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Steri_Label_Print_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Steri_Label_Print_Stats_Avg_Fields = {
+  __typename?: 'steri_label_print_stats_avg_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "steri_label_print_stats". All fields are combined with a logical 'AND'. */
+export type Steri_Label_Print_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<Steri_Label_Print_Stats_Bool_Exp>>;
+  _not?: InputMaybe<Steri_Label_Print_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<Steri_Label_Print_Stats_Bool_Exp>>;
+  clinic_id?: InputMaybe<Uuid_Comparison_Exp>;
+  label_date?: InputMaybe<Date_Comparison_Exp>;
+  printed_directly?: InputMaybe<Bigint_Comparison_Exp>;
+  printed_from_appointment?: InputMaybe<Bigint_Comparison_Exp>;
+  total_labels?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Steri_Label_Print_Stats_Max_Fields = {
+  __typename?: 'steri_label_print_stats_max_fields';
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  label_date?: Maybe<Scalars['date']['output']>;
+  printed_directly?: Maybe<Scalars['bigint']['output']>;
+  printed_from_appointment?: Maybe<Scalars['bigint']['output']>;
+  total_labels?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type Steri_Label_Print_Stats_Min_Fields = {
+  __typename?: 'steri_label_print_stats_min_fields';
+  clinic_id?: Maybe<Scalars['uuid']['output']>;
+  label_date?: Maybe<Scalars['date']['output']>;
+  printed_directly?: Maybe<Scalars['bigint']['output']>;
+  printed_from_appointment?: Maybe<Scalars['bigint']['output']>;
+  total_labels?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "steri_label_print_stats". */
+export type Steri_Label_Print_Stats_Order_By = {
+  clinic_id?: InputMaybe<Order_By>;
+  label_date?: InputMaybe<Order_By>;
+  printed_directly?: InputMaybe<Order_By>;
+  printed_from_appointment?: InputMaybe<Order_By>;
+  total_labels?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "steri_label_print_stats" */
+export enum Steri_Label_Print_Stats_Select_Column {
+  /** column name */
+  ClinicId = 'clinic_id',
+  /** column name */
+  LabelDate = 'label_date',
+  /** column name */
+  PrintedDirectly = 'printed_directly',
+  /** column name */
+  PrintedFromAppointment = 'printed_from_appointment',
+  /** column name */
+  TotalLabels = 'total_labels'
+}
+
+/** aggregate stddev on columns */
+export type Steri_Label_Print_Stats_Stddev_Fields = {
+  __typename?: 'steri_label_print_stats_stddev_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Steri_Label_Print_Stats_Stddev_Pop_Fields = {
+  __typename?: 'steri_label_print_stats_stddev_pop_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Steri_Label_Print_Stats_Stddev_Samp_Fields = {
+  __typename?: 'steri_label_print_stats_stddev_samp_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "steri_label_print_stats" */
+export type Steri_Label_Print_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Steri_Label_Print_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Steri_Label_Print_Stats_Stream_Cursor_Value_Input = {
+  clinic_id?: InputMaybe<Scalars['uuid']['input']>;
+  label_date?: InputMaybe<Scalars['date']['input']>;
+  printed_directly?: InputMaybe<Scalars['bigint']['input']>;
+  printed_from_appointment?: InputMaybe<Scalars['bigint']['input']>;
+  total_labels?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Steri_Label_Print_Stats_Sum_Fields = {
+  __typename?: 'steri_label_print_stats_sum_fields';
+  printed_directly?: Maybe<Scalars['bigint']['output']>;
+  printed_from_appointment?: Maybe<Scalars['bigint']['output']>;
+  total_labels?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Steri_Label_Print_Stats_Var_Pop_Fields = {
+  __typename?: 'steri_label_print_stats_var_pop_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Steri_Label_Print_Stats_Var_Samp_Fields = {
+  __typename?: 'steri_label_print_stats_var_samp_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Steri_Label_Print_Stats_Variance_Fields = {
+  __typename?: 'steri_label_print_stats_variance_fields';
+  printed_directly?: Maybe<Scalars['Float']['output']>;
+  printed_from_appointment?: Maybe<Scalars['Float']['output']>;
+  total_labels?: Maybe<Scalars['Float']['output']>;
 };
 
 /** select columns of table "steri_label" */
@@ -6887,6 +7142,8 @@ export enum Steri_Label_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  IsPrintedDirectly = 'is_printed_directly',
+  /** column name */
   NextLabelId = 'next_label_id',
   /** column name */
   SteriCycleId = 'steri_cycle_id',
@@ -6900,6 +7157,18 @@ export enum Steri_Label_Select_Column {
   UpdatedAt = 'updated_at'
 }
 
+/** select "steri_label_aggregate_bool_exp_bool_and_arguments_columns" columns of table "steri_label" */
+export enum Steri_Label_Select_Column_Steri_Label_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  IsPrintedDirectly = 'is_printed_directly'
+}
+
+/** select "steri_label_aggregate_bool_exp_bool_or_arguments_columns" columns of table "steri_label" */
+export enum Steri_Label_Select_Column_Steri_Label_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  IsPrintedDirectly = 'is_printed_directly'
+}
+
 /** input type for updating data in table "steri_label" */
 export type Steri_Label_Set_Input = {
   appointment_id?: InputMaybe<Scalars['bigint']['input']>;
@@ -6911,6 +7180,7 @@ export type Steri_Label_Set_Input = {
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
   expiry_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
+  is_printed_directly?: InputMaybe<Scalars['Boolean']['input']>;
   next_label_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_user_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -7001,6 +7271,7 @@ export type Steri_Label_Stream_Cursor_Value_Input = {
   creator_id?: InputMaybe<Scalars['uuid']['input']>;
   expiry_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
+  is_printed_directly?: InputMaybe<Scalars['Boolean']['input']>;
   next_label_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_id?: InputMaybe<Scalars['bigint']['input']>;
   steri_cycle_user_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -7050,6 +7321,8 @@ export enum Steri_Label_Update_Column {
   ExpiryAt = 'expiry_at',
   /** column name */
   Id = 'id',
+  /** column name */
+  IsPrintedDirectly = 'is_printed_directly',
   /** column name */
   NextLabelId = 'next_label_id',
   /** column name */
@@ -8133,6 +8406,12 @@ export type Subscription_Root = {
   steri_label_aggregate: Steri_Label_Aggregate;
   /** fetch data from the table: "steri_label" using primary key columns */
   steri_label_by_pk?: Maybe<Steri_Label>;
+  /** fetch data from the table: "steri_label_print_stats" */
+  steri_label_print_stats: Array<Steri_Label_Print_Stats>;
+  /** fetch aggregated fields from the table: "steri_label_print_stats" */
+  steri_label_print_stats_aggregate: Steri_Label_Print_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "steri_label_print_stats" */
+  steri_label_print_stats_stream: Array<Steri_Label_Print_Stats>;
   /** fetch data from the table in a streaming manner: "steri_label" */
   steri_label_stream: Array<Steri_Label>;
   /** fetch data from the table: "steri_template" */
@@ -8623,6 +8902,31 @@ export type Subscription_RootSteri_Label_AggregateArgs = {
 
 export type Subscription_RootSteri_Label_By_PkArgs = {
   id: Scalars['bigint']['input'];
+};
+
+
+export type Subscription_RootSteri_Label_Print_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Label_Print_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Label_Print_Stats_Order_By>>;
+  where?: InputMaybe<Steri_Label_Print_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootSteri_Label_Print_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Steri_Label_Print_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Steri_Label_Print_Stats_Order_By>>;
+  where?: InputMaybe<Steri_Label_Print_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootSteri_Label_Print_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Steri_Label_Print_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<Steri_Label_Print_Stats_Bool_Exp>;
 };
 
 

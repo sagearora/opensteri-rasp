@@ -33,7 +33,7 @@ import dotenv from 'dotenv';
 import { JOIN_URL } from './constant';
 import { initializePrinterConnectionWithCredentials } from './services/printerConnectionService';
 import { getClient } from './services/graphqlClient';
-import { isPrinterConnected, getPrinterState, triggerPrinterDetection } from './services/checkPrinter';
+import { isPrinterConnected, getPrinterState, triggerPrinterDetection, sendToPrinter } from './services/checkPrinter';
 import { PrinterService } from './services/printerService';
 
 const execAsync = promisify(exec);
@@ -623,6 +623,16 @@ export function createServer(): express.Application {
       });
     }
   });
+
+  app.post('/raw-command', async (req, res) => {
+    const { command } = req.body;
+    const result = await sendToPrinter(command);
+    res.json({
+      success: true,
+      message: `Successfully sent ${result} bytes to printer`,
+      data: result
+    });
+  })
 
   // Endpoint to get detailed USB device information for debugging
   app.get('/usb-debug', async (req, res) => {
