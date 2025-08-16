@@ -626,6 +626,8 @@ export function createServer(): express.Application {
 
   app.post('/raw-command', async (req, res) => {
     const { command } = req.body;
+    console.log(command);
+
     const result = await sendToPrinter(command);
     res.json({
       success: true,

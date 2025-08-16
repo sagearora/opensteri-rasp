@@ -142,6 +142,8 @@ export class PrinterService {
 
       const labelCommand = createLabelCmd(testLabel);
       const commandString = [PrinterLayoutCmd, labelCommand].join('\n');
+
+      console.log(commandString);
       
       const bytesSent = await sendToPrinter(commandString);
       
