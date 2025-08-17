@@ -71,18 +71,18 @@ const checkUSBPermissions = async (): Promise<boolean> => {
     // Check if user is in plugdev group
     const { stdout } = await execAsync('groups');
     const groups = stdout.trim().split(' ');
-    
+
     if (groups.includes('plugdev')) {
       console.log('User is in plugdev group - USB permissions OK');
       return true;
     }
-    
+
     // Check if running as root
     if (process.getuid && process.getuid() === 0) {
       console.log('Running as root - USB permissions OK');
       return true;
     }
-    
+
     console.warn('User not in plugdev group and not running as root - USB access may fail');
     return false;
   } catch (error) {
@@ -116,7 +116,7 @@ const listUSBDevices = async (): Promise<string> => {
  */
 const initDevice = async (_device: Device): Promise<void> => {
   console.log('Initializing GoDEX printer connection...');
-  
+
   try {
     // Check USB permissions first
     const hasPermissions = await checkUSBPermissions();
@@ -126,10 +126,10 @@ const initDevice = async (_device: Device): Promise<void> => {
       updatePrinterState(false, errorMsg);
       return;
     }
-    
+
     _device.open();
     const ifc = _device.interface(0);
-    
+
     // Detach kernel driver if active
     if (ifc.isKernelDriverActive()) {
       try {
@@ -142,11 +142,11 @@ const initDevice = async (_device: Device): Promise<void> => {
         return;
       }
     }
-    
+
     // Claim the interface
     ifc.claim();
     console.log('Claimed printer interface');
-    
+
     // Find the output endpoint
     const endpoint = ifc.endpoints.find(e => e.direction === 'out') as OutEndpoint | undefined;
     if (!endpoint) {
@@ -157,12 +157,12 @@ const initDevice = async (_device: Device): Promise<void> => {
       updatePrinterState(false, errorMsg);
       return;
     }
-    
+
     // Store device references
     out_endpoint = endpoint;
     device = _device;
     updatePrinterState(true);
-    
+
     console.log('GoDEX printer initialized successfully');
   } catch (error) {
     const errorMsg = `Error initializing printer device: ${error}`;
@@ -173,8 +173,8 @@ const initDevice = async (_device: Device): Promise<void> => {
 
 // USB event handlers
 usb.on('attach', async (d: Device) => {
-  if (d.deviceDescriptor.idVendor === PRINTER_VENDOR_ID && 
-      d.deviceDescriptor.idProduct === PRINTER_PRODUCT_ID) {
+  if (d.deviceDescriptor.idVendor === PRINTER_VENDOR_ID &&
+    d.deviceDescriptor.idProduct === PRINTER_PRODUCT_ID) {
     console.log('GoDEX printer detected, initializing...');
     await initDevice(d);
   }
@@ -194,11 +194,11 @@ usb.on('detach', () => {
 const initializePrinterOnStartup = async (): Promise<void> => {
   try {
     console.log('Checking for GoDEX printer on startup...');
-    
+
     // List USB devices for debugging
     const usbDevices = await listUSBDevices();
     console.log('Available USB devices:', usbDevices);
-    
+
     const connected = findByIds(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID);
     if (connected) {
       console.log('GoDEX printer found on startup, initializing...');
@@ -244,11 +244,11 @@ export const getPrinterState = (): PrinterConnectionState => {
 export const triggerPrinterDetection = async (): Promise<boolean> => {
   try {
     console.log('Manually triggering printer detection...');
-    
+
     // List USB devices for debugging
     const usbDevices = await listUSBDevices();
     console.log('Available USB devices during manual detection:', usbDevices);
-    
+
     const connected = findByIds(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID);
     if (connected) {
       console.log('GoDEX printer found during manual detection, initializing...');
@@ -279,7 +279,7 @@ export const sendToPrinter = async (cmd: string): Promise<number> => {
       reject(new Error('Printer not available'));
       return;
     }
-    
+
     out_endpoint.transfer(Buffer.from(cmd, 'utf-8'), (error, size) => {
       if (error) {
         reject(error);
@@ -325,17 +325,18 @@ export interface LabelData {
  */
 export const createLabelCmd = (labelData: LabelData): string => {
   const { id, name, category, user_name, created_at, expiry_at, qr } = labelData;
-  
-  // Base command without QR code
-  let command = `^L\nDy2-me-dd\nTh:m:s\nAA,4,9,1,1,0,0,#${id} - ${category}\nAC,4,29,1,1,0,0,${name
-    .slice(0, MaxContentSize)}\nAC,4,59,1,1,0,0,${name
-      .slice(MaxContentSize, MaxContentSize * 2)}\nAC,4,100,1,1,0,0,${user_name}\nAA,4,135,1,1,0,0,Date: ${format(created_at, 'yyyy-MM-dd HH:mm')}\nAA,4,162,1,1,0,0,Exp: ${format(expiry_at, 'yyyy-MM-dd HH:mm')}`;
-  
-  // Add QR code only if ID is not 0
-  if (id !== '0') {
-    command += `\nW218,9,5,2,M0,8,6,${qr.length},0\n${qr}`;
+
+  let command = '';
+  if (+id === 0) {
+    command = `^L\nAC,4,30,1,1,1,0,${name}\nAC,4,70,1,1,1,0,${user_name}\nAC,4,110,1,1,1,0,${category}`;
+  } else {
+    // Base command without QR code
+    command = `^L\nDy2-me-dd\nTh:m:s\nAA,4,9,1,1,0,0,#${id} - ${category}\nAC,4,29,1,1,0,0,${name
+      .slice(0, MaxContentSize)}\nAC,4,59,1,1,0,0,${name
+        .slice(MaxContentSize, MaxContentSize * 2)}\nAC,4,100,1,1,0,0,${user_name}\nAA,4,135,1,1,0,0,Date: ${format(
+          created_at, 'yyyy-MM-dd HH:mm')}\nAA,4,162,1,1,0,0,Exp: ${format(expiry_at, 'yyyy-MM-dd HH:mm')}\nW218,9,5,2,M0,8,6,${qr.length},0\n${qr}`;
   }
-  
+
   command += '\nE\n';
   return command;
 };
