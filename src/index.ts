@@ -12,9 +12,13 @@ import 'dotenv/config';
 
 // Import services
 import { stopPrinterHeartbeat } from './services/startHeartbeat';
+import { startUpdateChecker, stopUpdateChecker } from './services/updateCheckerService';
 
 // Import Express server
 import { createServer, startServer } from './server';
+
+// Import constants
+import { UPDATE_CHECK_ENABLED, UPDATE_CHECK_SCHEDULED_TIME } from './constant';
 
 /**
  * Initialize the application
@@ -22,6 +26,7 @@ import { createServer, startServer } from './server';
  * - Establishes GraphQL connections
  * - Sets up printer monitoring with archived_at watching
  * - Starts Express server for WiFi management
+ * - Starts periodic update checking if enabled
  */
 async function initializeApplication(): Promise<void> {
   try {
@@ -30,6 +35,14 @@ async function initializeApplication(): Promise<void> {
     // Start Express server for WiFi management
     const app = createServer();
     startServer(app, 3001);
+    
+    // Start scheduled update checking if enabled
+    if (UPDATE_CHECK_ENABLED) {
+      console.log(`Starting scheduled update checker for daily updates at ${UPDATE_CHECK_SCHEDULED_TIME}...`);
+      startUpdateChecker(UPDATE_CHECK_SCHEDULED_TIME);
+    } else {
+      console.log('Scheduled update checking is disabled');
+    }
     
     console.log('Application initialization completed successfully');
   } catch (error) {
@@ -46,6 +59,9 @@ function cleanup(): void {
   
   // Stop heartbeat monitoring
   stopPrinterHeartbeat();
+  
+  // Stop update checker
+  stopUpdateChecker();
   
   console.log('Cleanup completed');
 }
