@@ -23,11 +23,14 @@ RUN npm run build
 # -------- Runtime --------
 FROM node:20-bullseye AS runtime
 
-# Minimal runtime deps for your app endpoints
+# Runtime deps for your app endpoints
 # - libusb-1.0-0 : required by node-usb (if used)
 # - usbutils     : provides `lsusb` for /usb-debug endpoint
+# - libudev-dev  : required for USB native bindings compilation
+# - build-essential : required for native module compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libusb-1.0-0 usbutils ca-certificates \
+    libudev-dev build-essential python3 make g++ pkg-config \
  && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
