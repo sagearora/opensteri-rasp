@@ -35,7 +35,7 @@ USB_PRODUCT="OpenSteri USB-Ether"
 # Standalone docker-compose fallback version
 DC_VERSION="v2.29.2"
 
-log() { echo -e "\n[OSTERI-SETUP] $*"; }
+log() { echo -e "\n[OSTERI-SETUP v1.0] $*"; }
 
 require_root() {
   if [[ $EUID -ne 0 ]]; then
@@ -260,7 +260,22 @@ clone_repo_and_permissions() {
   if [[ -x "$APP_DIR/setup-usb-permissions.sh" ]]; then
     bash "$APP_DIR/setup-usb-permissions.sh" || true
   fi
+
+  # Ensure a .env file exists
+  if [[ ! -f "$APP_DIR/.env" ]]; then
+    log "Creating default .env file at $APP_DIR/.env"
+    cat > "$APP_DIR/.env" <<EOF
+# OpenSteri default environment variables
+NODE_ENV=production
+PORT=3001
+
+# Add additional environment variables here as needed, e.g.:
+# DB_URL=postgres://user:pass@host:5432/dbname
+# API_KEY=yourapikey
+EOF
+  fi
 }
+
 
 compose_overrides_and_service() {
   log "9) Compose override (host:${HOST_PORT} -> container:${CONTAINER_PORT}) + systemd unit"

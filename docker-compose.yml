@@ -10,10 +10,12 @@ services:
     user: "0:0"
     devices:
       - "/dev/bus/usb:/dev/bus/usb"
-    ports:
-      - "3001:3001"   # expose if you want to reach the UI/HTTP endpoints
+    # Note: No port mapping needed with host networking
+    # App will be available on host:3001
     env_file:
       - .env          # put PRINTER_ID, PRINTER_JOIN_TOKEN, etc. here
+    # Network access for WiFi management - use host networking for NetworkManager
+    network_mode: "host"
     # Opt-in label so Watchtower only updates this service
     labels:
       - "com.centurylinklabs.watchtower.enable=true"

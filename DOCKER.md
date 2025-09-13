@@ -57,6 +57,8 @@ docker compose logs -f opensteri
 docker compose ps
 ```
 
+**Note**: The container uses host networking to enable WiFi management functionality. This means the app will be accessible directly on the host's IP address at port 3001.
+
 ## 🔄 Automatic Updates
 
 The setup includes **Watchtower** which automatically:
@@ -86,6 +88,22 @@ lsusb
 
 # Check device permissions
 ls -la /dev/bus/usb/
+```
+
+### WiFi Management Issues
+
+```bash
+# Check if NetworkManager is running in container
+docker exec -it opensteri systemctl status NetworkManager
+
+# Check WiFi interfaces
+docker exec -it opensteri nmcli device status
+
+# Test WiFi scanning
+docker exec -it opensteri nmcli device wifi list
+
+# If NetworkManager is not running, start it
+docker exec -it opensteri systemctl start NetworkManager
 ```
 
 ### Permission Issues
