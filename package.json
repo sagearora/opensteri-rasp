@@ -1,6 +1,6 @@
 {
     "name": "printer-management-system",
-    "version": "1.0.43",
+    "version": "1.0.40",
     "description": "A comprehensive Node.js application for managing GoDEX printers and label printing functionality using environment-based authentication",
     "main": "dist/index.js",
     "scripts": {
@@ -52,7 +52,6 @@
         "express": "^4.18.2",
         "graphql": "^16.11.0",
         "graphql-request": "^7.2.0",
-        "graphql-tag": "^2.12.6",
         "graphql-ws": "^6.0.6",
         "node-fetch": "^2.7.0",
         "usb": "^2.16.0",
