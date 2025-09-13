@@ -35,8 +35,6 @@ import { initializePrinterConnectionWithCredentials } from './services/printerCo
 import { getClient } from './services/graphqlClient';
 import { isPrinterConnected, getPrinterState, triggerPrinterDetection, sendToPrinter } from './services/checkPrinter';
 import { PrinterService } from './services/printerService';
-import { triggerManualUpdateCheck, getUpdateCheckerStatus } from './services/updateCheckerService';
-import { getWifiConnectionInfo } from './services/wifiConnectivityService';
 
 const execAsync = promisify(exec);
 
@@ -674,53 +672,6 @@ export function createServer(): express.Application {
     }
   });
 
-  // Endpoint to manually trigger update check
-  app.post('/trigger-update', async (req, res) => {
-    try {
-      console.log('Manual update check requested');
-      
-      const result = await triggerManualUpdateCheck();
-      
-      if (result.success) {
-        res.json({ 
-          message: result.message,
-          output: result.output
-        });
-      } else {
-        res.status(400).json({ 
-          error: 'Update check failed',
-          message: result.message,
-          output: result.output
-        });
-      }
-    } catch (error) {
-      console.error('Error in trigger update endpoint:', error);
-      res.status(500).json({ 
-        error: 'Internal server error during update check',
-        details: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
-
-  // Endpoint to get update checker status
-  app.get('/update-status', async (req, res) => {
-    try {
-      const status = getUpdateCheckerStatus();
-      const wifiInfo = await getWifiConnectionInfo();
-      
-      res.json({
-        updateChecker: status,
-        wifi: wifiInfo,
-        message: 'Update checker status retrieved successfully'
-      });
-    } catch (error) {
-      console.error('Error getting update status:', error);
-      res.status(500).json({ 
-        error: 'Failed to get update checker status',
-        details: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
 
   return app;
 }

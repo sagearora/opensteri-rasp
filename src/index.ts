@@ -12,41 +12,47 @@ import 'dotenv/config';
 
 // Import services
 import { stopPrinterHeartbeat } from './services/startHeartbeat';
-import { startUpdateChecker, stopUpdateChecker } from './services/updateCheckerService';
+import { checkForUpdatesAtStartup } from './services/startupUpdateService';
 
 // Import Express server
 import { createServer, startServer } from './server';
 
 // Import constants
-import { UPDATE_CHECK_ENABLED, UPDATE_CHECK_SCHEDULED_TIME } from './constant';
+import { STARTUP_UPDATE_ENABLED } from './constant';
 
 /**
  * Initialize the application
+ * - Checks for and applies updates at startup
  * - Loads environment authentication data
  * - Establishes GraphQL connections
  * - Sets up printer monitoring with archived_at watching
  * - Starts Express server for WiFi management
- * - Starts periodic update checking if enabled
  */
 async function initializeApplication(): Promise<void> {
   try {
-    console.log('Initializing Printer Management System...');
+    console.log('🚀 Initializing Printer Management System...');
+    
+    // Check for updates at startup if enabled
+    if (STARTUP_UPDATE_ENABLED) {
+      console.log('🔄 Checking for updates at startup...');
+      const updateResult = await checkForUpdatesAtStartup();
+      
+      if (updateResult.success) {
+        console.log('✅ Startup update completed successfully');
+      } else {
+        console.log('⚠️ Startup update failed, but continuing with application startup');
+      }
+    } else {
+      console.log('⏭️ Startup update checking is disabled');
+    }
     
     // Start Express server for WiFi management
     const app = createServer();
     startServer(app, 3001);
     
-    // Start scheduled update checking if enabled
-    if (UPDATE_CHECK_ENABLED) {
-      console.log(`Starting scheduled update checker for daily updates at ${UPDATE_CHECK_SCHEDULED_TIME}...`);
-      startUpdateChecker(UPDATE_CHECK_SCHEDULED_TIME);
-    } else {
-      console.log('Scheduled update checking is disabled');
-    }
-    
-    console.log('Application initialization completed successfully');
+    console.log('✅ Application initialization completed successfully');
   } catch (error) {
-    console.error('Failed to initialize application:', error);
+    console.error('❌ Failed to initialize application:', error);
     process.exit(1);
   }
 }
@@ -55,15 +61,12 @@ async function initializeApplication(): Promise<void> {
  * Cleanup function for graceful shutdown
  */
 function cleanup(): void {
-  console.log('Performing cleanup...');
+  console.log('🧹 Performing cleanup...');
   
   // Stop heartbeat monitoring
   stopPrinterHeartbeat();
   
-  // Stop update checker
-  stopUpdateChecker();
-  
-  console.log('Cleanup completed');
+  console.log('✅ Cleanup completed');
 }
 
 // Application startup
