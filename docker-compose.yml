@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  opensteri:
+    image: ghcr.io/sagearora/opensteri-rasp:latest
+    container_name: opensteri
+    restart: unless-stopped
+    # Grant access to USB bus so your app can see the printer
+    # Root inside the container simplifies device permissions.
+    user: "0:0"
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+    ports:
+      - "3001:3001"   # expose if you want to reach the UI/HTTP endpoints
+    env_file:
+      - .env          # put PRINTER_ID, PRINTER_JOIN_TOKEN, etc. here
+    # Opt-in label so Watchtower only updates this service
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - --interval=1800          # check every 30 min
+      - --cleanup                # remove old images
+      - --rolling-restart        # restart services gracefully
+      - --label-enable           # only update labeled containers
