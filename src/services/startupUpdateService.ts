@@ -11,6 +11,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
 import { getLatestVersionInfo } from './githubVersionService';
 
 const execAsync = promisify(exec);
@@ -69,7 +70,9 @@ export async function checkForUpdatesAtStartup(): Promise<{ success: boolean; me
     console.log('🚀 Checking for updates at startup...');
     
     // Get current version from package.json
-    const packageJsonPath = require.resolve('../package.json');
+    // Find package.json relative to the project root (not dist folder)
+    const projectRoot = join(__dirname, '..', '..');
+    const packageJsonPath = join(projectRoot, 'package.json');
     const packageJsonContent = readFileSync(packageJsonPath, 'utf8');
     const packageJson = JSON.parse(packageJsonContent);
     const currentVersion = packageJson.version;
