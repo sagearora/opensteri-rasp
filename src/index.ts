@@ -38,7 +38,11 @@ async function initializeApplication(): Promise<void> {
       const updateResult = await checkForUpdatesAtStartup();
       
       if (updateResult.success) {
-        console.log('✅ Startup update completed successfully');
+        if (updateResult.updateApplied) {
+          console.log('✅ Startup update completed successfully');
+        } else {
+          console.log('✅ No update needed, application is up to date');
+        }
       } else {
         console.log('⚠️ Startup update failed, but continuing with application startup');
       }

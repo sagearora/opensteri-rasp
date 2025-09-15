@@ -2,7 +2,7 @@
  * Startup Update Service
  * 
  * This service handles checking for and applying updates at application startup.
- * It runs the self-update script once before the application starts.
+ * It checks the current version against the latest GitHub release before running updates.
  * 
  * @author Printer Management System
  * @version 1.0.0
@@ -10,6 +10,8 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { readFileSync } from 'fs';
+import { getLatestVersionInfo } from './githubVersionService';
 
 const execAsync = promisify(exec);
 
@@ -57,29 +59,68 @@ async function executeUpdate(): Promise<{ success: boolean; message: string; out
 /**
  * Check for and apply updates at startup
  * 
- * This function runs the update script once at application startup.
- * It will attempt to update the application before starting normal operations.
+ * This function checks the current version against the latest GitHub release
+ * and only runs the update script if an update is actually available.
  * 
- * @returns Promise<{ success: boolean; message: string; output?: string }>
+ * @returns Promise<{ success: boolean; message: string; output?: string; updateApplied?: boolean }>
  */
-export async function checkForUpdatesAtStartup(): Promise<{ success: boolean; message: string; output?: string }> {
+export async function checkForUpdatesAtStartup(): Promise<{ success: boolean; message: string; output?: string; updateApplied?: boolean }> {
   try {
     console.log('🚀 Checking for updates at startup...');
     
+    // Get current version from package.json
+    const packageJsonPath = require.resolve('../package.json');
+    const packageJsonContent = readFileSync(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(packageJsonContent);
+    const currentVersion = packageJson.version;
+    console.log(`📦 Current version: ${currentVersion}`);
+    
+    // Check if update is available
+    const versionInfo = await getLatestVersionInfo(currentVersion);
+    
+    if (!versionInfo) {
+      console.log('⚠️ Could not check for updates, skipping update process');
+      return {
+        success: true,
+        message: 'Could not check for updates, continuing with startup',
+        updateApplied: false
+      };
+    }
+    
+    if (!versionInfo.isUpdateAvailable) {
+      console.log('✅ Application is up to date, no update needed');
+      return {
+        success: true,
+        message: `Application is up to date (${currentVersion})`,
+        updateApplied: false
+      };
+    }
+    
+    console.log(`🔄 Update available: ${currentVersion} → ${versionInfo.latestVersion}`);
+    console.log('🚀 Starting update process...');
+    
+    // Run the update script
     const result = await executeUpdate();
     
     if (result.success) {
       console.log('✅ Startup update completed successfully');
+      return {
+        ...result,
+        updateApplied: true
+      };
     } else {
       console.error('❌ Startup update failed, but continuing with application startup');
+      return {
+        ...result,
+        updateApplied: false
+      };
     }
-    
-    return result;
   } catch (error) {
     console.error('❌ Error during startup update check:', error);
     return {
       success: false,
-      message: `Startup update error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Startup update error: ${error instanceof Error ? error.message : String(error)}`,
+      updateApplied: false
     };
   }
 }
